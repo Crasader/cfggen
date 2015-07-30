@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF8"?>
+<configs>
+	<group names="server:client"/>
+	
+	<alias type="Task" names="傻子:你好"/>
+	<alias type="int" names="整数:个数"/>
+	<alias type="long" names="角色id"/>
+	<alias type="long" names="roleid"/>
+	<alias type="Task1" names="任务1"/>
+	<alias type="Task2" names="任务2"/>
+
+	<struct name="Item">
+		<field name="id1" type="int"/>
+		<field name="id2" type="int"/>
+		<field name="x" type="int"/>
+	</struct>
+	
+	<struct name="ItemCfg">
+		<field name="items" type="list:Item" indexs="id1:id2"/>
+	</struct>
+	
+	<config name="items" type="ItemCfg" files="items.csv"/>
+	
+	
+	<struct name="NameCfg">
+		<field name="names" type="map:int:string"/>
+	</struct>
+	<config name="names" type="NameCfg" files="names.csv"/>
+	
+	<struct name="IndexCfg">
+		<field name="d1" type="int" ref="items.items@id1"/>
+		<field name="d2" type="int" ref="items.items@id1"/>
+		<field name="d3" type="int" ref="names.names"/>
+		<field name="d4" type="int" ref="names.names"/>
+		<field name="e1" type="list:int" ref="items.items@id2"/>
+		<field name="e2" type="set:int" ref="names.names"/>
+		<field name="e3" type="map:int:string" ref="names.names"/>
+		<field name="e4" type="map:string:int" ref=":names.names"/>
+		<field name="e5" type="map:int:int" ref="items.items@id1:names.names"/>
+	</struct>
+	<config name="indexs" type="IndexCfg" files="indexs.csv"/>
+	
+	<struct name="Task" alias="任务:将军">
+		<field name="id" type="int" />
+			<struct name="Task1">
+				<field name="x" type="float" />
+			</struct>
+			
+			<struct name="Task2">
+				<field name="y" type="int"/>
+				<field name="name" type="string" groups="client"/>
+			</struct>		
+	</struct>
+	
+	<struct name="CTest">
+		<field name="id" type="Task" groups="server"/>
+		<field name="d2" type="Task" groups="server"/>
+		<field name="id3" type="Task"/>
+		<field name="d24" type="Task"/>
+		<field name="d25" type="Task"/>
+		<field name="e1" type="enum:float" groups="server"/>
+		<field name="e2" type="enum:Task" groups="server"/>
+		
+		<field name="a1" type="list:int"/>
+		<field name="a2" type="list:string" groups="server"/>
+		
+		<field name="s1" type="set:int"/>
+		
+		<field name="d225" type="list:enum:Task" line="true" indexs="id"/>
+		
+		<field name="m1" type="map:int:int"/>
+		<field name="m2" type="map:int:string"/>
+		<field name="m3" type="map:int:Task"/>
+		
+		<const name="x1" type="int" value="7"/>
+		<const name="x2" type="float" value="8.5"/>
+		<const name="x3" type="string" value="sd"/>
+	</struct>
+	
+	<config name="test" files="test.csv:test2.csv" type="CTest"/>
+</configs>
