@@ -15,19 +15,16 @@
 		<field name="x" type="int"/>
 	</struct>
 	
-	<struct name="ItemCfg">
+	<config name="items" files="items.csv">
 		<field name="items" type="list:Item" indexs="id1:id2"/>
-	</struct>
-	
-	<config name="items" type="ItemCfg" files="items.csv"/>
+	</config>
 	
 	
-	<struct name="NameCfg">
+	<config name="names" files="names.csv">
 		<field name="names" type="map:int:string"/>
-	</struct>
-	<config name="names" type="NameCfg" files="names.csv"/>
+	</config>
 	
-	<struct name="IndexCfg">
+	<config name="indexs" type="IndexCfg" files="indexs.csv">
 		<field name="d1" type="int" ref="items.items@id1"/>
 		<field name="d2" type="int" ref="items.items@id1"/>
 		<field name="d3" type="int" ref="names.names"/>
@@ -37,8 +34,7 @@
 		<field name="e3" type="map:int:string" ref="names.names"/>
 		<field name="e4" type="map:string:int" ref=":names.names"/>
 		<field name="e5" type="map:int:int" ref="items.items@id1:names.names"/>
-	</struct>
-	<config name="indexs" type="IndexCfg" files="indexs.csv"/>
+	</config>
 	
 	<struct name="Task" alias="任务:将军">
 		<field name="id" type="int" />
@@ -52,7 +48,7 @@
 			</struct>		
 	</struct>
 	
-	<struct name="CTest">
+	<config name="test" files="test.csv:test2.csv" >
 		<field name="id" type="Task" groups="server"/>
 		<field name="d2" type="Task" groups="server"/>
 		<field name="id3" type="Task"/>
@@ -75,7 +71,5 @@
 		<const name="x1" type="int" value="7"/>
 		<const name="x2" type="float" value="8.5"/>
 		<const name="x3" type="string" value="sd"/>
-	</struct>
-	
-	<config name="test" files="test.csv:test2.csv" type="CTest"/>
+	</config>
 </configs>

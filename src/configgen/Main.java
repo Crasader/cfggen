@@ -23,7 +23,7 @@ public final class Main {
 	public static String csvDir = "";
 	public static String codeDir = "";
 	public static String dataDir = "";
-	public static String outputEncoding = "GBK";
+	public static String outputEncoding = "utf8";
 	public static String inputEncoding = "GBK";
 	public static boolean verbose = false;
 	
@@ -100,18 +100,13 @@ public final class Main {
         loadDefine(root);
         dumpDefine();
         verifyDefine();
-        dumpDefine();
         Config.collectRefStructs();
         
         loadData();
         
         verifyData();
-        
 
-		Utils.createDirIfNotExist(Main.dataDir);
 		new DataGen().gen();
-		
-		Utils.createDirIfNotExist(Main.codeDir);
         
         for(String lan : languages) {
         	if(!codeDir.isEmpty()) {
@@ -154,7 +149,9 @@ public final class Main {
         }
   
         for(Element ele : Utils.getChildsByTagName(root, "config")) {
-        	new Config(ele);
+        	final Config config = new Config(ele);
+        	ele.setAttribute("name", config.getType());
+        	new Struct(ele);
         }
 	}
 	

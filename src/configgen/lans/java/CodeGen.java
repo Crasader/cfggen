@@ -16,7 +16,6 @@ public class CodeGen implements Generator {
 	public final String namespace = "cfg";
 	@Override
 	public void gen() {
-		Utils.createDirIfNotExist(Main.codeDir + "/" + namespace);
 		Config.refStructs.forEach(s -> genStruct(Struct.get(s)));
 		
 		genConfig();
@@ -26,6 +25,7 @@ public class CodeGen implements Generator {
 	String readType(String type) {
 		switch(type) {
 			case "bool":
+			case "boolean":
 			case "Boolean": return "fs.getBool()";
 			case "int":
 			case "Integer": return "fs.getInt()";
@@ -182,12 +182,12 @@ public class CodeGen implements Generator {
 		final ArrayList<String> ls = new ArrayList<String>();
 		ls.add("package " + namespace + ";");
 		ls.add("public class CfgMgr {");
-		ls.add("public static class DataDir { public static String dir; }");
+		ls.add("public static class DataDir { public static String dir; public static String encoding; }");
 		ls.add("public static void load() {  }");
 		Config.configs.values().forEach(c -> ls.add(String.format("public static final %s %s;", c.getType(), c.getName())));
 		ls.add("static {");
 		Config.configs.values().forEach(c -> 
-			ls.add(String.format("%s = new %s(CSVStream.create(DataDir.dir + \"/%s\"));", c.getName(), c.getType(), c.getFiles()[0])));
+			ls.add(String.format("%s = new %s(CSVStream.create(DataDir.dir + \"/%s\", DataDir.encoding));", c.getName(), c.getType(), c.getFiles()[0])));
 		ls.add("}");
 		
 		ls.add("public static Object create(String name, CSVStream fs) {");

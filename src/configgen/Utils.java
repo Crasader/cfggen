@@ -53,6 +53,10 @@ public final class Utils {
 	
 	public static void save(String file, String text) {
 		try {
+			File f = new File(file);
+			if(!f.getParentFile().exists()) {
+				f.getParentFile().mkdirs();
+			}
 			Files.write(new File(file).toPath(), text.getBytes(Main.outputEncoding));
 		} catch (Exception e) {
 			e.printStackTrace();

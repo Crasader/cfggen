@@ -33,10 +33,10 @@ public class Config {
 	private configgen.data.FStruct data;
 	public Config(Element data) {
 		name = data.getAttribute("name");
+		type = name.substring(0, 1).toUpperCase() + name.substring(1) + "Cfg";
 		if(configs.put(name, this) != null) {
 			throw new RuntimeException("config:" + name + " is duplicate!");
 		}
-		type = data.getAttribute("type");
 		files = Utils.split(data, "files");
 	}
 	

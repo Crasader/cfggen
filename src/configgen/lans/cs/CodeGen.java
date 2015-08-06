@@ -16,7 +16,6 @@ public class CodeGen implements Generator {
 	public final String namespace = "cfg";
 	@Override
 	public void gen() {
-		Utils.createDirIfNotExist(Main.codeDir + "/" + namespace);
 		Config.refStructs.forEach(s -> genStruct(Struct.get(s)));
 		
 		genConfig();
@@ -174,12 +173,15 @@ public class CodeGen implements Generator {
 		ls.add("using System;");
 		ls.add("namespace " + namespace + "{");
 		ls.add("public class CfgMgr {");
-		ls.add("public class DataDir { public static string Dir { set; get;} }");
+		ls.add("public class DataDir {");
+		ls.add("public static string Dir { set; get;} ");
+		ls.add("public static string Encoding { set; get; }");
+		ls.add("}");
 		ls.add("public static void Load() {  }");
 		Config.configs.values().forEach(c -> ls.add(String.format("public static readonly %s %s;", c.getType(), c.getName())));
 		ls.add("static CfgMgr() {");
 		Config.configs.values().forEach(c -> 
-			ls.add(String.format("%s = new %s(CSVStream.Create(DataDir.Dir + \"/%s\"));", c.getName(), c.getType(), c.getFiles()[0])));
+			ls.add(String.format("%s = new %s(CSVStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding));", c.getName(), c.getType(), c.getFiles()[0])));
 		ls.add("}");
 		
 		ls.add("public static Object Create(string name, CSVStream fs) {");

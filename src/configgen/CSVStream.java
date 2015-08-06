@@ -106,9 +106,9 @@ public final class CSVStream extends FlatStream {
 	@Override
 	public boolean getBool() {
 		final String s = getNextAndCheckNotEmpty();
-		if(s.equals("true"))
+		if(s.equalsIgnoreCase("true"))
 			return true;
-		else if(s.equals("false"))
+		else if(s.equalsIgnoreCase("false"))
 			return false;
 		else 
 			error(s + " isn't bool");

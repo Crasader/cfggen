@@ -18,9 +18,9 @@ namespace cfg
         private readonly List<List<string>> lines;
         private int row;
         private int col;
-        CSVStream(string file)
+        CSVStream(string file, string encoding)
         {
-            using (var reader = File.OpenText(file))
+            using (var reader = new StreamReader(file, Encoding.GetEncoding(encoding)))
             {
                 lines = CSV.Parse(reader);
             }
@@ -124,7 +124,7 @@ namespace cfg
 
         public bool GetBool()
         {
-            var s = GetNextAndCheckNotEmpty();
+            var s = GetNextAndCheckNotEmpty().ToLower();
             if (s == "true")
                 return true;
             if (s == "false")
@@ -133,9 +133,9 @@ namespace cfg
             return false;
         }
 
-        public static CSVStream Create(string file)
+        public static CSVStream Create(string file, string encoding)
         {
-            return new CSVStream(file);
+            return new CSVStream(file, encoding);
 
         }
     }

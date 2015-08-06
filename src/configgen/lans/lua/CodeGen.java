@@ -15,7 +15,6 @@ public class CodeGen implements Generator {
 	public final String namespace = "cfg";	
 	@Override
 	public void gen() {	
-		Utils.createDirIfNotExist(Main.codeDir + "/" + namespace);
 		genStructs();		
 		genConfig();
 	}
@@ -58,7 +57,7 @@ public class CodeGen implements Generator {
 								ls.addAll(cs);
 							}
 							
-							// Ö»ÓÐlistµÄvalue¿ÉÒÔÊÇÃ¶¾Ù
+							// Ö»ï¿½ï¿½listï¿½ï¿½valueï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¶ï¿½ï¿½
 							if(isEnum) {
 								int i = 0;
 								for(String ename : f.getEnums()) {
@@ -116,7 +115,7 @@ public class CodeGen implements Generator {
 	void genConfig() {
 		final ArrayList<String> ls = new ArrayList<String>();
 		ls.add("return {");
-			Config.configs.values().forEach(c -> ls.add(String.format("%s = \"%s\",", c.getName(), c.getFiles()[0])));
+			Config.configs.values().forEach(c -> ls.add(String.format("%s = {type='%s', file='%s'},", c.getName(), c.getType(), c.getFiles()[0])));
 		
 		ls.add("}");
 		final String outFile = String.format("%s/%s/configs.lua", Main.codeDir, namespace);

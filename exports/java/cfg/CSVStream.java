@@ -6,9 +6,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
-import configgen.CSV;
-import configgen.Main;
-
 public final class CSVStream extends FlatStream {
 	private final List<List<String>> lines;
 	private int col;
@@ -89,9 +86,9 @@ public final class CSVStream extends FlatStream {
 	@Override
 	public boolean getBool() {
 		final String s = getNextAndCheckNotEmpty();
-		if(s.equals("true"))
+		if(s.equalsIgnoreCase("true"))
 			return true;
-		else if(s.equals("false"))
+		else if(s.equalsIgnoreCase("false"))
 			return false;
 		else 
 			error(s + " isn't bool");
@@ -132,9 +129,9 @@ public final class CSVStream extends FlatStream {
 		return sb.toString();
 	}
 
-	public static CSVStream create(String dataFile) {
+	public static CSVStream create(String dataFile, String inputEncoding) {
 		try {
-			return new CSVStream(CSV.parse(new BufferedReader(new InputStreamReader(new FileInputStream(new File(dataFile)), Main.inputEncoding))));
+			return new CSVStream(CSV.parse(new BufferedReader(new InputStreamReader(new FileInputStream(new File(dataFile)), inputEncoding))));
 		} catch (Exception e) {
 			throw new RuntimeException("data file:" + dataFile + " loads fail!");
 		}

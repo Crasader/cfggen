@@ -12,6 +12,7 @@ namespace test
         static void Main(string[] args)
         {
             CfgMgr.DataDir.Dir = "f:/workspace/luxian/luxian/cfggen/data";
+            CfgMgr.DataDir.Encoding = "utf-8";
             System.Console.WriteLine("++++");
             CfgMgr.Load();
         }
