@@ -2,6 +2,7 @@
  local sub = string.sub
  local gsub = string.gsub
  local gmatch = string.gmatch
+ local lower = string.lower
  local error = error
  local open = io.open
  local setmetatable = setmetatable
@@ -96,7 +97,7 @@
  end
  
 function os:get_bool()
-    local next = self:get_next()
+    local next = lower(self:get_next())
     if next == "true" then
         return true
     elseif next == "false" then
