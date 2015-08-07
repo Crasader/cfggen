@@ -40,7 +40,7 @@ public final class Main {
         System.out.println("    -codedir         output code directory.");
         System.out.println("    -datadir output data directory");
         System.out.println("    -group server:client:all:xxx   group to export, can be multi.");
-        System.out.println("    -outputencoding  output encoding. default GBK");
+        System.out.println("    -outputencoding  output encoding. default utf8");
         System.out.println("    -inputencoding   input encoding. default GBK");
         System.out.println("    -verbose  show detail. default not");
 
@@ -83,16 +83,18 @@ public final class Main {
 			}
 		}
 		
-		if(languages.isEmpty())
-			usage("-lan miss");
+//		if(languages.isEmpty())
+//			usage("-lan miss");
 		if(csvDir.isEmpty())
 			usage("-configdir miss");
 		if(xmlSchemeFile.isEmpty())
 			usage("-configxml miss");
 		if(groups.isEmpty())
 			usage("-group miss");
+		if(codeDir.isEmpty() && !languages.isEmpty())
+			usage("-lan miss");
 
-		printArgs();
+		//printArgs();
 		
         final File cfgxml = new File(csvDir + "/" + xmlSchemeFile);
         Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(cfgxml).getDocumentElement();
@@ -105,21 +107,16 @@ public final class Main {
         loadData();
         
         verifyData();
-
-		new DataGen().gen();
+        if(!dataDir.isEmpty()) {
+        	new DataGen().gen();
+        }
         
-        for(String lan : languages) {
-        	if(!codeDir.isEmpty()) {
-        		Class<?> cls =  Class.forName("configgen.lans." + lan + ".CodeGen");
-            	Generator generator = (Generator)cls.newInstance();
-            	generator.gen();
-        	}
-//        	if(!dataDir.isEmpty()) {
-//        		Class<?> cls =  Class.forName("configgen.lans." + lan + ".DataGen");
-//            	Generator generator = (Generator)cls.newInstance();
-//            	generator.gen();
-//        	}
-        	
+        if(!codeDir.isEmpty() && !languages.isEmpty()) {
+	        for(String lan : languages) {
+	        		Class<?> cls =  Class.forName("configgen.lans." + lan + ".CodeGen");
+	            	Generator generator = (Generator)cls.newInstance();
+	            	generator.gen();
+	        }
         }
 	}
 	
