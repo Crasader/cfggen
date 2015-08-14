@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 import configgen.Utils;
 
 public final class Group {
-	// group ¼¯ºÏ
+	// group é›†åˆ
 	public final static HashSet<String> groups = new HashSet<String>();
 	
 	static {

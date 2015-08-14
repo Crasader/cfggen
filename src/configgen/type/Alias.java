@@ -8,7 +8,7 @@ import org.w3c.dom.Element;
 import configgen.Utils;
 
 public final class Alias {
-	// 类别名到实际名字的映射表
+	// 绫诲埆鍚嶅埌瀹為檯鍚嶅瓧鐨勬槧灏勮〃
 	public final static HashMap<String, String> alias2orgin = new HashMap<String, String>();
 	
 	public static void load(Element data) {
