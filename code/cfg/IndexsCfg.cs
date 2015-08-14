@@ -1,6 +1,8 @@
 using System;
 namespace cfg{
 public class IndexsCfg  {
+public const int __TYPE_ID__ = 1000004;
+public int GetTypeid() { return __TYPE_ID__; }
 public readonly int d1;
 public readonly int d2;
 public readonly int d3;

@@ -52,8 +52,11 @@ public class CodeGen implements Generator {
 		final String name = struct.getName();
 		ls.add(String.format("public class %s %s {", name, (base.isEmpty() ? "" : ": " + base)));
 		
+		ls.add(String.format("public const int __TYPE_ID__ = %s;", struct.getTypeid()));
+		ls.add("public int GetTypeid() { return __TYPE_ID__; }");
+		
 		for(Const c : struct.getConsts()) {
-			ls.add(String.format("public static readonly %s %s = %s;",
+			ls.add(String.format("public const %s %s = %s;",
 				toJavaType(c.getType()), c.getName(), toJavaValue(c.getType(), c.getValue())));
 		}
 		

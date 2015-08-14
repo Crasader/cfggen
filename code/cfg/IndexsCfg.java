@@ -1,5 +1,7 @@
 package cfg;
 public class IndexsCfg  {
+public final static int __TYPE_ID__ = 1000004;
+public final int getTypeid() { return __TYPE_ID__; }
 public final int d1;
 public final int d2;
 public final int d3;

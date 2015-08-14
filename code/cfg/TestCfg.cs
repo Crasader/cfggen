@@ -1,9 +1,11 @@
 using System;
 namespace cfg{
 public class TestCfg  {
-public static readonly int x1 = 7;
-public static readonly float x2 = 8.5f;
-public static readonly string x3 = "sd";
+public const int __TYPE_ID__ = 1000005;
+public int GetTypeid() { return __TYPE_ID__; }
+public const int x1 = 7;
+public const float x2 = 8.5f;
+public const string x3 = "sd";
 public readonly Task id;
 public readonly Task d2;
 public readonly Task id3;

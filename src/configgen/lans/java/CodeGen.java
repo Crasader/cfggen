@@ -60,6 +60,8 @@ public class CodeGen implements Generator {
 		final String base = struct.getBase();
 		final String name = struct.getName();
 		ls.add(String.format("public class %s %s {", name, (base.isEmpty() ? "" : "extends " + base)));
+		ls.add(String.format("public final static int __TYPE_ID__ = %s;", struct.getTypeid()));
+		ls.add("public final int getTypeid() { return __TYPE_ID__; }");
 		
 		for(Const c : struct.getConsts()) {
 			ls.add(String.format("public static final %s %s = %s;",

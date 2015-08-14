@@ -1,5 +1,7 @@
 package cfg;
 public class TestCfg  {
+public final static int __TYPE_ID__ = 1000005;
+public final int getTypeid() { return __TYPE_ID__; }
 public static final int x1 = 7;
 public static final float x2 = 8.5f;
 public static final String x3 = "sd";

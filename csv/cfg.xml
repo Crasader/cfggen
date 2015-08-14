@@ -38,11 +38,11 @@
 	
 	<struct name="Task" alias="任务:将军">
 		<field name="id" type="int" />
-			<struct name="Task1">
+			<struct name="Task1" typeid="1">
 				<field name="x" type="float" />
 			</struct>
 			
-			<struct name="Task2">
+			<struct name="Task2" typeid="2">
 				<field name="y" type="int"/>
 				<field name="name" type="string" groups="client"/>
 			</struct>		

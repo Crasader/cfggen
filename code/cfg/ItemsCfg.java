@@ -1,5 +1,7 @@
 package cfg;
 public class ItemsCfg  {
+public final static int __TYPE_ID__ = 1000002;
+public final int getTypeid() { return __TYPE_ID__; }
 public final java.util.List<Item> items = new java.util.ArrayList<Item>();
 public final java.util.Map<Integer, Item> items_id2 = new java.util.HashMap<Integer, Item>();
 public final java.util.Map<Integer, Item> items_id1 = new java.util.HashMap<Integer, Item>();
