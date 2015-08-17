@@ -48,7 +48,7 @@
 			</struct>		
 	</struct>
 	
-	<config name="test" files="test.csv:test2.csv" >
+	<config name="test" files="test.xlsx:test2.csv" >
 		<field name="id" type="Task" groups="server"/>
 		<field name="d2" type="Task" groups="server"/>
 		<field name="id3" type="Task"/>

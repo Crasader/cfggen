@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
-public final class CSVStream extends FlatStream {
+public final class CSVStream {
 	private final List<List<String>> lines;
 	private int col;
 	private int row;
@@ -43,7 +43,6 @@ public final class CSVStream extends FlatStream {
 		}
 	}
 	
-	@Override
 	public boolean isSectionEnd() {
 		while(true) {
 			if(row >= lines.size()) return true;
@@ -83,7 +82,6 @@ public final class CSVStream extends FlatStream {
 		return s;
 	}
 	
-	@Override
 	public boolean getBool() {
 		final String s = getNextAndCheckNotEmpty();
 		if(s.equalsIgnoreCase("true"))
@@ -95,25 +93,21 @@ public final class CSVStream extends FlatStream {
 		return false;
 	}
 	
-	@Override
 	public int getInt() {
 		final String s = getNextAndCheckNotEmpty();
 		return Integer.parseInt(s);
 	}
 	
-	@Override
 	public long getLong() {
 		final String s = getNextAndCheckNotEmpty();
 		return Long.parseLong(s);
 	}
 	
-	@Override
 	public float getFloat() {
 		final String s = getNextAndCheckNotEmpty();
 		return Float.parseFloat(s);
 	}
 
-	@Override
 	public String getString() {
 		final String s = getNextAndCheckNotEmpty();
 		return s.replace("\\#", "#").replace("\\]", "]").replace("\\s", "").replace("\\\\", "\\");

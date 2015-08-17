@@ -115,7 +115,7 @@ public class CodeGen implements Generator {
 	void genConfig() {
 		final ArrayList<String> ls = new ArrayList<String>();
 		ls.add("return {");
-			Config.configs.values().forEach(c -> ls.add(String.format("%s = {type='%s', file='%s'},", c.getName(), c.getType(), c.getFiles()[0])));
+			Config.configs.values().forEach(c -> ls.add(String.format("%s = {type='%s', file='%s'},", c.getName(), c.getType(), c.getOutputDataFile())));
 		
 		ls.add("}");
 		final String outFile = String.format("%s/%s/configs.lua", Main.codeDir, namespace);

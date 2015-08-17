@@ -10,7 +10,12 @@
 	</target>
 
 	<target name="compile" depends="init">
-		<javac encoding="utf8" srcdir="${src}" destdir="${build}" includeantruntime="false" debug="true" debuglevel="lines,source">
+		<path id="classpath">
+			<fileset dir=".">
+				<include name="poi-*.jar" />
+			</fileset>
+		</path>
+		<javac encoding="utf8" srcdir="${src}" destdir="${build}" includeantruntime="false" classpathref="classpath" debug="true" debuglevel="lines,source">
 			<compilerarg line="-Xlint:unchecked" />
 		</javac>
 	</target>
@@ -20,7 +25,10 @@
 	</target>
 
 	<target name="dist" depends="clean, compile">
-		<jar jarfile="config.jar" basedir="${build}" manifest="${src}/MANIFEST.MF" />
+		<jar jarfile="config.jar" basedir="${build}" manifest="${src}/MANIFEST.MF" >
+			<zipgroupfileset dir="." includes="poi-*.jar" />
+			<zipgroupfileset dir="." includes="xmlbeans-*.jar" />
+		</jar>
 		<delete dir="${build}"/>
 	</target>
 

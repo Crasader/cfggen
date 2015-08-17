@@ -24,12 +24,12 @@ public final class Struct {
 	private final HashSet<Struct> subs = new HashSet<>();
 	
 	public Struct(Element data) {
-		this(data, null);
+		this(data, "");
 	}
 	
 	public Struct(Element data, String base) {
 		name = data.getAttribute("name");
-		this.base = base != null && !base.isEmpty() ? base : data.getAttribute("base");
+		this.base = base;
 		if(structs.put(name, this) != null) {
 			error(" is duplicate!");
 		}

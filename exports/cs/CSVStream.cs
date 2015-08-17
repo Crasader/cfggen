@@ -13,7 +13,6 @@ namespace cfg
     {
         private readonly string EOL = "##";
         private readonly string END = "]]";
-        private readonly string EMPTY = "\"\"";
 
         private readonly List<List<string>> lines;
         private int row;

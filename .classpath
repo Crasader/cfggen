@@ -2,5 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="poi-3.12-20150511.jar"/>
+	<classpathentry kind="lib" path="poi-ooxml-3.12-20150511.jar"/>
+	<classpathentry kind="lib" path="xmlbeans-2.6.0.jar"/>
+	<classpathentry kind="lib" path="poi-ooxml-schemas-3.12-20150511.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

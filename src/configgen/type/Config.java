@@ -1,10 +1,5 @@
 package configgen.type;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,8 +8,7 @@ import java.util.Set;
 
 import org.w3c.dom.Element;
 
-import configgen.CSV;
-import configgen.CSVStream;
+import configgen.RowColumnStream;
 import configgen.FlatStream;
 import configgen.Main;
 import configgen.Utils;
@@ -29,6 +23,7 @@ public class Config {
 	private final String name;
 	private String type;
 	private final String[] files;
+	private final String outputDataFile;
 	
 	private configgen.data.FStruct data;
 	public Config(Element data) {
@@ -38,6 +33,7 @@ public class Config {
 			throw new RuntimeException("config:" + name + " is duplicate!");
 		}
 		files = Utils.split(data, "files");
+		outputDataFile = Utils.getFileWithoutExtension(files[0]) + ".data";
 	}
 	
 	public String getName() {
@@ -52,6 +48,10 @@ public class Config {
 		return files;
 	}
 	
+	public final String getOutputDataFile() {
+		return outputDataFile;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -75,16 +75,15 @@ public class Config {
 		type = t;
 	}
 	
-	public void loadData() throws IOException {
+	public void loadData() throws Exception {
 		List<List<String>> lines = new ArrayList<>();
 		for(String file : files) {
 			file = Main.csvDir + "/" + file;
-			System.out.println("load " + name + ", csv:" + file);
-			lines.addAll(CSV.parse(new BufferedReader(new InputStreamReader(new FileInputStream(new File(file)), Main.inputEncoding))));
-			//System.out.println(lines);
+			System.out.println("load " + name + ", file:" + file);
+			lines.addAll(Utils.parse(file));
 		}
 		
-		final FlatStream fs = new CSVStream(lines);
+		final FlatStream fs = new RowColumnStream(lines);
 		data = new FStruct(null, null, type, fs);
 		Main.println(data.toString());
 	}
@@ -128,10 +127,10 @@ public class Config {
 	
 	public void save(Set<String> groups) {
 		final List<List<String>> lines = new ArrayList<List<String>>();
-		final CSVStream is = new CSVStream(lines);
+		final RowColumnStream is = new RowColumnStream(lines);
 		data.accept(new DataVisitor(is, groups));
 		
-		final String outDataFile = Main.dataDir + "/" + files[0];
+		final String outDataFile = Main.dataDir + "/" + this.outputDataFile;
 		Utils.save(outDataFile, is.toCSVData());
 		
 	}

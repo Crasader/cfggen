@@ -13,7 +13,6 @@ import configgen.type.Group;
 import configgen.type.Struct;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -172,7 +171,7 @@ public final class Main {
 		Config.configs.values().forEach(c -> c.verifyDefine());
 	}
 	
-	static void loadData() throws IOException {
+	static void loadData() throws Exception {
 		for(Config c : Config.configs.values()) {
 			c.loadData();
 		}

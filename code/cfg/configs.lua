@@ -1,6 +1,6 @@
 return {
-names = {type='NamesCfg', file='names.csv'},
-test = {type='TestCfg', file='test.csv'},
-indexs = {type='IndexsCfg', file='indexs.csv'},
-items = {type='ItemsCfg', file='items.csv'},
+names = {type='NamesCfg', file='names.data'},
+test = {type='TestCfg', file='test.data'},
+indexs = {type='IndexsCfg', file='indexs.data'},
+items = {type='ItemsCfg', file='items.data'},
 }

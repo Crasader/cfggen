@@ -50,10 +50,14 @@ public class CodeGen implements Generator {
 		
 		final String base = struct.getBase();
 		final String name = struct.getName();
-		ls.add(String.format("public class %s %s {", name, (base.isEmpty() ? "" : ": " + base)));
+		ls.add(String.format("public %s class %s %s {", struct.isDynamic() ? "abstract" : "sealed", name, (base.isEmpty() ? "" : ": " + base)));
 		
+		if(struct.isDynamic()) {
+			ls.add("public abstract int GetTypeid();");
+		} else {
 		ls.add(String.format("public const int __TYPE_ID__ = %s;", struct.getTypeid()));
-		ls.add("public int GetTypeid() { return __TYPE_ID__; }");
+		ls.add(String.format("public %s int GetTypeid() { return __TYPE_ID__; }", struct.getBase().isEmpty() ? "" : "override"));
+		}
 		
 		for(Const c : struct.getConsts()) {
 			ls.add(String.format("public const %s %s = %s;",
@@ -184,7 +188,7 @@ public class CodeGen implements Generator {
 		Config.configs.values().forEach(c -> ls.add(String.format("public static readonly %s %s;", c.getType(), c.getName())));
 		ls.add("static CfgMgr() {");
 		Config.configs.values().forEach(c -> 
-			ls.add(String.format("%s = new %s(CSVStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding));", c.getName(), c.getType(), c.getFiles()[0])));
+			ls.add(String.format("%s = new %s(CSVStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding));", c.getName(), c.getType(), c.getOutputDataFile())));
 		ls.add("}");
 		
 		ls.add("public static Object Create(string name, CSVStream fs) {");

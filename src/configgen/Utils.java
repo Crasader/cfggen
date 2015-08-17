@@ -1,10 +1,23 @@
 package configgen;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellValue;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -44,6 +57,84 @@ public final class Utils {
 		return eles;
 	}
 	
+	public static String getFileExtension(String file) {
+		try {
+			return file.substring(file.lastIndexOf('.') + 1);
+		} catch (Exception e) {
+			return "";
+		}
+	}
+	
+	public static String getFileWithoutExtension(String file) {
+		try {
+			return file.substring(0, file.lastIndexOf('.'));
+		} catch (Exception e) {
+			return file;
+		}
+	}
+	
+	public static List<List<String>> parse(String file) throws Exception {
+		switch(getFileExtension(file)) {
+		case "csv": return parseCSV(file);
+		default : return parseExcel(file);
+		}
+	}
+	
+	static List<List<String>> parseCSV(String file) throws IOException {
+		return CSV.parse(new BufferedReader(new InputStreamReader(new FileInputStream(new File(file)), Main.inputEncoding)));
+	}
+	
+	static List<List<String>> parseExcel(String file) throws Exception {
+		final Workbook workbook = WorkbookFactory.create(new File(file));
+		final List<List<String>> lines = new ArrayList<>();
+		final FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+		for(int i = 0 , n = workbook.getNumberOfSheets() ; i < n ; i++) {
+			final Sheet sheet = workbook.getSheetAt(i);
+			for(Row row : sheet) {
+				final List<String> line = new ArrayList<>();
+				lines.add(line);
+				
+				for(Cell cell : row) {
+		            switch (cell.getCellType()) {
+	                case Cell.CELL_TYPE_STRING:
+	                    line.add(cell.getRichStringCellValue().getString());
+	                    break;
+	                case Cell.CELL_TYPE_NUMERIC:
+	                    if (DateUtil.isCellDateFormatted(cell)) {
+	                        line.add(cell.getDateCellValue().toString());
+	                    } else {
+	                        line.add(niceConvert(cell.getNumericCellValue()));
+	                    }
+	                    break;
+	                case Cell.CELL_TYPE_BOOLEAN:
+	                    line.add(Boolean.toString(cell.getBooleanCellValue()));
+	                    break;
+	                case Cell.CELL_TYPE_FORMULA:
+	                    final CellValue value = evaluator.evaluate(cell);
+	                    switch(value.getCellType()) {
+	                    case Cell.CELL_TYPE_BOOLEAN: line.add(Boolean.toString(value.getBooleanValue())); break;
+	                    case Cell.CELL_TYPE_NUMERIC: line.add(niceConvert(value.getNumberValue())); break;
+	                    case Cell.CELL_TYPE_STRING: line.add(value.getStringValue()); break;
+	                    case Cell.CELL_TYPE_BLANK : break;
+	                    default : throw new RuntimeException("unknown formula result:" + value);
+	                    }
+	                    break;
+	                default:
+	                    throw new RuntimeException("unknown cell type:" + cell.getCellType());
+	            }
+				}
+			}
+			
+		}
+		return lines;	
+	}
+	
+	public static String niceConvert(double value) {
+		final String s = Double.toString(value);
+		return s.endsWith(".0") ? s.substring(0, s.length() - 2) : s;
+		
+	}
+	
 	public static void createDirIfNotExist(String dir) {
 		final File dirFile = new File(dir);
 		if(!dirFile.exists()) {
@@ -61,5 +152,11 @@ public final class Utils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		System.out.println(parse("F:/cfggen.git/trunk/csv/test.csv"));
+		System.out.println(parse("F:/cfggen.git/trunk/csv/test.xlsx"));
+		System.out.println(parse("F:/cfggen.git/trunk/csv/test.xls"));
 	}
 }
