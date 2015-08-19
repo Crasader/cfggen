@@ -1,6 +1,5 @@
 package configgen;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public final class RowColumnStream extends FlatStream {
@@ -115,28 +114,10 @@ public final class RowColumnStream extends FlatStream {
 		return false;
 	}
 	
-	private RowColumnStream put(String x) {
-		if(lines.isEmpty()) {
-			lines.add(new ArrayList<String>());
-		}
-		lines.get(lines.size() - 1).add(x);
-		return this;
-	}
-	
-	@Override
-	public RowColumnStream putBool(boolean x) {
-		return put(x ? "true" : "false");
-	}
-	
 	@Override
 	public int getInt() {
 		final String s = getNextAndCheckNotEmpty();
 		return Integer.parseInt(s);
-	}
-	
-	@Override
-	public RowColumnStream putInt(int x) {
-		return put(Integer.toString(x));
 	}
 	
 	@Override
@@ -146,44 +127,15 @@ public final class RowColumnStream extends FlatStream {
 	}
 	
 	@Override
-	public RowColumnStream putLong(long x) {
-		return put(Long.toString(x));
-	}
-	
-	@Override
 	public float getFloat() {
 		final String s = getNextAndCheckNotEmpty();
 		return Float.parseFloat(s);
-	}
-	
-	@Override
-	public RowColumnStream putFloat(float x) {
-		return put(Float.toString(x));
 	}
 
 	@Override
 	public String getString() {
 		final String s = getNextAndCheckNotEmpty();
 		return s.replace("\\#", "#").replace("\\]", "]").replace("\\s", "").replace("\\\\", "\\");
-	}
-	
-	@Override
-	public RowColumnStream putString(String x) {
-		if(x.isEmpty()) {
-			return put("\\s");
-		}
-		x = x.replace("\\", "\\\\").replace("]", "\\]").replace("#", "\\#");
-		
-		if(x.contains(",") || x.contains("\"") || x.contains(" ") || x.contains("\t")) {
-			return put("\"" + (x.replace("\"", "\"\"")) + "\"");
-		} else {
-			return put(x);
-		}
-	}
-	
-	@Override
-	public RowColumnStream putSectionEnd() {
-		return put(END);
 	}
 	
 	public String toCSVData() {

@@ -74,7 +74,7 @@ public class CodeGen implements Generator {
 		
 		final ArrayList<String> ds = new ArrayList<String>();
 		final ArrayList<String> cs = new ArrayList<String>();
-		cs.add(String.format("public %s(CSVStream fs) {", name));
+		cs.add(String.format("public %s(DataStream fs) {", name));
 		
 		if(!base.isEmpty()) {
 			cs.add("super(fs);");
@@ -104,7 +104,7 @@ public class CodeGen implements Generator {
 							final String valueType = toBoxType(toJavaType(isEnum ?ftypes.get(2) : ftypes.get(1)));
 							ds.add(String.format("public final java.util.List<%s> %s = new java.util.ArrayList<%s>();", valueType, fname, valueType));
 							
-							cs.add("while(!fs.isSectionEnd()) {");
+							cs.add("for(int n = fs.getInt(); n-- > 0 ; ) {");
 							cs.add(String.format("this.%s.add(%s);", fname, readType(valueType)));
 							cs.add("}");
 							
@@ -134,7 +134,7 @@ public class CodeGen implements Generator {
 						case "set": {
 							final String valueType = toBoxType(toJavaType(ftypes.get(1)));
 							ds.add(String.format("public final java.util.Set<%s> %s = new java.util.HashSet<%s>();", valueType, fname, valueType));
-							cs.add("while(!fs.isSectionEnd()) {");
+							cs.add("for(int n = fs.getInt(); n-- > 0 ; ) {");
 							cs.add(String.format("this.%s.add(%s);", fname, readType(valueType)));
 							cs.add("}");
 							break;
@@ -143,7 +143,7 @@ public class CodeGen implements Generator {
 							final String keyType = toBoxType(toJavaType(ftypes.get(1)));;
 							final String valueType = toBoxType(toJavaType(ftypes.get(2)));
 							ds.add(String.format("public final java.util.Map<%s, %s> %s = new java.util.HashMap<%s, %s>();", keyType, valueType, fname, keyType, valueType));
-							cs.add("while(!fs.isSectionEnd()) {");
+							cs.add("for(int n = fs.getInt(); n-- > 0 ; ) {");
 							cs.add(String.format("this.%s.put(%s, %s);", fname, readType(keyType), readType(valueType)));
 							cs.add("}");
 							break;
@@ -193,12 +193,12 @@ public class CodeGen implements Generator {
 		Config.configs.values().forEach(c -> ls.add(String.format("public static final %s %s;", c.getType(), c.getName())));
 		ls.add("static {");
 		Config.configs.values().forEach(c -> 
-			ls.add(String.format("%s = new %s(CSVStream.create(DataDir.dir + \"/%s\", DataDir.encoding));", c.getName(), c.getType(), c.getOutputDataFile())));
+			ls.add(String.format("%s = new %s(DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding));", c.getName(), c.getType(), c.getOutputDataFile())));
 		ls.add("}");
 		
-		ls.add("public static Object create(String name, CSVStream fs) {");
+		ls.add("public static Object create(String name, DataStream fs) {");
 		ls.add("try {");
-		ls.add("return Class.forName(\"cfg.\" + name).getConstructor(CSVStream.class).newInstance(fs);");
+		ls.add("return Class.forName(\"cfg.\" + name).getConstructor(DataStream.class).newInstance(fs);");
 		ls.add("} catch (Exception e) {");
 		ls.add("e.printStackTrace();");
 		ls.add("return null;");

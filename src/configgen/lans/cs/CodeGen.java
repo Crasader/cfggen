@@ -68,9 +68,9 @@ public class CodeGen implements Generator {
 		final ArrayList<String> cs = new ArrayList<String>();
 		
 		if(!base.isEmpty()) {
-			cs.add(String.format("public %s(CSVStream fs) : base(fs) {", name));
+			cs.add(String.format("public %s(DataStream fs) : base(fs) {", name));
 		} else {
-			cs.add(String.format("public %s(CSVStream fs) {", name));
+			cs.add(String.format("public %s(DataStream fs) {", name));
 		}
 		
 		for(Field f : struct.getFields()) {
@@ -97,7 +97,7 @@ public class CodeGen implements Generator {
 							final String valueType = toBoxType(toJavaType(isEnum ?ftypes.get(2) : ftypes.get(1)));
 							ds.add(String.format("public readonly System.Collections.Generic.List<%s> %s = new System.Collections.Generic.List<%s>();", valueType, fname, valueType));
 							
-							cs.add("while(!fs.IsSectionEnd()) {");
+							cs.add("for(int n = fs.GetInt(); n-- > 0 ; ) {");
 							cs.add(String.format("this.%s.Add(%s);", fname, readType(valueType)));
 							cs.add("}");
 							
@@ -127,7 +127,7 @@ public class CodeGen implements Generator {
 						case "set": {
 							final String valueType = toBoxType(toJavaType(ftypes.get(1)));
 							ds.add(String.format("public readonly System.Collections.Generic.HashSet<%s> %s = new System.Collections.Generic.HashSet<%s>();", valueType, fname, valueType));
-							cs.add("while(!fs.IsSectionEnd()) {");
+							cs.add("for(int n = fs.GetInt(); n-- > 0 ; ) {");
 							cs.add(String.format("this.%s.Add(%s);", fname, readType(valueType)));
 							cs.add("}");
 							break;
@@ -136,7 +136,7 @@ public class CodeGen implements Generator {
 							final String keyType = toBoxType(toJavaType(ftypes.get(1)));;
 							final String valueType = toBoxType(toJavaType(ftypes.get(2)));
 							ds.add(String.format("public readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();", keyType, valueType, fname, keyType, valueType));
-							cs.add("while(!fs.IsSectionEnd()) {");
+							cs.add("for(int n = fs.GetInt(); n-- > 0 ; ) {");
 							cs.add(String.format("this.%s[%s] = %s;", fname, readType(keyType), readType(valueType)));
 							cs.add("}");
 							break;
@@ -188,12 +188,12 @@ public class CodeGen implements Generator {
 		Config.configs.values().forEach(c -> ls.add(String.format("public static readonly %s %s;", c.getType(), c.getName())));
 		ls.add("static CfgMgr() {");
 		Config.configs.values().forEach(c -> 
-			ls.add(String.format("%s = new %s(CSVStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding));", c.getName(), c.getType(), c.getOutputDataFile())));
+			ls.add(String.format("%s = new %s(DataStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding));", c.getName(), c.getType(), c.getOutputDataFile())));
 		ls.add("}");
 		
-		ls.add("public static Object Create(string name, CSVStream fs) {");
+		ls.add("public static Object Create(string name, DataStream fs) {");
 		ls.add("try {");
-		ls.add("return Type.GetType(\"" + namespace + ".\" + name).GetConstructor(new []{typeof (CSVStream)}).Invoke(new object[]{fs});");
+		ls.add("return Type.GetType(\"" + namespace + ".\" + name).GetConstructor(new []{typeof (DataStream)}).Invoke(new object[]{fs});");
 		ls.add("} catch (Exception e) {");
 		ls.add("System.Console.WriteLine(e);");
 		ls.add("return null;");

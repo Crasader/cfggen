@@ -126,12 +126,11 @@ public class Config {
 	}
 	
 	public void save(Set<String> groups) {
-		final List<List<String>> lines = new ArrayList<List<String>>();
-		final RowColumnStream is = new RowColumnStream(lines);
-		data.accept(new DataVisitor(is, groups));
+		final DataVisitor vs = new DataVisitor(groups);
+		data.accept(vs);
 		
 		final String outDataFile = Main.dataDir + "/" + this.outputDataFile;
-		Utils.save(outDataFile, is.toCSVData());
+		Utils.save(outDataFile, vs.toData());
 		
 	}
 	

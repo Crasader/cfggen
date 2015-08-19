@@ -85,7 +85,7 @@ public class CodeGen implements Generator {
 	
 	void genStructs() {
 		final ArrayList<String> ls = new ArrayList<String>();
-		ls.add(String.format("local os = require '%s.cvsstream'", namespace));
+		ls.add(String.format("local os = require '%s.datastream'", namespace));
 		ls.add("local insert = table.insert");
 		ls.add("local ipairs = ipairs");
 

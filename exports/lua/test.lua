@@ -22,9 +22,9 @@ local function dump_table(t)
  return concat(code)
 end
 
-local r = os.new("f:/workspace/luxian/luxian/cfggen/data/test.csv")
+local r = os.new("F:/cfggen.git/trunk/data/test.data")
 
-local v = r:get_CTest()
+local v = r:get_TestCfg()
 
 print(dump_table(v))
 

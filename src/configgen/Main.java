@@ -25,6 +25,7 @@ public final class Main {
 	public static String outputEncoding = "utf8";
 	public static String inputEncoding = "GBK";
 	public static boolean verbose = false;
+	public static boolean noverify = false;
 	
 	public static final Set<String> languages = new HashSet<String>();
 	public static final Set<String> groups = new HashSet<String>();
@@ -42,6 +43,8 @@ public final class Main {
         System.out.println("    -outputencoding  output encoding. default utf8");
         System.out.println("    -inputencoding   input encoding. default GBK");
         System.out.println("    -verbose  show detail. default not");
+        System.out.println("    -noverify no verify reference");
+        System.out.println("    --help show usage");
 
         Runtime.getRuntime().exit(1);
     }
@@ -76,14 +79,18 @@ public final class Main {
 			case "-verbose":
 				verbose = true;
 				break;
+			case "-noverify":
+				noverify = true;
+				break;
+			case "--help":
+				usage("");
+				break;
 			default:
 				usage("unknown args " + args[i]);
 				break;
 			}
 		}
-		
-//		if(languages.isEmpty())
-//			usage("-lan miss");
+
 		if(csvDir.isEmpty())
 			usage("-configdir miss");
 		if(xmlSchemeFile.isEmpty())
@@ -105,7 +112,8 @@ public final class Main {
         
         loadData();
         
-        verifyData();
+        if(!noverify)
+        	verifyData();
         if(!dataDir.isEmpty()) {
         	new DataGen().gen();
         }

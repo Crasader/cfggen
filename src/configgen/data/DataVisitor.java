@@ -3,16 +3,14 @@ package configgen.data;
 import java.util.Map;
 import java.util.Set;
 
-import configgen.FlatStream;
 import configgen.type.Field;
 import configgen.type.Struct;
 
 
 public class DataVisitor implements Visitor {
 	private final Set<String> groups;
-	private final FlatStream fs;
-	public DataVisitor(FlatStream fs, Set<String> groups) {
-		this.fs = fs;
+	private final DataMarshal fs = new DataMarshal();
+	public DataVisitor(Set<String> groups) {
 		this.groups = groups;
 	}
 	
@@ -69,32 +67,36 @@ public class DataVisitor implements Visitor {
 	@Override
 	public void accept(FList x) {
 		if(x.getDefine().checkInGroup(groups)) {
+			fs.putInt(x.values.size());
 			for(Type field : x.values) {
 				field.accept(this);
 			}
-			fs.putSectionEnd();
 		}
 	}
 	
 	@Override
 	public void accept(FMap x) {
 		if(x.getDefine().checkInGroup(groups)) {
+			fs.putInt(x.values.size());
 			for(Map.Entry<Type, Type> field : x.values.entrySet()) {
 				field.getKey().accept(this);
 				field.getValue().accept(this);
 			}
-			fs.putSectionEnd();
 		}
 	}
 
 	@Override
 	public void accept(FSet x) {
 		if(x.getDefine().checkInGroup(groups)) {
+			fs.putInt(x.values.size());
 			for(Type field : x.values) {
 				field.accept(this);
 			}
-			fs.putSectionEnd();
 		}
+	}
+	
+	public final String toData() {
+		return fs.toData();
 	}
 
 
