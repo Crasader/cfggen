@@ -18,9 +18,9 @@ public class FMap extends Type {
 		if(keyDefine.isEnum())
 			valueDefine = valueDefine.stripAdoreType();
 		while(!is.isSectionEnd()) {
-			values.put(Type.create(host, keyDefine, is), Type.create(host, valueDefine, is));
-			if(define.isAline()) {
-				is.checkLineEnd();
+			final Type key = Type.create(host, keyDefine, is);
+			if(values.put(key, Type.create(host, valueDefine, is)) != null) {
+				throw new RuntimeException(String.format("field:%s key:%s dunplicate", define, key));
 			}
 		}
 		define.getEnums().addAll(keyDefine.getEnums());

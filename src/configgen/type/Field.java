@@ -16,7 +16,6 @@ public final class Field {
 	private final String fullType;
 	private final List<String> types;
 
-	private final boolean aline; 
 	private final HashSet<String> indexs = new HashSet<String>();
 	private final HashSet<String> groups = new HashSet<String>();
 	private final List<String> refs = new ArrayList<String>();
@@ -60,22 +59,19 @@ public final class Field {
 		if(groups.isEmpty()) 
 			groups.add("all");
 		
-		final String expectLineEnd = data.getAttribute("line");
-		aline = expectLineEnd.equals("true");
 	}
 	
-	private Field(String parent, String name, String fullType, List<String> types, HashSet<String> groups, boolean aline) {
+	private Field(String parent, String name, String fullType, List<String> types, HashSet<String> groups) {
 		this.parent = parent;
 		this.name = name;
 		this.fullType = fullType;
 		this.types = types;
 		this.groups.addAll(groups);
-		this.aline = aline;
 	}
 	
 	public Field stripAdoreType() {
 		final List<String> newTypes = types.subList(1, types.size());
-		return new Field(parent, name, fullType, newTypes, groups, aline);
+		return new Field(parent, name, fullType, newTypes, groups);
 	}
 	
 	public final String getParent() {
@@ -112,10 +108,6 @@ public final class Field {
 	
 	public final String getValueRef() {
 		return getType().equals("map") ? (refs.size() >= 2 ? refs.get(1) : "") : (refs.size() >= 1 ? refs.get(0) : ""); 
-	}
-	
-	public final boolean isAline() {
-		return aline;
 	}
 
 	public final boolean checkInGroup(Set<String> gs) {

@@ -19,16 +19,15 @@ public class FList extends Type {
 		Field valueDefine = define.stripAdoreType();
 		while(!is.isSectionEnd()) {
 			values.add(Type.create(host, valueDefine, is));
-			if(define.isAline()) {
-				is.checkLineEnd();
-			}
 		}
 		
 		for(String idx : define.getIndexs()) {
 			final HashSet<Type> m = new HashSet<Type>();
 			for(Type v : values) {
 				FStruct s = (FStruct)v;
-				m.add(s.getField(idx));
+				Type key = s.getField(idx);
+				if(!m.add(key)) 
+					throw new RuntimeException(String.format("field:%s idx:%s key:%s duplicate!", define, idx, key));
 			}
 			indexs.put(idx, m);
 		}

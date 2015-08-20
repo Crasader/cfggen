@@ -1,23 +1,22 @@
 package configgen.data;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import configgen.FlatStream;
 import configgen.type.Config;
 import configgen.type.Field;
 
 public class FSet extends Type {
-	final public List<Type> values = new ArrayList<Type>();
+	final public Set<Type> values = new HashSet<Type>();
 	public FSet(FStruct host, Field define, FlatStream is) {
 		super(host, define);
 		Field valueDefine = define.stripAdoreType();
 		while(!is.isSectionEnd()) {
-			values.add(Type.create(host, valueDefine, is));
-			if(define.isAline()) {
-				is.checkLineEnd();
+			Type value = Type.create(host, valueDefine, is);
+			if(!values.add(value)) {
+				throw new RuntimeException(String.format("field:%s value:%s duplicate!", define, value));
 			}
 		}
 		define.getEnums().addAll(valueDefine.getEnums());
