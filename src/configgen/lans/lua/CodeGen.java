@@ -107,7 +107,7 @@ public class CodeGen implements Generator {
 	
 		ls.add("return os");
 		final String code = ls.stream().collect(Collectors.joining("\n"));
-		Main.println(code);
+		//Main.println(code);
 		final String outFile = String.format("%s/%s/structs.lua", Main.codeDir, namespace);
 		Utils.save(outFile, code);
 	}

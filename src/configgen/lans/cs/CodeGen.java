@@ -153,7 +153,7 @@ public class CodeGen implements Generator {
 		ls.add("}");
 		ls.add("}");
 		final String code = ls.stream().collect(Collectors.joining("\n"));
-		Main.println(code);
+		//Main.println(code);
 		final String outFile = String.format("%s/%s/%s.cs", Main.codeDir, namespace, name);
 		Utils.save(outFile, code);
 	}

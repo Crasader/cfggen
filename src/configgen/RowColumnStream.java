@@ -15,23 +15,25 @@ public final class RowColumnStream extends FlatStream {
 	
 	public RowColumnStream(List<List<String>> data) {
 		lines = data;
-		col = row = 0;
+		col = -1;
+		row = 0;
 		Cur = this;
 	}
 	
 	private String getNext() {
 		while(true) {
 			if(row >= lines.size()) return null;
+			++col;
 			List<String> line = lines.get(row);
 			if(col >= line.size()) {
 				row++;
-				col = 0;
+				col = -1;
 				continue;
 			}
-			final String data = line.get(col++);
+			final String data = line.get(col);
 			if(data.startsWith(EOL)) {
 				row++;
-				col = 0;
+				col = -1;
 				continue;
 			}
 			if(!data.isEmpty()) {
@@ -44,27 +46,26 @@ public final class RowColumnStream extends FlatStream {
 	public boolean isSectionEnd() {
 		while(true) {
 			if(row >= lines.size()) return true;
+			col++;
 			List<String> line = lines.get(row);
 			if(col >= line.size()) {
 				row++;
-				col = 0;
+				col = -1;
 				continue;
 			}
 			final String data = line.get(col);
 			if(data.startsWith(EOL)) {
 				row++;
-				col = 0;
+				col = -1;
 				continue;
 			}
 			if(!data.isEmpty()) {
 				if(data.startsWith(END)) {
-					col++;
 					return true;
 				} else {
+					col--;
 					return false;
 				}
-			} else {
-				col++;
 			}
 		}
 	}
@@ -92,7 +93,7 @@ public final class RowColumnStream extends FlatStream {
 	}
 	
 	private void error(String err) {
-		throw new RuntimeException(String.format("%d:%d %s", row, col, err));
+		throw new RuntimeException(String.format("%d:%d %s", row + 1, col + 1, err));
 	}
 	
 	private String getNextAndCheckNotEmpty() {
@@ -117,19 +118,34 @@ public final class RowColumnStream extends FlatStream {
 	@Override
 	public int getInt() {
 		final String s = getNextAndCheckNotEmpty();
-		return Integer.parseInt(s);
+		try {
+			return Integer.parseInt(s);
+		} catch(Exception e) {
+			error(s + " isn't int");
+			return -1;
+		}
 	}
 	
 	@Override
 	public long getLong() {
 		final String s = getNextAndCheckNotEmpty();
-		return Long.parseLong(s);
+		try {
+			return Long.parseLong(s);
+		} catch(Exception e) {
+			error(s + " isn't long");
+			return -1;
+		}
 	}
 	
 	@Override
 	public float getFloat() {
 		final String s = getNextAndCheckNotEmpty();
-		return Float.parseFloat(s);
+		try {
+			return Float.parseFloat(s);
+		} catch(Exception e) {
+			error(s + " isn't float");
+			return 0f;
+		}
 	}
 
 	@Override

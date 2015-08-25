@@ -85,12 +85,11 @@ public class Config {
 		
 		final FlatStream fs = new RowColumnStream(lines);
 		data = new FStruct(null, null, type, fs);
-		Main.println(data.toString());
 	}
 	
 	public static void collectRefStructs() {
 		configs.values().forEach(c -> collectRef(c.getType()));
-		Main.println(refStructs);
+		//Main.println(refStructs);
 	}
 	
 	static void collectRef(String struct) {

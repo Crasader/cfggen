@@ -13,8 +13,10 @@ import configgen.type.Group;
 import configgen.type.Struct;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public final class Main {
@@ -30,12 +32,13 @@ public final class Main {
 	public static final Set<String> languages = new HashSet<String>();
 	public static final Set<String> groups = new HashSet<String>();
 	
+	private static List<Object> lastLoadDatas = new ArrayList<>();
+	
     private static void usage(String reason) {
         System.out.println(reason);
 
         System.out.println("Usage: java -jar config.jar [options]");
         System.out.println("    -lan cs:lua:java     language type. can be multi.");
-        System.out.println("    -configdir       config data directory");
         System.out.println("    -configxml       config xml file");
         System.out.println("    -codedir         output code directory.");
         System.out.println("    -datadir output data directory");
@@ -54,9 +57,6 @@ public final class Main {
 			switch (args[i]) {
 			case "-lan":
 				languages.addAll(Arrays.asList(args[++i].split(":")));
-				break;
-			case "-configdir":
-				csvDir = args[++i];
 				break;
 			case "-configxml":
 				xmlSchemeFile = args[++i];
@@ -91,8 +91,6 @@ public final class Main {
 			}
 		}
 
-		if(csvDir.isEmpty())
-			usage("-configdir miss");
 		if(xmlSchemeFile.isEmpty())
 			usage("-configxml miss");
 		if(groups.isEmpty())
@@ -102,15 +100,23 @@ public final class Main {
 
 		//printArgs();
 		
-        final File cfgxml = new File(csvDir + "/" + xmlSchemeFile);
+        final File cfgxml = new File(xmlSchemeFile);
+        csvDir = cfgxml.toPath().getParent().toString();
         Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(cfgxml).getDocumentElement();
         
         loadDefine(root);
-        dumpDefine();
+        //dumpDefine();
         verifyDefine();
         Config.collectRefStructs();
-        
-        loadData();
+        try {
+        	loadData();
+        } catch(Exception e) {
+        	System.out.println("=================last datas=====================");
+        	lastLoadDatas.forEach(d ->System.out.println(d));
+        	System.out.println("=================last datas=====================");
+        	e.printStackTrace();
+        	System.exit(1);
+        }
         
         if(!noverify)
         	verifyData();
@@ -125,18 +131,6 @@ public final class Main {
 	            	generator.gen();
 	        }
         }
-	}
-	
-	public static void printArgs() {
-		System.out.println("-lan " + languages);
-		System.out.println("-configdir " + csvDir);
-		System.out.println("-configxml " + xmlSchemeFile);
-		System.out.println("-codedir " + codeDir);
-		System.out.println("-datadir " + dataDir);
-		System.out.println("-group " + groups);
-		System.out.println("-inputcoding " + inputEncoding);
-		System.out.println("-outputencoding " + outputEncoding);
-		System.out.println("-verbose " + verbose);
 	}
 
 	public static void loadDefine(Element root) {
@@ -165,12 +159,11 @@ public final class Main {
 		}
 	}
 	
-	private static void dumpDefine() {
+	public static void dumpDefine() {
 		println("groups:" + Group.groups);
 		println("alias:" + Alias.alias2orgin);
 		Config.configs.values().forEach(c -> println(c.toString()));
-		Struct.structs.values().forEach(s -> println(s.toString()));
-		
+		Struct.structs.values().forEach(s -> println(s.toString()));	
 	}
 	
 	private static void verifyDefine() {
@@ -189,5 +182,12 @@ public final class Main {
 		for(Config c : Config.configs.values()) {
 			c.verifyData();
 		}
+	}
+	
+	public static void addLastLoadData(Object data) {
+		if(lastLoadDatas.size() > 100) {
+			lastLoadDatas = lastLoadDatas.subList(50, lastLoadDatas.size());
+		}
+		lastLoadDatas.add(data);
 	}
 }

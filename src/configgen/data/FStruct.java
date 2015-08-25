@@ -3,6 +3,7 @@ package configgen.data;
 import java.util.ArrayList;
 
 import configgen.FlatStream;
+import configgen.Main;
 import configgen.type.Field;
 import configgen.type.Struct;
 
@@ -56,6 +57,9 @@ public class FStruct extends Type {
 		for(Field f : self.getFields()) {
 			values.add(Type.create(this, f, is));
 		}
+		// 最近一条读取的数据.便于分析
+		if(!self.isDynamic())
+			Main.addLastLoadData(this);
 	}
 	
 	public String toString() {
