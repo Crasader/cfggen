@@ -23,21 +23,24 @@ public final class Field {
 	public final static HashSet<String> RawTypes = new HashSet<String>(Arrays.asList("bool", "int", "float", "long", "string"));
 	public final static HashSet<String> ConTypes = new HashSet<String>(Arrays.asList("list", "set", "map"));
 	
-	public Field(String parent, Element data) {
+	public Field(String parent, String name, String fulltype, String[] types, String[] indexs, String[] refs, String[] groups) {
 		this.parent = parent;
-		name = data.getAttribute("name");
-		fullType = data.getAttribute("type");
-		types = Arrays.asList(Utils.split(data, "type"));
-		if(types.isEmpty())
+		this.name = name;
+		this.fullType = fulltype;
+		this.types = Arrays.asList(types);
+		if(this.types.isEmpty())
 			error("type miss");
 
 		if(name.isEmpty())
 			error("name miss");
 		
-		if(types.get(0).equals("list")) {
-			final String valueType = types.get(1);
+		for(String idx : indexs)
+			this.indexs.add(idx.toLowerCase());
+		
+		if(types[0].equals("list")) {
+			final String valueType = types[1];
 			if(Field.isStruct(valueType)) {
-				indexs.addAll(Arrays.asList(Utils.split(data, "indexs")));
+				this.indexs.addAll(Arrays.asList(indexs));
 				Struct s = Struct.get(valueType);
 				for(String idx : indexs) {
 					if(s.getField(idx) == null)
@@ -46,18 +49,29 @@ public final class Field {
 			}
 		}
 		
-		refs.addAll(Arrays.asList(Utils.split(data, "ref")));
+		this.refs.addAll(Arrays.asList(refs));
 		
 //		else if(!name.isEmpty() && isEnum())
 //			error("enum can't have name");
 		
-		for(String groupName : Utils.split(data, "groups")) {
-			groups.add(groupName);
+		for(String groupName : groups) {
+			this.groups.add(groupName);
 		}
 		
-		if(groups.isEmpty()) 
-			groups.add("all");
-		
+		if(this.groups.isEmpty()) 
+			this.groups.add("all");
+	}
+	
+	public Field(String parent, Element data) {
+		this(
+			parent, 
+			data.getAttribute("name"),
+			data.getAttribute("type"),
+			Utils.split(data, "type"),
+			Utils.split(data, "indexs"),
+			Utils.split(data, "ref"),
+			Utils.split(data, "groups")
+			);	
 	}
 	
 	private Field(String parent, String name, String fullType, List<String> types, HashSet<String> groups) {

@@ -71,8 +71,8 @@ public class FStruct extends Type {
 	}
 
 
-
-	public void veryfyData() {
+	@Override
+	public void verifyData() {
 		values.forEach(v -> v.verifyData());
 	}
 

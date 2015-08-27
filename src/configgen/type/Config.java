@@ -13,7 +13,7 @@ import configgen.FlatStream;
 import configgen.Main;
 import configgen.Utils;
 import configgen.data.DataVisitor;
-import configgen.data.FStruct;
+import configgen.data.FList;
 import configgen.data.Type;
 
 public class Config {
@@ -23,26 +23,33 @@ public class Config {
 	private final String name;
 	private String type;
 	private final String dir;
-	private final String[] files;
-	private final String outputDataFile;
-	private final boolean noLoadData;
+	private final String[] inputFiles;
+	private final String outputFile;
+	private final String[] indexs;
+	private final String[] groups;
 	
-	private configgen.data.FStruct data;
+	private FList data;
 	public Config(Element data, String csvDir) {
 		dir = csvDir;
-		name = data.getAttribute("name");
-		type = name.substring(0, 1).toUpperCase() + name.substring(1) + "Cfg";
+		type = data.getAttribute("name");
+		name = type.toLowerCase();
 		if(configs.put(name, this) != null) {
-			throw new RuntimeException("config:" + name + " is duplicate!");
+			Utils.error("config:" + name + " is duplicate!");
 		}
-		files = Utils.split(data, "files");
-		if(!dir.isEmpty()) {
-			for(int i = 0 ; i < files.length ; i++) {
-				files[i] = dir + "/" + files[i];
-			}
+		
+		inputFiles = Utils.split(data, "input");
+		for(int i = 0 ; i < inputFiles.length ; i++) {
+			inputFiles[i] = Utils.combine(dir, inputFiles[i]);
 		}
-		outputDataFile = Utils.getFileWithoutExtension(files[0]) + ".data";
-		noLoadData = data.getAttribute("noload").equals("true");
+		if(data.getAttribute("output").isEmpty())
+			Utils.error("config:%s output miss", name);
+		outputFile = Utils.combine(dir, data.getAttribute("output"));
+		
+		groups = Utils.split(data, "groups");
+		
+		indexs = Utils.split(data, "indexs");
+		if(indexs.length != 1)
+			Utils.error("config:%s indexs can only have one!", type);
 	}
 	
 	public String getName() {
@@ -54,19 +61,24 @@ public class Config {
 	}
 
 	public String[] getFiles() {
-		return files;
+		return inputFiles;
 	}
 	
-	public final String getOutputDataFile() {
-		return outputDataFile;
+	public String getIndex() {
+		return indexs[0];
 	}
+	
+	public String getOutputDataFile() {
+		return outputFile;
+	}
+
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("config{name=").append(name).append(",type=").append(type);
 		sb.append(",files={");
-		for(String f : files) {
+		for(String f : inputFiles) {
 			sb.append(f).append(",");
 		}
 		sb.append("}}");
@@ -85,16 +97,21 @@ public class Config {
 	}
 	
 	public void loadData() throws Exception {
-		if(noLoadData) return;
 		List<List<String>> lines = new ArrayList<>();
-		for(String file : files) {
+		for(String file : inputFiles) {
 			file = Main.csvDir + "/" + file;
 			System.out.println("load " + name + ", file:" + file);
+			//System.out.println(lines);
 			lines.addAll(Utils.parse(file));
 		}
 		
 		final FlatStream fs = new RowColumnStream(lines);
-		data = new FStruct(null, null, type, fs);
+		data = new FList(null, new Field(".", name, "list:" + type, 
+				new String[]{"list", type},
+				indexs,
+				new String[]{},
+				groups),
+				fs);
 	}
 	
 	public static void collectRefStructs() {
@@ -120,32 +137,25 @@ public class Config {
 		}
 	}
 	
-	public static Type getData(String namePath) {
+	public static HashSet<Type> getData(String name) {
 		try {
-			final String[] names = namePath.split("\\.");
-			Type type = configs.get(names[0]).data;
-			for(int i = 1 ; i < names.length ; i++) {
-				type = ((FStruct)type).getField(names[i]);
-			}
-			return type;
+			return configs.get(name).data.indexs.values().iterator().next();
 		} catch(Exception e) {
 			e.printStackTrace();
-			throw new RuntimeException("index data:" + namePath + " can't find");
+			throw new RuntimeException("config:" + name + " can't find");
 		}
 	}
 	
 	public void save(Set<String> groups) {
-		if(noLoadData) return;
+		if(inputFiles.length == 0) return;
 		final DataVisitor vs = new DataVisitor(groups);
-		data.accept(vs);
-		
-		final String outDataFile = Main.dataDir + "/" + this.outputDataFile;
+		data.accept(vs);	
+		final String outDataFile = Main.dataDir + "/" + getOutputDataFile();
 		Utils.save(outDataFile, vs.toData());
-		
 	}
 	
 	public void verifyData() {
-		data.veryfyData();
+		data.verifyData();
 	}
 	
 }

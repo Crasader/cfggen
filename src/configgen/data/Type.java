@@ -1,8 +1,6 @@
 package configgen.data;
 
 import java.util.HashSet;
-import java.util.Map;
-
 import configgen.FlatStream;
 import configgen.type.Alias;
 import configgen.type.Config;
@@ -83,18 +81,9 @@ public abstract class Type {
 	public void verifyData() {
 		final String ref = define.getRef();
 		if(ref.isEmpty()) return;
-		final String[] subRef = ref.split("@");
-		Type data = Config.getData(subRef[0]);
-		if(data instanceof FList) {
-			String idx = subRef[1];
-			HashSet<Type> validValues = ((FList)data).indexs.get(idx);
-				if(!validValues.contains(this))
-					System.out.println("field:" + define.getName() + " value:" + this + " can't find in index:" + ref);
-		} else {
-			Map<Type, Type> validValues = ((FMap)data).values;
-				if(!validValues.containsKey(this))
-					System.out.println("field:" + define.getName() + " value:" + this + " can't find in index:" + ref);
-		}
+		HashSet<Type> validValues = Config.getData(ref);
+		if(!validValues.contains(this))
+				System.out.println("field:" + define.getName() + " value:" + this + " can't find in index:" + ref);
 	}
 	
 }

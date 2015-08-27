@@ -43,41 +43,19 @@ public class FMap extends Type {
 	public void verifyData() {
 		final String keyRef = define.getKeyRef();
 		if(!keyRef.isEmpty()) {
-			final String[] subRef = keyRef.split("@");
-			Type data = Config.getData(subRef[0]);
-			if(data instanceof FList) {
-				String idx = subRef[1];
-				HashSet<Type> validValues = ((FList)data).indexs.get(idx);
-				for(Type d : values.keySet()) {
-					if(!validValues.contains(d))
-						System.out.println("field:" + define.getName() + " key:" + d + " can't find in index:" + keyRef);
-				}
-			} else {
-				Map<Type, Type> validValues = ((FMap)data).values;
-				for(Type d : values.keySet()) {
-					if(!validValues.containsKey(d))
-						System.out.println("field:" + define.getName() + " key:" + d + " can't find in index:" + keyRef);
-				}
+			HashSet<Type> validValues = Config.getData(keyRef);
+			for(Type d : values.keySet()) {
+				if(!validValues.contains(d))
+					System.out.println("field:" + define.getName() + " value:" + d + " can't find in index:" + keyRef);
 			}
 		}
 		
 		final String valueRef = define.getValueRef();
 		if(!valueRef.isEmpty()) {
-			final String[] subRef = valueRef.split("@");
-			Type data = Config.getData(subRef[0]);
-			if(data instanceof FList) {
-				String idx = subRef[1];
-				HashSet<Type> validValues = ((FList)data).indexs.get(idx);
-				for(Type d : values.values()) {
-					if(!validValues.contains(d))
-						System.out.println("field:" + define.getName() + " value:" + d + " can't find in index:" + valueRef);
-				}
-			} else {
-				Map<Type, Type> validValues = ((FMap)data).values;
-				for(Type d : values.values()) {
-					if(!validValues.containsKey(d))
-						System.out.println("field:" + define.getName() + " value:" + d + " can't find in index:" + valueRef);
-				}
+			HashSet<Type> validValues = Config.getData(valueRef);
+			for(Type d : values.values()) {
+				if(!validValues.contains(d))
+					System.out.println("field:" + define.getName() + " value:" + d + " can't find in index:" + valueRef);
 			}
 		}
 	}

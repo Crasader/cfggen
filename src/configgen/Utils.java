@@ -28,6 +28,11 @@ public final class Utils {
 		throw new RuntimeException(String.format(fmt, params));
 	}
 	
+	
+	public static String combine(String parent, String sub) {
+		return parent.isEmpty() ? sub : parent + "/" + sub;
+	}
+	
 	public static String[] split(Element ele, String attr) {
 		final String str = ele.getAttribute(attr);
 		if(str.isEmpty()) {

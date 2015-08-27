@@ -96,14 +96,11 @@ public final class Main {
 		if(codeDir.isEmpty() && !languages.isEmpty())
 			usage("-lan miss");
 
-		//printArgs();
-		
         final File cfgxml = new File(xmlSchemeFile);
         csvDir = cfgxml.toPath().getParent().toString();
         Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(cfgxml).getDocumentElement();
         
         loadDefine(root, "");
-        //dumpDefine();
         verifyDefine();
         Config.collectRefStructs();
         try {
@@ -145,14 +142,13 @@ public final class Main {
         }
   
         for(Element ele : Utils.getChildsByTagName(root, "config")) {
-        	final Config config = new Config(ele, relateDir);
-        	ele.setAttribute("name", config.getType());
         	new Struct(ele);
+        	new Config(ele, relateDir);
         }
         
         for(Element ele : Utils.getChildsByTagName(root, "import")) {
-        	for(String file : Utils.split(ele, "files")) {
-        		final String newRelateDir = file.contains("/") ? combine(relateDir, file.substring(0, file.lastIndexOf('/'))) : relateDir;
+        	for(String file : Utils.split(ele, "input")) {
+        		final String newRelateDir = file.contains("/") ? Utils.combine(relateDir, file.substring(0, file.lastIndexOf('/'))) : relateDir;
         		loadDefine(DocumentBuilderFactory.newInstance().newDocumentBuilder().
         			parse(csvDir + "/" + file).getDocumentElement()
         			, newRelateDir);
@@ -160,10 +156,7 @@ public final class Main {
         }
         
 	}
-	
-	public static String combine(String parent, String sub) {
-		return parent.isEmpty() ? sub : parent + "/" + sub;
-	}
+
 	
 	public static void println(Object s) {
 		if(verbose) {

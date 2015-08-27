@@ -101,11 +101,27 @@ public class CodeGen implements Generator {
 	}
 	
 	void genConfig() {
-		final ArrayList<String> ls = new ArrayList<String>();
-		ls.add("return {");
-			Config.configs.values().forEach(c -> ls.add(String.format("%s = {type='%s', file='%s'},", c.getName(), c.getType(), c.getOutputDataFile())));
+
 		
-		ls.add("}");
+		final ArrayList<String> ls = new ArrayList<String>();
+		ls.add(String.format("local os = require '%s.structs'", namespace));
+		ls.add("local create_datastream = create_datastream");
+		ls.add("local cfgs = {}");
+
+		Config.configs.values().forEach(
+			c -> {
+			ls.add("--================================");
+			ls.add("local c = {}");
+			ls.add(String.format("local fs = create_datastream(\"%s\");", c.getOutputDataFile()));
+			ls.add("for i = 1, fs:get_int() do");
+			ls.add(String.format("local v = fs:get_%s();", c.getType()));
+			ls.add(String.format("c[v.%s] = v", c.getIndex()));
+			ls.add("end");
+			ls.add(String.format("cfgs.%s = c", c.getName()));
+		});
+		
+		ls.add("return cfgs");
+		
 		final String outFile = String.format("%s/%s/configs.lua", Main.codeDir, namespace);
 		final String code = ls.stream().collect(Collectors.joining("\n"));
 		Utils.save(outFile, code);

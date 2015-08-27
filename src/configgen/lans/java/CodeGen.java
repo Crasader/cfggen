@@ -168,7 +168,9 @@ public class CodeGen implements Generator {
 		}
 	}
 	
-	
+	String getIndexType(Config c) {
+		return toBoxType(Struct.get(c.getType()).getField(c.getIndex()).getType());
+	}
 	
 	void genConfig() {
 		final ArrayList<String> ls = new ArrayList<String>();
@@ -176,10 +178,18 @@ public class CodeGen implements Generator {
 		ls.add("public class CfgMgr {");
 		ls.add("public static class DataDir { public static String dir; public static String encoding; }");
 		ls.add("public static void load() {  }");
-		Config.configs.values().forEach(c -> ls.add(String.format("public static final %s %s;", c.getType(), c.getName())));
+		Config.configs.values().forEach(c -> ls.add(String.format("public static final java.util.Map<%s, %s> %s = new java.util.HashMap<>();", 
+				getIndexType(c), c.getType(), c.getName())));
 		ls.add("static {");
-		Config.configs.values().forEach(c -> 
-			ls.add(String.format("%s = new %s(DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding));", c.getName(), c.getType(), c.getOutputDataFile())));
+		Config.configs.values().forEach(
+			c -> {
+			ls.add("{");
+			ls.add(String.format("DataStream fs =DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding);", c.getOutputDataFile()));
+			ls.add("for(int n = fs.getInt() ; n-- > 0 ; ) {");
+			ls.add(String.format("final %s v = (%s)create(\"%s\", fs);", c.getType(), c.getType(), c.getType()));
+			ls.add(String.format("%s.put(v.%s, v);", c.getName(), c.getIndex()));
+			ls.add("}}");
+		});
 		ls.add("}");
 		
 		ls.add("public static Object create(String name, DataStream fs) {");

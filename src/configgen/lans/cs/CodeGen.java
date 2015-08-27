@@ -88,7 +88,7 @@ public class CodeGen implements Generator {
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {
-							final String valueType = toBoxType(toJavaType(ftypes.get(1)));
+							final String valueType = toJavaType(ftypes.get(1));
 							ds.add(String.format("public readonly System.Collections.Generic.List<%s> %s = new System.Collections.Generic.List<%s>();", valueType, fname, valueType));
 							
 							cs.add("for(int n = fs.GetInt(); n-- > 0 ; ) {");
@@ -100,7 +100,7 @@ public class CodeGen implements Generator {
 								Struct s = Struct.get(valueType);
 								for(String idx : f.getIndexs()) {
 									Field idxf = s.getField(idx);
-									final String keyType = toBoxType(toJavaType(idxf.getType()));
+									final String keyType = toJavaType(idxf.getType());
 									ds.add(String.format("public readonly System.Collections.Generic.Dictionary<%s, %s> %s_%s = new System.Collections.Generic.Dictionary<%s, %s>();",
 											keyType, valueType, fname, idx, keyType, valueType));
 									cs.add(String.format("this.%s_%s.Add(_V.%s, _V);", fname, idx, idx));
@@ -111,7 +111,7 @@ public class CodeGen implements Generator {
 							break;
 						}
 						case "set": {
-							final String valueType = toBoxType(toJavaType(ftypes.get(1)));
+							final String valueType = toJavaType(ftypes.get(1));
 							ds.add(String.format("public readonly System.Collections.Generic.HashSet<%s> %s = new System.Collections.Generic.HashSet<%s>();", valueType, fname, valueType));
 							cs.add("for(int n = fs.GetInt(); n-- > 0 ; ) {");
 							cs.add(String.format("this.%s.Add(%s);", fname, readType(valueType)));
@@ -119,8 +119,8 @@ public class CodeGen implements Generator {
 							break;
 						}
 						case "map": {
-							final String keyType = toBoxType(toJavaType(ftypes.get(1)));;
-							final String valueType = toBoxType(toJavaType(ftypes.get(2)));
+							final String keyType = toJavaType(ftypes.get(1));
+							final String valueType = toJavaType(ftypes.get(2));
 							ds.add(String.format("public readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();", keyType, valueType, fname, keyType, valueType));
 							cs.add("for(int n = fs.GetInt(); n-- > 0 ; ) {");
 							cs.add(String.format("this.%s[%s] = %s;", fname, readType(keyType), readType(valueType)));
@@ -148,10 +148,6 @@ public class CodeGen implements Generator {
 		return rawType;
 	}
 	
-	public String toBoxType(String type) {
-		return type;
-	}
-	
 	String toJavaValue(String type, String value) {
 		switch(type) {
 		case "string": return "\"" + value + "\"";
@@ -159,6 +155,10 @@ public class CodeGen implements Generator {
 		default: return value;
 		}
 
+	}
+	
+	String getIndexType(Config c) {
+		return Struct.get(c.getType()).getField(c.getIndex()).getType();
 	}
 	
 	void genConfig() {
@@ -171,10 +171,20 @@ public class CodeGen implements Generator {
 		ls.add("public static string Encoding { set; get; }");
 		ls.add("}");
 		ls.add("public static void Load() {  }");
-		Config.configs.values().forEach(c -> ls.add(String.format("public static readonly %s %s;", c.getType(), c.getName())));
+		Config.configs.values().forEach(c -> ls.add(String.format("public static readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();",
+				getIndexType(c), c.getType(), c.getName(), getIndexType(c), c.getType())));
 		ls.add("static CfgMgr() {");
-		Config.configs.values().forEach(c -> 
-			ls.add(String.format("%s = new %s(DataStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding));", c.getName(), c.getType(), c.getOutputDataFile())));
+		Config.configs.values().forEach(
+				c -> {
+				ls.add("{");
+				ls.add(String.format("var fs =DataStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding);", c.getOutputDataFile()));
+				ls.add("for(var n = fs.GetInt() ; n-- > 0 ; ) {");
+				ls.add(String.format("var v = (%s)Create(\"%s\", fs);", c.getType(), c.getType()));
+				ls.add(String.format("%s.Add(v.%s, v);", c.getName(), c.getIndex()));
+				ls.add("}}");
+			});
+//		Config.configs.values().forEach(c -> 
+//			ls.add(String.format("%s = new %s(DataStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding));", c.getName(), c.getType(), c.getOutputDataFile())));
 		ls.add("}");
 		
 		ls.add("public static Object Create(string name, DataStream fs) {");
