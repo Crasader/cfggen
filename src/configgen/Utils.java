@@ -24,6 +24,10 @@ import org.w3c.dom.NodeList;
 
 public final class Utils {
 	
+	public static void error(String fmt, Object... params) {
+		throw new RuntimeException(String.format(fmt, params));
+	}
+	
 	public static String[] split(Element ele, String attr) {
 		final String str = ele.getAttribute(attr);
 		if(str.isEmpty()) {

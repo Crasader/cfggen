@@ -24,6 +24,7 @@ public class Config {
 	private String type;
 	private final String[] files;
 	private final String outputDataFile;
+	private final boolean noLoadData;
 	
 	private configgen.data.FStruct data;
 	public Config(Element data) {
@@ -34,6 +35,7 @@ public class Config {
 		}
 		files = Utils.split(data, "files");
 		outputDataFile = Utils.getFileWithoutExtension(files[0]) + ".data";
+		noLoadData = data.getAttribute("noload").equals("true");
 	}
 	
 	public String getName() {
@@ -76,6 +78,7 @@ public class Config {
 	}
 	
 	public void loadData() throws Exception {
+		if(noLoadData) return;
 		List<List<String>> lines = new ArrayList<>();
 		for(String file : files) {
 			file = Main.csvDir + "/" + file;
@@ -125,6 +128,7 @@ public class Config {
 	}
 	
 	public void save(Set<String> groups) {
+		if(noLoadData) return;
 		final DataVisitor vs = new DataVisitor(groups);
 		data.accept(vs);
 		
