@@ -22,18 +22,25 @@ public class Config {
 	
 	private final String name;
 	private String type;
+	private final String dir;
 	private final String[] files;
 	private final String outputDataFile;
 	private final boolean noLoadData;
 	
 	private configgen.data.FStruct data;
-	public Config(Element data) {
+	public Config(Element data, String csvDir) {
+		dir = csvDir;
 		name = data.getAttribute("name");
 		type = name.substring(0, 1).toUpperCase() + name.substring(1) + "Cfg";
 		if(configs.put(name, this) != null) {
 			throw new RuntimeException("config:" + name + " is duplicate!");
 		}
 		files = Utils.split(data, "files");
+		if(!dir.isEmpty()) {
+			for(int i = 0 ; i < files.length ; i++) {
+				files[i] = dir + "/" + files[i];
+			}
+		}
 		outputDataFile = Utils.getFileWithoutExtension(files[0]) + ".data";
 		noLoadData = data.getAttribute("noload").equals("true");
 	}

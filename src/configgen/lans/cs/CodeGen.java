@@ -85,16 +85,10 @@ public class CodeGen implements Generator {
 				} else if(f.isStruct()) {
 					ds.add(String.format("public readonly %s %s;", jtype, fname));
 					cs.add(String.format("this.%s = %s;", fname, readType(jtype)));
-				} else if(f.isEnum()) {
-					final String ename = f.getEnums().get(0);
-					jtype = toJavaType(ftypes.get(1));
-					ds.add(String.format("public readonly %s %s;", jtype, ename));
-					cs.add(String.format("this.%s = %s;", ename, readType(jtype)));
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {
-							boolean isEnum = Field.isEnum(ftypes.get(1));
-							final String valueType = toBoxType(toJavaType(isEnum ?ftypes.get(2) : ftypes.get(1)));
+							final String valueType = toBoxType(toJavaType(ftypes.get(1)));
 							ds.add(String.format("public readonly System.Collections.Generic.List<%s> %s = new System.Collections.Generic.List<%s>();", valueType, fname, valueType));
 							
 							cs.add("for(int n = fs.GetInt(); n-- > 0 ; ) {");
@@ -114,14 +108,6 @@ public class CodeGen implements Generator {
 								cs.add("}");
 							}
 							
-							//容器类中只有List的value允许为enum类型
-							if(isEnum) {
-								int i = 0;
-								for(String ename : f.getEnums()) {
-									ds.add(String.format("public readonly %s %s;", valueType, ename));
-									cs.add(String.format("this.%s = this.%s[%d];", ename, fname, i++));
-								}
-							}
 							break;
 						}
 						case "set": {

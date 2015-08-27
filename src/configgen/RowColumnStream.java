@@ -9,7 +9,6 @@ public final class RowColumnStream extends FlatStream {
 	
 	private final String EOL = "##"; // %#
 	private final String END = "]]"; // %]
-	//private final String EMPTY = "\"\""; // %"
 	
 	public static RowColumnStream Cur;
 	

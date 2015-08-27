@@ -31,8 +31,6 @@ public class FList extends Type {
 			}
 			indexs.put(idx, m);
 		}
-
-		define.getEnums().addAll(valueDefine.getEnums());
 	}
 	
 	public String toString() {

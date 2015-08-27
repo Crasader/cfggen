@@ -19,7 +19,6 @@ public class FSet extends Type {
 				throw new RuntimeException(String.format("field:%s value:%s duplicate!", define, value));
 			}
 		}
-		define.getEnums().addAll(valueDefine.getEnums());
 	}
 	
 	public String toString() {

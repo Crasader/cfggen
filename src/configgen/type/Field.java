@@ -19,7 +19,6 @@ public final class Field {
 	private final HashSet<String> indexs = new HashSet<String>();
 	private final HashSet<String> groups = new HashSet<String>();
 	private final List<String> refs = new ArrayList<String>();
-	private final List<String> enums = new ArrayList<String>();
 	
 	public final static HashSet<String> RawTypes = new HashSet<String>(Arrays.asList("bool", "int", "float", "long", "string"));
 	public final static HashSet<String> ConTypes = new HashSet<String>(Arrays.asList("list", "set", "map"));
@@ -32,11 +31,11 @@ public final class Field {
 		if(types.isEmpty())
 			error("type miss");
 
-		if(name.isEmpty() && !isEnum())
+		if(name.isEmpty())
 			error("name miss");
 		
 		if(types.get(0).equals("list")) {
-			final String valueType = isEnum(types.get(1)) ? types.get(2) : types.get(1);
+			final String valueType = types.get(1);
 			if(Field.isStruct(valueType)) {
 				indexs.addAll(Arrays.asList(Utils.split(data, "indexs")));
 				Struct s = Struct.get(valueType);
@@ -120,10 +119,6 @@ public final class Field {
 		return false;
 	}
 
-	public final List<String> getEnums() {
-		return enums;
-	}
-
 	public final HashSet<String> getIndexs() {
 		return indexs;
 	}
@@ -142,14 +137,6 @@ public final class Field {
 
 	public static boolean isContainer(String type) {
 		return ConTypes.contains(type);
-	}
-	
-	public boolean isEnum() {
-		return isEnum(types.get(0));
-	}
-	
-	public static boolean isEnum(String type) {
-		return type.equals("enum");
 	}
 	
 	public boolean isStruct() {
@@ -187,7 +174,7 @@ public final class Field {
 		if(realType != null) {
 			types.set(idx, realType);
 		} else {
-			error("invalid type:" + realType);
+			error("invalid type:" + origName);
 		}
 	}
 	
@@ -202,8 +189,6 @@ public final class Field {
 			
 		} else if(isStruct()) {
 			
-		} else if(isEnum()) {
-			checkType(1);
 		} else if(isContainer()) {
 			if("map".equals(type)) {
 				checkType(1);
@@ -212,11 +197,9 @@ public final class Field {
 				checkType(1);
 			} else if("list".equals(type)) {
 				checkType(1);
-				if(isEnum(types.get(1))) {
-					checkType(2);
-				}
+
 				if(!indexs.isEmpty()) {
-					final String valueType = isEnum(types.get(1)) ? types.get(2) : types.get(1);
+					final String valueType = types.get(1);
 					if(!isStruct(valueType)) {
 						error("list value type:" + valueType + "must be struct to indexed");
 					}

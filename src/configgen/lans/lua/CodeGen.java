@@ -34,15 +34,10 @@ public class CodeGen implements Generator {
 					ls.add(String.format("o.%s = self:get_%s()", fname, ftype));
 				} else if(f.isStruct()) {
 					ls.add(String.format("o.%s = self:get_%s()", fname, ftype));
-				} else if(f.isEnum()) {
-					fname = f.getEnums().get(0);
-					ftype = ftypes.get(1);
-					ls.add(String.format("o.%s = self:get_%s()", fname, ftype));
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {
-							boolean isEnum = Field.isEnum(ftypes.get(1));
-							final String valueType = isEnum ? ftypes.get(2) : ftypes.get(1);
+							final String valueType = ftypes.get(1);
 							ls.add(String.format("local _list = self:get_list('%s')", valueType));
 							ls.add(String.format("o.%s = _list", fname));
 							
@@ -57,13 +52,6 @@ public class CodeGen implements Generator {
 								ls.addAll(cs);
 							}
 							
-							// ֻ��list��value������ö��
-							if(isEnum) {
-								int i = 0;
-								for(String ename : f.getEnums()) {
-									ls.add(String.format("o.%s = _list[%d]", ename, ++i));
-								}
-							}
 							break;
 						}
 						case "set": {

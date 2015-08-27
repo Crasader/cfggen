@@ -92,16 +92,10 @@ public class CodeGen implements Generator {
 				} else if(f.isStruct()) {
 					ds.add(String.format("public final %s %s;", jtype, fname));
 					cs.add(String.format("this.%s = %s;", fname, readType(jtype)));
-				} else if(f.isEnum()) {
-					final String ename = f.getEnums().get(0);
-					jtype = toJavaType(ftypes.get(1));
-					ds.add(String.format("public final %s %s;", jtype, ename));
-					cs.add(String.format("this.%s = %s;", ename, readType(jtype)));
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {
-							boolean isEnum = Field.isEnum(ftypes.get(1));
-							final String valueType = toBoxType(toJavaType(isEnum ?ftypes.get(2) : ftypes.get(1)));
+							final String valueType = toBoxType(toJavaType(ftypes.get(1)));
 							ds.add(String.format("public final java.util.List<%s> %s = new java.util.ArrayList<%s>();", valueType, fname, valueType));
 							
 							cs.add("for(int n = fs.getInt(); n-- > 0 ; ) {");
@@ -121,14 +115,6 @@ public class CodeGen implements Generator {
 								cs.add("}");
 							}
 							
-							// ֻ��list��value������ö��
-							if(isEnum) {
-								int i = 0;
-								for(String ename : f.getEnums()) {
-									ds.add(String.format("public final %s %s;", valueType, ename));
-									cs.add(String.format("this.%s = this.%s.get(%d);", ename, fname, i++));
-								}
-							}
 							break;
 						}
 						case "set": {

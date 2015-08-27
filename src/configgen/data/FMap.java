@@ -15,16 +15,12 @@ public class FMap extends Type {
 		super(host, define);
 		Field keyDefine = define.stripAdoreType();
 		Field valueDefine = keyDefine.stripAdoreType();
-		if(keyDefine.isEnum())
-			valueDefine = valueDefine.stripAdoreType();
 		while(!is.isSectionEnd()) {
 			final Type key = Type.create(host, keyDefine, is);
 			if(values.put(key, Type.create(host, valueDefine, is)) != null) {
 				throw new RuntimeException(String.format("field:%s key:%s dunplicate", define, key));
 			}
 		}
-		define.getEnums().addAll(keyDefine.getEnums());
-		define.getEnums().addAll(valueDefine.getEnums());
 	}
 	
 	public String toString() {

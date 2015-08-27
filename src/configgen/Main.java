@@ -3,9 +3,7 @@ package configgen;
 
 
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.w3c.dom.Element;
-
 import configgen.data.DataGen;
 import configgen.type.Alias;
 import configgen.type.Config;
@@ -104,7 +102,7 @@ public final class Main {
         csvDir = cfgxml.toPath().getParent().toString();
         Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(cfgxml).getDocumentElement();
         
-        loadDefine(root);
+        loadDefine(root, "");
         //dumpDefine();
         verifyDefine();
         Config.collectRefStructs();
@@ -133,7 +131,7 @@ public final class Main {
         }
 	}
 
-	public static void loadDefine(Element root) {
+	public static void loadDefine(Element root, String relateDir) throws Exception {
         for(Element ele : Utils.getChildsByTagName(root, "group")) {
         	Group.load(ele);
         }
@@ -147,10 +145,24 @@ public final class Main {
         }
   
         for(Element ele : Utils.getChildsByTagName(root, "config")) {
-        	final Config config = new Config(ele);
+        	final Config config = new Config(ele, relateDir);
         	ele.setAttribute("name", config.getType());
         	new Struct(ele);
         }
+        
+        for(Element ele : Utils.getChildsByTagName(root, "import")) {
+        	for(String file : Utils.split(ele, "files")) {
+        		final String newRelateDir = file.contains("/") ? combine(relateDir, file.substring(0, file.lastIndexOf('/'))) : relateDir;
+        		loadDefine(DocumentBuilderFactory.newInstance().newDocumentBuilder().
+        			parse(csvDir + "/" + file).getDocumentElement()
+        			, newRelateDir);
+        	}
+        }
+        
+	}
+	
+	public static String combine(String parent, String sub) {
+		return parent.isEmpty() ? sub : parent + "/" + sub;
 	}
 	
 	public static void println(Object s) {
