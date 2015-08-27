@@ -22,11 +22,13 @@ local function dump_table(t)
  return concat(code)
 end
 
-local r = os.new("F:/cfggen.git/trunk/data/test.data")
 
-local v = r:get_TestCfg()
+local os = require "cfg.structs"
 
-print(dump_table(v))
+function create_datastream(file)
+    return os.new("../data/" .. file)
+end
 
+local cfgs = require "cfg.configs"
 
-
+print(dump_table(cfgs))
