@@ -107,18 +107,19 @@ public class CodeGen implements Generator {
 		ls.add(String.format("local os = require '%s.structs'", namespace));
 		ls.add("local create_datastream = create_datastream");
 		ls.add("local cfgs = {}");
-
-		Config.configs.values().forEach(
-			c -> {
-			ls.add("--================================");
-			ls.add("local c = {}");
-			ls.add(String.format("local fs = create_datastream(\"%s\");", c.getOutputDataFile()));
-			ls.add("for i = 1, fs:get_int() do");
-			ls.add(String.format("local v = fs:get_%s();", c.getType()));
-			ls.add(String.format("c[v.%s] = v", c.getIndex()));
-			ls.add("end");
-			ls.add(String.format("cfgs.%s = c", c.getName()));
-		});
+		ls.add("for _, s in ipairs({");
+		Config.configs.values().forEach(c -> ls.add(String.format("{name='%s', type='%s', index='%s', output='%s'},",
+			c.getName(), c.getType(), c.getIndex(), c.getOutputDataFile())));
+		ls.add("}) do");
+		
+		ls.add("local c = {}");
+		ls.add(String.format("local fs = create_datastream(s.output);"));
+		ls.add("for i = 1, fs:get_int() do");
+		ls.add("local v = fs['get_' .. s.type](fs)");
+		ls.add("c[v[s.index]] = v");
+		ls.add("cfgs[s.name] = c");
+		ls.add("end");
+		ls.add("end");
 		
 		ls.add("return cfgs");
 		
