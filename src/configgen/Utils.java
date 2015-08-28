@@ -128,6 +128,8 @@ public final class Utils {
 	                    default : throw new RuntimeException("unknown formula result:" + value);
 	                    }
 	                    break;
+	                case Cell.CELL_TYPE_BLANK:
+	                	break;
 	                default:
 	                    throw new RuntimeException("unknown cell type:" + cell.getCellType());
 	            }

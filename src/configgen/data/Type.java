@@ -64,7 +64,7 @@ public abstract class Type {
 				Struct real = Struct.get(realType);
 				if(real == null)
 					error("dynamic type:" + realType + " unknown");
-				if(!base.getSubTypes().contains(real))
+				if(Struct.isDeriveFrom(realType, baseType))
 					error("dynamic type:" + realType + "isn't sub type of:" + baseType);
 				return new FStruct(host, define, realType, is);
 			} else {

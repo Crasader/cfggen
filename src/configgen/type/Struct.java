@@ -88,6 +88,14 @@ public final class Struct {
 	public final ArrayList<Const> getConsts() {
 		return consts;
 	}
+	
+	public static boolean isDeriveFrom(String child, String ancestor) {
+		while(true) {
+			if(child == ancestor) return true;
+			if(child.isEmpty()) return false;
+			child = Struct.get(child).getBase();
+		}
+	}
 
 	@Override
 	public String toString() {
