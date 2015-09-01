@@ -56,8 +56,7 @@ public final class DataStream {
 	}
 
 	public String getString() {
-		final String s = getNextAndCheckNotEmpty();
-		return s.replace("\\#", "#").replace("\\]", "]").replace("\\s", "").replace("\\\\", "\\");
+		return getNextAndCheckNotEmpty();
 	}
 
 	public static DataStream create(String dataFile, String inputEncoding) {
