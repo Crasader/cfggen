@@ -158,7 +158,7 @@ public final class Field {
 	}
 	
 	public static boolean isStruct(String type) {
-		return Struct.structs.containsKey(type);
+		return Struct.getStructs().containsKey(type);
 	}
 	
 	public String toString() {

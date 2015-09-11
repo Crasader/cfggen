@@ -9,6 +9,7 @@ public final class RowColumnStream extends FlatStream {
 	
 	private final String EOL = "##"; // %#
 	private final String END = "]]"; // %]
+	private final String EMPTY = "\"\"";
 	
 	public static RowColumnStream Cur;
 	
@@ -150,7 +151,10 @@ public final class RowColumnStream extends FlatStream {
 	@Override
 	public String getString() {
 		final String s = getNextAndCheckNotEmpty();
-		return s.replace("\\#", "#").replace("\\]", "]").replace("\\s", "").replace("\\\\", "\\");
+		if(s.equals(EMPTY)) return "";
+		if(s.indexOf('\n') >= 0)
+			Utils.error("can't contain \n in string! please choose alternative char.");
+		return s.indexOf('%') >= 0 ? s.replace("%#", "#").replace("%]", "]") : s;
 	}
 	
 	public String toCSVData() {

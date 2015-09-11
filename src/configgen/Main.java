@@ -168,12 +168,12 @@ public final class Main {
 		println("groups:" + Group.groups);
 		println("alias:" + Alias.alias2orgin);
 		Config.configs.values().forEach(c -> println(c.toString()));
-		Struct.structs.values().forEach(s -> println(s.toString()));	
+		Struct.getStructs().values().forEach(s -> println(s.toString()));	
 	}
 	
 	private static void verifyDefine() {
 		Alias.verityDefine();
-		Struct.structs.values().forEach(s -> s.verityDefine());
+		Struct.getStructs().values().forEach(s -> s.verityDefine());
 		Config.configs.values().forEach(c -> c.verifyDefine());
 	}
 	

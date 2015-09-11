@@ -52,7 +52,7 @@ public class FStruct extends Type {
 	void load(Struct self, FlatStream is) {
 		final String base = self.getBase();
 		if(!base.isEmpty()) {
-			load(Struct.structs.get(base), is);
+			load(Struct.get(base), is);
 		}
 		for(Field f : self.getFields()) {
 			values.add(Type.create(this, f, is));

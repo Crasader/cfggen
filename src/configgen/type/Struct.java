@@ -9,11 +9,23 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public final class Struct {
-	public final static HashMap<String, Struct> structs = new HashMap<String, Struct>();
+	private final static HashMap<String, Struct> structs = new HashMap<String, Struct>();
 	public static int NextTypeId = 1000000;
 	
 	public static Struct get(String name) {
-		return structs.get(name);
+		return structs.get(name.toLowerCase());
+	}
+	
+	public static Struct put(String name, Struct struct) {
+		return structs.put(name.toLowerCase(), struct);
+	}
+	
+	public final static HashMap<String, Struct> getStructs() {
+		return structs;
+	}
+	
+	public final static boolean isStruct(String name) {
+		return structs.containsKey(name.toLowerCase());
 	}
 	
 	private final int typeid;
@@ -30,7 +42,7 @@ public final class Struct {
 	public Struct(Element data, String base) {
 		name = data.getAttribute("name");
 		this.base = base;
-		if(structs.put(name, this) != null) {
+		if(put(name, this) != null) {
 			error(" is duplicate!");
 		}
 		final String typeidStr = data.getAttribute("typeid");
