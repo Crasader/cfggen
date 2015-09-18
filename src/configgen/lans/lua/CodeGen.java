@@ -8,6 +8,7 @@ import configgen.Generator;
 import configgen.Main;
 import configgen.Utils;
 import configgen.type.Config;
+import configgen.type.Const;
 import configgen.type.Field;
 import configgen.type.Struct;
 
@@ -71,20 +72,41 @@ public class CodeGen implements Generator {
 		}
 	}
 	
+	String toLuaValue(String type, String value) {
+		switch(type) {
+		case "string": return "\"" + value + "\"";
+		default: return value;
+		}
+
+	}
+	
 	void genStructs() {
 		final ArrayList<String> ls = new ArrayList<String>();
 		ls.add(String.format("local os = require '%s.datastream'", namespace));
+		ls.add("local cfg = cfg");
+
 		ls.add("local insert = table.insert");
 		ls.add("local ipairs = ipairs");
+		ls.add("local setmetatable = setmetatable");
+
 
 		for(String name : Config.refStructs) {
 			final Struct struct = Struct.get(name);
+			
+			ls.add("local meta = {}");
+			ls.add("meta.__index = meta");
+			ls.add("meta.__class = '" + name + "'");
+			for(Const c : struct.getConsts()) {
+				ls.add(String.format("meta.%s = %s", c.getName(), toLuaValue(c.getType(), c.getValue())));
+			}
+			ls.add(String.format("cfg.%s = meta", name));
 			
 			ls.add(String.format("function os:get_%s()", name));
 			if(struct.isDynamic()) {
 				ls.add("return self['get_' .. self:get_string()](self)");
 			} else {
 				ls.add("local o = {}");
+				ls.add(String.format("setmetatable(o, cfg.%s)", name));
 				genStructBody(struct, ls);
 				ls.add("return o");
 			}

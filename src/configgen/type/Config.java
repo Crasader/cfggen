@@ -27,6 +27,7 @@ public class Config {
 	private final String outputFile;
 	private final String[] indexs;
 	private final String[] groups;
+	private final boolean manager; // 是否出现在CfgMgr的加载列表里
 	
 	private FList data;
 	public Config(Element data, String csvDir) {
@@ -50,6 +51,7 @@ public class Config {
 		indexs = Utils.split(data, "indexs");
 		if(indexs.length != 1)
 			Utils.error("config:%s indexs can only have one!", type);
+		manager = !data.getAttribute("manager").equals("false");
 	}
 	
 	public String getName() {
@@ -70,6 +72,10 @@ public class Config {
 	
 	public String getOutputDataFile() {
 		return outputFile;
+	}
+	
+	public boolean inManager() {
+		return manager;
 	}
 
 
@@ -115,7 +121,10 @@ public class Config {
 	}
 	
 	public static void collectRefStructs() {
-		configs.values().forEach(c -> collectRef(c.getType()));
+		for(Struct s : Struct.getStructs().values()) {
+			refStructs.add(s.getName());
+		}
+		//configs.values().forEach(c -> collectRef(c.getType()));
 		//Main.println(refStructs);
 	}
 	

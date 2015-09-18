@@ -61,7 +61,8 @@ public class CodeGen implements Generator {
 		final String name = struct.getName();
 		ls.add(String.format("public %s class %s %s {", (struct.isDynamic() ? "abstract" : "final"), name, (base.isEmpty() ? "" : "extends " + base)));
 		if(struct.isDynamic()) {
-			ls.add("public abstract int getTypeid();");
+			if(base.isEmpty())
+				ls.add("public abstract int getTypeid();");
 		} else {
 			ls.add(String.format("public final static int __TYPE_ID__ = %s;", struct.getTypeid()));
 			ls.add("public final int getTypeid() { return __TYPE_ID__; }");
