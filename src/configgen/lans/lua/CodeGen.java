@@ -96,7 +96,7 @@ public class CodeGen implements Generator {
 			
 			ls.add("local meta = {}");
 			ls.add("meta.__index = meta");
-			ls.add("meta.__class = '" + name + "'");
+			ls.add("meta.class = '" + name + "'");
 			for(Const c : struct.getConsts()) {
 				ls.add(String.format("meta.%s = %s", c.getName(), toLuaValue(c.getType(), c.getValue())));
 			}

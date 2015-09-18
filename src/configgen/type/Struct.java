@@ -10,7 +10,6 @@ import org.w3c.dom.NodeList;
 
 public final class Struct {
 	private final static HashMap<String, Struct> structs = new HashMap<String, Struct>();
-	public static int NextTypeId = 1000000;
 	
 	public static Struct get(String name) {
 		return structs.get(name.toLowerCase());
@@ -28,7 +27,6 @@ public final class Struct {
 		return structs.containsKey(name.toLowerCase());
 	}
 	
-	private final int typeid;
 	private final String name;
 	private final String base;
 	private final ArrayList<Field> fields = new ArrayList<>();
@@ -45,8 +43,6 @@ public final class Struct {
 		if(put(name, this) != null) {
 			error(" is duplicate!");
 		}
-		final String typeidStr = data.getAttribute("typeid");
-		typeid = typeidStr.isEmpty() ? NextTypeId++ : Integer.parseInt(typeidStr);
 		final NodeList nodes = data.getChildNodes();
 		for(int i = 0 ; i < nodes.getLength() ; i++) {
 			final Node node = nodes.item(i);
@@ -71,10 +67,6 @@ public final class Struct {
 	
 	public String getBase() {
 		return base;
-	}
-	
-	public int getTypeid() {
-		return typeid;
 	}
 	
 	public boolean isDynamic() {
