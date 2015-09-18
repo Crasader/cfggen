@@ -95,7 +95,7 @@ public final class Main {
 		if(groups.isEmpty())
 			usage("-group miss");
 		if(codeDir.isEmpty() && !languages.isEmpty())
-			usage("-lan miss");
+			usage("-codedir miss");
 
         final File cfgxml = new File(xmlSchemeFile);
         final Path parent = cfgxml.toPath().getParent();
