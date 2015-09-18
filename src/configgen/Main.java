@@ -11,6 +11,7 @@ import configgen.type.Group;
 import configgen.type.Struct;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -97,7 +98,8 @@ public final class Main {
 			usage("-lan miss");
 
         final File cfgxml = new File(xmlSchemeFile);
-        csvDir = cfgxml.toPath().getParent().toString();
+        final Path parent = cfgxml.toPath().getParent();
+        csvDir = parent != null ? parent.toString() : ".";
         Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(cfgxml).getDocumentElement();
         
         loadDefine(root, "");
