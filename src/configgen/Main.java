@@ -23,6 +23,7 @@ public final class Main {
 	public static String csvDir = "";
 	public static String codeDir = "";
 	public static String dataDir = "";
+	public static String csmarshalcodeDir = "";
 	public static String outputEncoding = "utf8";
 	public static String inputEncoding = "GBK";
 	public static boolean verbose = false;
@@ -41,6 +42,7 @@ public final class Main {
         System.out.println("    -configxml       config xml file");
         System.out.println("    -codedir         output code directory.");
         System.out.println("    -datadir output data directory");
+        System.out.println("    -csmarshalcodedir   csharp marshal code output directory" );
         System.out.println("    -group server:client:all:xxx   group to export, can be multi.");
         System.out.println("    -outputencoding  output encoding. default utf8");
         System.out.println("    -inputencoding   input encoding. default GBK");
@@ -62,6 +64,9 @@ public final class Main {
 				break;
 			case "-codedir":
 				codeDir = args[++i];
+				break;
+			case "-csmarshalcodedir":
+				csmarshalcodeDir = args[++i];
 				break;
 			case "-datadir":
 				dataDir = args[++i];
@@ -92,7 +97,7 @@ public final class Main {
 
 		if(xmlSchemeFile.isEmpty())
 			usage("-configxml miss");
-		if(groups.isEmpty())
+		if(groups.isEmpty() && csmarshalcodeDir.isEmpty())
 			usage("-group miss");
 		if(codeDir.isEmpty() && !languages.isEmpty())
 			usage("-codedir miss");
@@ -105,6 +110,12 @@ public final class Main {
         loadDefine(root, "");
         verifyDefine();
         Config.collectRefStructs();
+        
+        if(!csmarshalcodeDir.isEmpty()) {
+        	(new configgen.lans.cs.CodeGen()).genMarshallCode();
+        	return;
+        }
+        
         try {
         	loadData();
         } catch(Exception e) {

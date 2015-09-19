@@ -196,4 +196,78 @@ public class CodeGen implements Generator {
 		Utils.save(outFile, code);
 	}
 
+	public void genMarshallCode() {
+		Config.refStructs.forEach(s -> genStructMarshallCode(Struct.get(s)));
+	}
+
+	private void genStructMarshallCode(Struct struct) {
+		final ArrayList<String> ls = new ArrayList<String>();
+		ls.add("using System;");
+		ls.add("namespace " + namespace + ".marshal {");
+		
+		final String base = struct.getBase();
+		final String name = struct.getName();
+		ls.add(String.format("public %s class %s %s {", struct.isDynamic() ? "abstract" : "sealed", name, (base.isEmpty() ? ": IMarshaller" : ": " + base)));
+
+		
+		final ArrayList<String> ds = new ArrayList<String>();
+		final ArrayList<String> cs = new ArrayList<String>();
+		final String adorn = base.isEmpty() ? (struct.isDynamic() ? "virtual" : "") : "override";
+		cs.add(String.format("public %s void Write(DataWriter dw) {", adorn));
+		if(!base.isEmpty())
+			cs.add("base.Write(dw);");
+		
+		for(Field f : struct.getFields()) {
+			String ftype = f.getType();
+			String jtype = toJavaType(ftype);
+			final String fname = f.getName();
+			final List<String> ftypes = f.getTypes();
+			
+			//if(f.checkInGroup(Main.groups)) {
+				if(f.isRaw()) {
+					cs.add(String.format("dw.Write(this.%s);", fname));
+					ds.add(String.format("public %s %s;", jtype, fname));
+					
+				} else if(f.isStruct()) {
+					cs.add(String.format("dw.Write(this.%s, %s);", fname, Struct.isDynamic(jtype)));
+					ds.add(String.format("public %s %s;", jtype, fname));
+				} else if(f.isContainer()) {
+					switch(ftype) {
+						case "list": {
+							final String valueType = toJavaType(ftypes.get(1));
+							cs.add(String.format("dw.Write(this.%s, %s);", fname, Struct.isDynamic(valueType)));
+							ds.add(String.format("public readonly System.Collections.Generic.List<%s> %s = new System.Collections.Generic.List<%s>();", valueType, fname, valueType));
+							break;
+						}
+						case "set": {
+							final String valueType = toJavaType(ftypes.get(1));
+							cs.add(String.format("dw.Write(this.%s, %s);", fname, Struct.isDynamic(valueType)));
+							ds.add(String.format("public readonly System.Collections.Generic.HashSet<%s> %s = new System.Collections.Generic.HashSet<%s>();", valueType, fname, valueType));
+							break;
+						}
+						case "map": {
+							final String keyType = toJavaType(ftypes.get(1));
+							final String valueType = toJavaType(ftypes.get(2));
+							cs.add(String.format("dw.Write(this.%s, %s, %s);", fname, Struct.isDynamic(keyType), Struct.isDynamic(valueType)));
+							ds.add(String.format("public readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();", keyType, valueType, fname, keyType, valueType));
+							break;
+						}
+					}
+				//}
+			}
+		}
+		
+		cs.add("}");
+		ls.addAll(ds);
+		ls.addAll(cs);
+		
+		ls.add("}");
+		ls.add("}");
+		
+		final String code = ls.stream().collect(Collectors.joining("\n"));
+		//Main.println(code);
+		final String outFile = String.format("%s/%s.cs", Main.csmarshalcodeDir, name);
+		Utils.save(outFile, code);
+	}
+
 }

@@ -85,10 +85,19 @@ public final class Utils {
 	public static List<List<String>> parse(String file) throws Exception {
 		switch(getFileExtension(file)) {
 		case "csv": return parseCSV(file);
+		case "lne": return parseLineFile(file);
 		default : return parseExcel(file);
 		}
 	}
 	
+	private static List<List<String>> parseLineFile(String file) throws Exception {
+		final List<String> lines = Files.readAllLines(new File(file).toPath());
+		final List<List<String>> rowcol = new ArrayList<>();
+		rowcol.add(lines);
+		return rowcol;
+	}
+
+
 	static List<List<String>> parseCSV(String file) throws IOException {
 		return CSV.parse(new BufferedReader(new InputStreamReader(new FileInputStream(new File(file)), Main.inputEncoding)));
 	}

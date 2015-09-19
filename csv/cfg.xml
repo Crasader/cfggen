@@ -38,11 +38,20 @@
 			<struct name="Task2" typeid="2">
 				<field name="y" type="int"/>
 				<field name="name" type="string" groups="client"/>
-			</struct>		
+
+			</struct>
+							
+				<struct name="Task3">
+					<field name="z" type="bool"/>
+					<struct name="Task4">
+						<field name="xxx" type="bool"/>
+					</struct>
+				</struct>	
 	</struct>
 	
-	<config name="Test" input="test.xlsx:test2.csv" indexs="xid" output="test.data">
+	<config name="Test" input="test.lne" indexs="xid" output="test.data">
 		<field name="xid" type="int" />
+		<field name="b" type="bool"/>
 		<field name="id" type="Task" groups="server"/>
 		<field name="d2" type="Task" groups="server"/>
 		<field name="id3" type="Task"/>

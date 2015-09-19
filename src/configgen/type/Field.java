@@ -157,6 +157,11 @@ public final class Field {
 		return isStruct(types.get(0));
 	}
 	
+	public boolean isDynamic() {
+		Struct s = Struct.get(types.get(0));
+		return s != null && s.isDynamic();
+	}
+	
 	public static boolean isStruct(String type) {
 		return Struct.isStruct(type);
 	}

@@ -27,6 +27,11 @@ public final class Struct {
 		return structs.containsKey(name.toLowerCase());
 	}
 	
+	public final static boolean isDynamic(String name) {
+		Struct s = get(name);
+		return s != null && s.isDynamic();
+	}
+	
 	private final String name;
 	private final String base;
 	private final ArrayList<Field> fields = new ArrayList<>();
