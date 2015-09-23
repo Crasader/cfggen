@@ -171,13 +171,13 @@ public class CodeGen implements Generator {
 		ls.add("package " + namespace + ";");
 		ls.add("public class CfgMgr {");
 		ls.add("public static class DataDir { public static String dir; public static String encoding; }");
-		ls.add("public static void load() {  }");
 		Config.configs.values().forEach(c -> ls.add(String.format("public static final java.util.Map<%s, %s> %s = new java.util.HashMap<>();", 
 				getIndexType(c), c.getType(), c.getName())));
-		ls.add("static {");
+		ls.add("public static void load() {");
 		Config.configs.values().forEach(
 			c -> {
 			ls.add("{");
+			ls.add(String.format("%s.clear();", c.getName()));
 			ls.add(String.format("DataStream fs =DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding);", c.getOutputDataFile()));
 			ls.add("for(int n = fs.getInt() ; n-- > 0 ; ) {");
 			ls.add(String.format("final %s v = (%s)create(\"%s\", fs);", c.getType(), c.getType(), c.getType()));

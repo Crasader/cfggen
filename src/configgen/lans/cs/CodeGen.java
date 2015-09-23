@@ -163,13 +163,14 @@ public class CodeGen implements Generator {
 		ls.add("public static string Dir { set; get;} ");
 		ls.add("public static string Encoding { set; get; }");
 		ls.add("}");
-		ls.add("public static void Load() {  }");
 		Config.configs.values().forEach(c -> ls.add(String.format("public static readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();",
 				getIndexType(c), c.getType(), c.getName(), getIndexType(c), c.getType())));
-		ls.add("static CfgMgr() {");
+
+		ls.add("public static void Load() {");
 		Config.configs.values().forEach(
 				c -> {
 				ls.add("{");
+				ls.add(String.format("%s.Clear();", c.getName()));
 				ls.add(String.format("var fs =DataStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding);", c.getOutputDataFile()));
 				ls.add("for(var n = fs.GetInt() ; n-- > 0 ; ) {");
 				ls.add(String.format("var v = (%s)Create(\"%s\", fs);", c.getType(), c.getType()));
