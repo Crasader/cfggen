@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
@@ -171,6 +172,16 @@ public final class Utils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static boolean checkInGroup(Set<String> toCheck, Set<String> groups) {
+		if(toCheck.contains("all")) return true;
+		if(groups.contains("all")) return true;
+		for(String g : groups) {
+			if(toCheck.contains(g))
+				return true;
+		}
+		return false;
 	}
 	
 	public static void main(String[] args) throws Exception {

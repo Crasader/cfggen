@@ -1,6 +1,7 @@
 package configgen.type;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ public class Config {
 	private final String outputFile;
 	private final String[] indexs;
 	private final String[] groups;
+	private final HashSet<String> hsGroups = new HashSet<>();
 	private final boolean manager; // 是否出现在CfgMgr的加载列表里
 	
 	private FList data;
@@ -47,6 +49,9 @@ public class Config {
 		outputFile = Utils.combine(dir, data.getAttribute("output"));
 		
 		groups = Utils.split(data, "groups");
+		hsGroups.addAll(Arrays.asList(groups));
+		if(hsGroups.isEmpty())
+			hsGroups.add("all");
 		
 		indexs = Utils.split(data, "indexs");
 		if(indexs.length != 1)
@@ -100,6 +105,7 @@ public class Config {
 	}
 	
 	public void loadData() throws Exception {
+		System.out.println("==load config:" + name);
 		if(inputFile.isEmpty()) return;
 		final String fullPath = Utils.combine(Main.csvDir, inputFile);
 		final File f = new File(fullPath);
@@ -165,8 +171,8 @@ public class Config {
 		}
 	}
 	
-	public boolean checkInGroup(Set<String> groups) {
-		return data.getDefine().checkInGroup(groups);
+	public boolean checkInGroup(Set<String> gs) {
+		return Utils.checkInGroup(hsGroups, gs);
 	}
 	
 	public static List<Config> getExportConfigs() {
@@ -182,6 +188,7 @@ public class Config {
 	}
 	
 	public void verifyData() {
+		if(inputFile.isEmpty()) return;
 		data.verifyData();
 	}
 	

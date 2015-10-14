@@ -122,13 +122,7 @@ public final class Struct {
 	}
 	
 	public final boolean checkInGroup(Set<String> gs) {
-		if(groups.contains("all")) return true;
-		if(gs.contains("all")) return true;
-		for(String g : gs) {
-			if(groups.contains(g))
-				return true;
-		}
-		return false;
+		return Utils.checkInGroup(groups, gs);
 	}
 
 	@Override
