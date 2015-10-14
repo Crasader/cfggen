@@ -1,5 +1,7 @@
 package configgen.data;
 
+import org.w3c.dom.Element;
+
 import configgen.FlatStream;
 import configgen.type.Field;
 
@@ -10,6 +12,11 @@ public class FFloat extends Type {
 		value = is.getFloat();
 	}
 	
+	public FFloat(FStruct host, Field define, Element node) {
+		super(host, define);
+		value = Float.parseFloat(node.getFirstChild().getTextContent());
+	}
+
 	public final float value;
 	
 	public String toString() {

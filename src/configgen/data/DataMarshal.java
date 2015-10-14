@@ -34,6 +34,8 @@ public final class DataMarshal {
 	}
 	
 	public String toData() {
-		return line.stream().collect(Collectors.joining("\n"));
+		final ArrayList<String> newLines = new ArrayList<String>(line);
+		newLines.add("");
+		return newLines.stream().collect(Collectors.joining("\n"));
 	}
 }

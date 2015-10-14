@@ -1,5 +1,7 @@
 package configgen.data;
 
+import org.w3c.dom.Element;
+
 import configgen.FlatStream;
 import configgen.type.Field;
 
@@ -10,6 +12,11 @@ public final class FInt extends Type {
 		value = is.getInt();
 	}
 	
+	public FInt(FStruct host, Field define, Element node) {
+		super(host, define);
+		value = Integer.parseInt(node.getFirstChild().getTextContent());
+	}
+
 	public final int value;
 	
 	public String toString() {

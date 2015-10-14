@@ -1,6 +1,8 @@
 package configgen.data;
 
 import java.util.HashSet;
+
+import org.w3c.dom.Element;
 import configgen.FlatStream;
 import configgen.type.Alias;
 import configgen.type.Config;
@@ -76,6 +78,53 @@ public abstract class Type {
 		return null;
 	}
 	
+
+	public static Type create(FStruct host, Field define, Element node) {
+		final String type = define.getType();
+		if(define.isRaw()) {
+			if(type.equals("bool")) {
+				return new FBool(host, define, node);
+			} else if(type.equals("int")) {
+				return new FInt(host, define, node);
+			} else if(type.equals("long")) {
+				return new FLong(host, define, node);
+			} else if(type.equals("float")) {
+				return new FFloat(host, define, node);
+			} else if(type.equals("string")) {
+				return new FString(host, define, node);
+			}
+		} else if(define.isContainer()) {
+			if(type.equals("list")) {
+				return new FList(host, define, node);
+			} else if(type.equals("set")) {
+				return new FSet(host, define, node);
+			} else if(type.equals("map")) {
+				return new FMap(host, define, node);
+			}
+		} else if(define.isStruct()) {
+			final String baseType = define.getType();
+			final Struct base = Struct.get(define.getType());
+			if(base.isDynamic()) {
+				final String subType = node.getAttribute("type");
+				final String realType = Alias.getOriginName(subType);
+				if(realType == null) {
+					error("dynamic sub type:" + subType + " unknown");
+				}
+				Struct real = Struct.get(realType);
+				if(real == null)
+					error("dynamic type:" + realType + " unknown");
+				if(Struct.isDeriveFrom(realType, baseType))
+					error("dynamic type:" + realType + "isn't sub type of:" + baseType);
+				return new FStruct(host, define, realType, node);
+			} else {
+				return new FStruct(host, define, baseType, node);
+			}
+		}
+		
+		error("unknown type:" + type);
+		return null;
+	}
+	
 	public abstract void accept(Visitor visitor);
 
 	public void verifyData() {
@@ -85,5 +134,6 @@ public abstract class Type {
 		if(!validValues.contains(this))
 				System.out.println("field:" + define.getName() + " value:" + this + " can't find in index:" + ref);
 	}
+
 	
 }

@@ -1,10 +1,11 @@
 package configgen.type;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Element;
 
@@ -23,7 +24,7 @@ public class Config {
 	private final String name;
 	private String type;
 	private final String dir;
-	private final String[] inputFiles;
+	private final String inputFile;
 	private final String outputFile;
 	private final String[] indexs;
 	private final String[] groups;
@@ -38,10 +39,7 @@ public class Config {
 			Utils.error("config:" + name + " is duplicate!");
 		}
 		
-		inputFiles = Utils.split(data, "input");
-		for(int i = 0 ; i < inputFiles.length ; i++) {
-			inputFiles[i] = Utils.combine(dir, inputFiles[i]);
-		}
+		inputFile = Utils.combine(dir, data.getAttribute("input"));
 		if(data.getAttribute("output").isEmpty())
 			Utils.error("config:%s output miss", name);
 		outputFile = Utils.combine(dir, data.getAttribute("output"));
@@ -62,8 +60,8 @@ public class Config {
 		return type;
 	}
 
-	public String[] getFiles() {
-		return inputFiles;
+	public String getFiles() {
+		return inputFile;
 	}
 	
 	public String getIndex() {
@@ -83,10 +81,7 @@ public class Config {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("config{name=").append(name).append(",type=").append(type);
-		sb.append(",files={");
-		for(String f : inputFiles) {
-			sb.append(f).append(",");
-		}
+		sb.append(",file=").append(inputFile);
 		sb.append("}}");
 		return sb.toString();
 	}
@@ -103,21 +98,34 @@ public class Config {
 	}
 	
 	public void loadData() throws Exception {
-		List<List<String>> lines = new ArrayList<>();
-		for(String file : inputFiles) {
-			file = Main.csvDir + "/" + file;
-			System.out.println("load " + name + ", file:" + file);
-			//System.out.println(lines);
-			lines.addAll(Utils.parse(file));
+		if(inputFile.isEmpty()) return;
+		final String fullPath = Utils.combine(Main.csvDir, inputFile);
+		final File f = new File(fullPath);
+		if(f.isDirectory()) {
+			data = new FList(null, new Field(".", name, "list:" + type, 
+					new String[]{"list", type},
+					indexs,
+					new String[]{},
+					groups),
+					f);
+		} else if(!inputFile.endsWith(".xml")) { 
+			final FlatStream fs = new RowColumnStream(Utils.parse(fullPath));
+			data = new FList(null, new Field(".", name, "list:" + type, 
+					new String[]{"list", type},
+					indexs,
+					new String[]{},
+					groups),
+					fs);
+		} else {
+			data = new FList(null, new Field(".", name, "list:" + type, 
+					new String[]{"list", type},
+					indexs,
+					new String[]{},
+					groups),
+					DocumentBuilderFactory.newInstance().newDocumentBuilder().
+        			parse(fullPath).getDocumentElement());
 		}
-		
-		final FlatStream fs = new RowColumnStream(lines);
-		data = new FList(null, new Field(".", name, "list:" + type, 
-				new String[]{"list", type},
-				indexs,
-				new String[]{},
-				groups),
-				fs);
+		Main.println(data);
 	}
 	
 	public static void collectRefStructs() {
@@ -156,10 +164,10 @@ public class Config {
 	}
 	
 	public void save(Set<String> groups) {
-		if(inputFiles.length == 0) return;
+		if(inputFile.isEmpty()) return;
 		final DataVisitor vs = new DataVisitor(groups);
 		data.accept(vs);	
-		final String outDataFile = Main.dataDir + "/" + getOutputDataFile();
+		final String outDataFile = Utils.combine(Main.dataDir, getOutputDataFile());
 		Utils.save(outDataFile, vs.toData());
 	}
 	

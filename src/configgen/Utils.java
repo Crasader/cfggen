@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -55,7 +54,7 @@ public final class Utils {
 		return sb.toString();
 	}
 	
-	public static Collection<Element> getChildsByTagName(Element data, String tag) {
+	public static List<Element> getChildsByTagName(Element data, String tag) {
 		ArrayList<Element> eles = new ArrayList<Element>();
 		final NodeList nodes = data.getChildNodes();
 		for(int i = 0 ; i < nodes.getLength() ; i++) {

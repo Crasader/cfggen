@@ -1,5 +1,7 @@
 package configgen.data;
 
+import org.w3c.dom.Element;
+
 import configgen.FlatStream;
 import configgen.type.Field;
 
@@ -10,6 +12,11 @@ public final class FLong extends Type {
 		value = is.getLong();
 	}
 	
+	public FLong(FStruct host, Field define, Element node) {
+		super(host, define);
+		value = Long.parseLong(node.getFirstChild().getTextContent());
+	}
+
 	public final long value;
 
 	public String toString() {

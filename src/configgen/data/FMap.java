@@ -4,7 +4,12 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import configgen.FlatStream;
+import configgen.Utils;
 import configgen.type.Config;
 import configgen.type.Field;
 
@@ -23,6 +28,22 @@ public class FMap extends Type {
 		}
 	}
 	
+	public FMap(FStruct host, Field define, Element ele) {
+		super(host, define);
+		Field keyDefine = define.stripAdoreType();
+		Field valueDefine = keyDefine.stripAdoreType();
+		final NodeList nodes = ele.getChildNodes();
+		for(int i = 0, n = nodes.getLength() ; i < n ; i++) {
+			final Node node = nodes.item(i);
+			if(node.getNodeType() == Node.ELEMENT_NODE) {
+				final Type key = Type.create(host, keyDefine,  (Element)((Element)node).getElementsByTagName("key").item(0));
+				final Type value = Type.create(host, valueDefine, (Element)((Element)node).getElementsByTagName("value").item(0));
+				if(values.put(key, value) != null)
+					Utils.error("field:%s key:%s dunplicate", define, key);
+			}
+		}
+	}
+
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("Map<").append(define.getFullType()).append(">{");

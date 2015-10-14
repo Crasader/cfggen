@@ -3,6 +3,7 @@
 	<group names="server:client"/>
 	
 	<import input="item/item.xml"/>
+	<import input="skill.xml"/>
 	
 	<alias type="Task" names="傻子:你好"/>
 	<alias type="int" names="整数:个数"/>
@@ -49,7 +50,7 @@
 				</struct>	
 	</struct>
 	
-	<config name="Test" input="test.lne" indexs="xid" output="test.data">
+	<config name="Test" input="test.data.xml" indexs="xid" output="test.data">
 		<field name="xid" type="int" />
 		<field name="b" type="bool"/>
 		<field name="id" type="Task" groups="server"/>

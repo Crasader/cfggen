@@ -193,6 +193,7 @@ public final class Main {
 	static void loadData() throws Exception {
 		for(Config c : Config.configs.values()) {
 			c.loadData();
+			println(c);
 		}
 	}
 	

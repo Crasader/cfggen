@@ -1,6 +1,9 @@
 package configgen.data;
 
+import org.w3c.dom.Element;
+
 import configgen.FlatStream;
+import configgen.Utils;
 import configgen.type.Field;
 
 public class FBool extends Type {
@@ -10,6 +13,19 @@ public class FBool extends Type {
 		value = is.getBool();
 	}
 	
+	public FBool(FStruct host, Field define, Element node) {
+		super(host, define);
+		final String s = node.getFirstChild().getTextContent().toLowerCase();
+		if(s.equals("true"))
+			value = true;
+		else if(s.equals("false"))
+			value = false;
+		else {
+			Utils.error("%s is not boolean value", s);
+			value = false;
+		}
+	}
+
 	public final boolean value;
 	
 	public String toString() {
