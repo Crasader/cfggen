@@ -16,7 +16,7 @@ public class CodeGen implements Generator {
 	public final String namespace = "cfg";
 	@Override
 	public void gen() {
-		Config.refStructs.forEach(s -> genStruct(Struct.get(s)));
+		Struct.getExports().forEach(s -> genStruct(s));
 		
 		genConfig();
 
@@ -155,6 +155,7 @@ public class CodeGen implements Generator {
 	}
 	
 	void genConfig() {
+		final List<Config> exportConfigs = Config.getExportConfigs();
 		final ArrayList<String> ls = new ArrayList<String>();
 		ls.add("using System;");
 		ls.add("namespace " + namespace + "{");
@@ -163,11 +164,11 @@ public class CodeGen implements Generator {
 		ls.add("public static string Dir { set; get;} ");
 		ls.add("public static string Encoding { set; get; }");
 		ls.add("}");
-		Config.configs.values().forEach(c -> ls.add(String.format("public static readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();",
+		exportConfigs.forEach(c -> ls.add(String.format("public static readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();",
 				getIndexType(c), c.getType(), c.getName(), getIndexType(c), c.getType())));
 
 		ls.add("public static void Load() {");
-		Config.configs.values().forEach(
+		exportConfigs.forEach(
 				c -> {
 				ls.add("{");
 				ls.add(String.format("%s.Clear();", c.getName()));

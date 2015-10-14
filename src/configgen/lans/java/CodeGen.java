@@ -16,8 +16,7 @@ public class CodeGen implements Generator {
 	public final String namespace = "cfg";
 	@Override
 	public void gen() {
-		Config.refStructs.forEach(s -> genStruct(Struct.get(s)));
-		
+		Struct.getExports().forEach(s -> genStruct(s));
 		genConfig();
 
 	}
@@ -167,14 +166,15 @@ public class CodeGen implements Generator {
 	}
 	
 	void genConfig() {
+		final List<Config> exportConfigs = Config.getExportConfigs();
 		final ArrayList<String> ls = new ArrayList<String>();
 		ls.add("package " + namespace + ";");
 		ls.add("public class CfgMgr {");
 		ls.add("public static class DataDir { public static String dir; public static String encoding; }");
-		Config.configs.values().forEach(c -> ls.add(String.format("public static final java.util.Map<%s, %s> %s = new java.util.HashMap<>();", 
+		exportConfigs.forEach(c -> ls.add(String.format("public static final java.util.Map<%s, %s> %s = new java.util.HashMap<>();", 
 				getIndexType(c), c.getType(), c.getName())));
 		ls.add("public static void load() {");
-		Config.configs.values().forEach(
+		exportConfigs.forEach(
 			c -> {
 			ls.add("{");
 			ls.add(String.format("%s.clear();", c.getName()));

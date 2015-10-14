@@ -3,7 +3,9 @@ package configgen.type;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -163,8 +165,16 @@ public class Config {
 		}
 	}
 	
+	public boolean checkInGroup(Set<String> groups) {
+		return data.getDefine().checkInGroup(groups);
+	}
+	
+	public static List<Config> getExportConfigs() {
+		return configs.values().stream().filter(c -> c.checkInGroup(Main.groups)).collect(Collectors.toList());
+	}
+	
 	public void save(Set<String> groups) {
-		if(inputFile.isEmpty()) return;
+		if(inputFile.isEmpty() || !checkInGroup(groups)) return;
 		final DataVisitor vs = new DataVisitor(groups);
 		data.accept(vs);	
 		final String outDataFile = Utils.combine(Main.dataDir, getOutputDataFile());

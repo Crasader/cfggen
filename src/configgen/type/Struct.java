@@ -1,12 +1,19 @@
 package configgen.type;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import configgen.Main;
+import configgen.Utils;
 
 public final class Struct {
 	private final static HashMap<String, Struct> structs = new HashMap<String, Struct>();
@@ -32,11 +39,16 @@ public final class Struct {
 		return s != null && s.isDynamic();
 	}
 	
+	public static List<Struct> getExports() {
+		return structs.values().stream().filter(s -> s.checkInGroup(Main.groups)).collect(Collectors.toList());
+	}
+	
 	private final String name;
 	private final String base;
 	private final ArrayList<Field> fields = new ArrayList<>();
 	private final ArrayList<Const> consts = new ArrayList<>();
 	private final HashSet<Struct> subs = new HashSet<>();
+	private final HashSet<String> groups = new HashSet<>();
 	
 	public Struct(Element data) {
 		this(data, "");
@@ -48,6 +60,9 @@ public final class Struct {
 		if(put(name, this) != null) {
 			error(" is duplicate!");
 		}
+		groups.addAll(Arrays.asList(Utils.split(data, "groups")));
+		if(groups.isEmpty())
+			groups.add("all");
 		final NodeList nodes = data.getChildNodes();
 		for(int i = 0 ; i < nodes.getLength() ; i++) {
 			final Node node = nodes.item(i);
@@ -104,6 +119,16 @@ public final class Struct {
 			if(child.isEmpty()) return false;
 			child = Struct.get(child).getBase();
 		}
+	}
+	
+	public final boolean checkInGroup(Set<String> gs) {
+		if(groups.contains("all")) return true;
+		if(gs.contains("all")) return true;
+		for(String g : gs) {
+			if(groups.contains(g))
+				return true;
+		}
+		return false;
 	}
 
 	@Override

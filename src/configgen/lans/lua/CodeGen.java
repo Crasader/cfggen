@@ -91,8 +91,8 @@ public class CodeGen implements Generator {
 		ls.add("local setmetatable = setmetatable");
 
 
-		for(String name : Config.refStructs) {
-			final Struct struct = Struct.get(name);
+		for(Struct struct : Struct.getExports()) {
+			final String name = struct.getName();
 			
 			ls.add("local meta = {}");
 			ls.add("meta.__index = meta");
@@ -124,14 +124,13 @@ public class CodeGen implements Generator {
 	}
 	
 	void genConfig() {
-
-		
+		final List<Config> exportConfigs = Config.getExportConfigs();
 		final ArrayList<String> ls = new ArrayList<String>();
 		ls.add(String.format("local os = require '%s.structs'", namespace));
 		ls.add("local create_datastream = create_datastream");
 		ls.add("local cfgs = {}");
 		ls.add("for _, s in ipairs({");
-		Config.configs.values().forEach(c -> ls.add(String.format("{name='%s', type='%s', index='%s', output='%s'},",
+		exportConfigs.forEach(c -> ls.add(String.format("{name='%s', type='%s', index='%s', output='%s'},",
 			c.getName(), c.getType(), c.getIndex(), c.getOutputDataFile())));
 		ls.add("}) do");
 		
