@@ -2,6 +2,7 @@ package configgen.lans.cs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import configgen.Generator;
@@ -9,6 +10,7 @@ import configgen.Main;
 import configgen.Utils;
 import configgen.type.Config;
 import configgen.type.Const;
+import configgen.type.ENUM;
 import configgen.type.Field;
 import configgen.type.Struct;
 
@@ -17,6 +19,7 @@ public class CodeGen implements Generator {
 	@Override
 	public void gen() {
 		Struct.getExports().forEach(s -> genStruct(s));
+		ENUM.getExports().forEach(e -> genEnum(e));
 		
 		genConfig();
 
@@ -41,6 +44,21 @@ public class CodeGen implements Generator {
 					return "(" + type + ")CfgMgr.Create(\"" + type + "\", fs)";
 			}
 		}
+	}
+	
+	void genEnum(ENUM e) {
+		final ArrayList<String> ls = new ArrayList<String>();
+		ls.add("package " + namespace + ";");
+		final String name = e.getName();
+		ls.add(String.format("public sealed class %s {", name));
+		for(Map.Entry<String, Integer> me : e.getCases().entrySet()) {
+			ls.add(String.format("public const int %s = %d;", me.getKey(), me.getValue()));
+		}
+		ls.add("}");
+		final String code = ls.stream().collect(Collectors.joining("\n"));
+		//Main.println(code);
+		final String outFile = String.format("%s/%s/%s.cs", Main.codeDir, namespace, name);
+		Utils.save(outFile, code);
 	}
 	
 	void genStruct(Struct struct) {
@@ -78,6 +96,9 @@ public class CodeGen implements Generator {
 				} else if(f.isStruct()) {
 					ds.add(String.format("public readonly %s %s;", jtype, fname));
 					cs.add(String.format("this.%s = %s;", fname, readType(jtype)));
+				} else if(f.isEnum()) {
+					ds.add(String.format("public readonly int %s;", fname));
+					cs.add(String.format("this.%s = %s;", fname, readType("int")));
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {

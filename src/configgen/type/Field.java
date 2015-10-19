@@ -166,6 +166,14 @@ public final class Field {
 		return Struct.isStruct(type);
 	}
 	
+	public boolean isEnum() {
+		return ENUM.isEnum(types.get(0));
+	}
+	
+	public static boolean isEnum(String type) {
+		return ENUM.isEnum(type);
+	}
+	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Field{name=").append(name).append(",types={");
@@ -207,6 +215,8 @@ public final class Field {
 		if(isRaw()) {
 			
 		} else if(isStruct()) {
+			
+		} else if(isEnum()) {
 			
 		} else if(isContainer()) {
 			if("map".equals(type)) {

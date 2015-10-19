@@ -20,7 +20,7 @@ public final class Alias {
 	}
 	
 	public static boolean isType(String type) {
-		return Field.isRaw(type) || Field.isContainer(type) || Field.isStruct(type);
+		return Field.isRaw(type) || Field.isContainer(type) || Field.isStruct(type) || Field.isEnum(type);
 	}
 	
 	public static String getOriginName(String type) {

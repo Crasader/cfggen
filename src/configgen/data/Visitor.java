@@ -20,4 +20,6 @@ public interface Visitor {
 
 	void accept(FStruct fStruct);
 
+	void accept(FEnum fEnum);
+
 }

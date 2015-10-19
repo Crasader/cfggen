@@ -57,9 +57,10 @@ public final class Struct {
 	public Struct(Element data, String base) {
 		name = data.getAttribute("name");
 		this.base = base;
-		if(put(name, this) != null) {
+		if(Utils.existType(name)) {
 			error(" is duplicate!");
 		}
+		put(name, this);
 		groups.addAll(Arrays.asList(Utils.split(data, "groups")));
 		if(groups.isEmpty())
 			groups.add("all");

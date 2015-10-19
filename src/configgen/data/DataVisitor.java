@@ -50,6 +50,15 @@ public class DataVisitor implements Visitor {
 			fs.putString(x.value);
 		}
 	}
+	
+
+	@Override
+	public void accept(FEnum x) {
+		if(x.getDefine().checkInGroup(groups)) {
+			fs.putInt(x.value);
+		}
+		
+	}
 
 	@Override
 	public void accept(FStruct x) {
@@ -98,6 +107,7 @@ public class DataVisitor implements Visitor {
 	public final String toData() {
 		return fs.toData();
 	}
+
 
 
 }

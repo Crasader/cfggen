@@ -54,6 +54,9 @@ public abstract class Type {
 			} else if(type.equals("map")) {
 				return new FMap(host, define, is);
 			}
+			
+		} else if(define.isEnum()) {
+			return new FEnum(host, define, is);
 		} else if(define.isStruct()) {
 			final String baseType = define.getType();
 			final Struct base = Struct.get(define.getType());
@@ -101,6 +104,8 @@ public abstract class Type {
 			} else if(type.equals("map")) {
 				return new FMap(host, define, node);
 			}
+		} else if(define.isEnum()) {
+			return new FEnum(host, define, node);
 		} else if(define.isStruct()) {
 			final String baseType = define.getType();
 			final Struct base = Struct.get(define.getType());

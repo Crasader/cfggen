@@ -2,6 +2,7 @@ package configgen.lans.lua;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import configgen.Generator;
@@ -9,6 +10,7 @@ import configgen.Main;
 import configgen.Utils;
 import configgen.type.Config;
 import configgen.type.Const;
+import configgen.type.ENUM;
 import configgen.type.Field;
 import configgen.type.Struct;
 
@@ -16,7 +18,7 @@ public class CodeGen implements Generator {
 	public final String namespace = "cfg";	
 	@Override
 	public void gen() {	
-		genStructs();		
+		genStructAndEnums();		
 		genConfig();
 	}
 	
@@ -35,6 +37,8 @@ public class CodeGen implements Generator {
 					ls.add(String.format("o.%s = self:get_%s()", fname, ftype));
 				} else if(f.isStruct()) {
 					ls.add(String.format("o.%s = self:get_%s()", fname, ftype));
+				} else if(f.isEnum()) {
+					ls.add(String.format("o.%s = self:get_int()", fname));
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {
@@ -80,7 +84,7 @@ public class CodeGen implements Generator {
 
 	}
 	
-	void genStructs() {
+	void genStructAndEnums() {
 		final ArrayList<String> ls = new ArrayList<String>();
 		ls.add(String.format("local os = require '%s.datastream'", namespace));
 		ls.add("cfg = {}");
@@ -112,6 +116,15 @@ public class CodeGen implements Generator {
 				ls.add("return o");
 			}
 			ls.add("end");
+		}
+		
+		for(ENUM e : ENUM.getExports()) {
+			final String name = e.getName();
+			ls.add(String.format("cfg.%s = {", name));
+			for(Map.Entry<String, Integer> me : e.getCases().entrySet()) {
+				ls.add(String.format("%s = %d,", me.getKey(), me.getValue()));
+			}
+			ls.add("}");
 		}
 
 

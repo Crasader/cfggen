@@ -7,6 +7,7 @@ import org.w3c.dom.Element;
 import configgen.data.DataGen;
 import configgen.type.Alias;
 import configgen.type.Config;
+import configgen.type.ENUM;
 import configgen.type.Group;
 import configgen.type.Struct;
 
@@ -148,6 +149,10 @@ public final class Main {
         
         for(Element ele : Utils.getChildsByTagName(root, "alias")) {
         	Alias.load(ele);
+        }
+        
+        for(Element ele : Utils.getChildsByTagName(root, "enum")) {
+        	new ENUM(ele);
         }
         
         for(Element ele : Utils.getChildsByTagName(root, "struct")) {

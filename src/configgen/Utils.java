@@ -22,7 +22,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import configgen.type.ENUM;
+import configgen.type.Struct;
+
 public final class Utils {
+	
+	public static boolean existType(String name) {
+		name = name.toLowerCase();
+		return Struct.isStruct(name) || ENUM.isEnum(name);
+	}
 	
 	public static void error(String fmt, Object... params) {
 		throw new RuntimeException(String.format(fmt, params));
