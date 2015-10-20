@@ -3,6 +3,7 @@
 <root>
 	<item>
 		<xid>1</xid>
+		<en>类型A</en>
 		<b>true</b>
 		<id type="Task1">
 			<id>5</id>

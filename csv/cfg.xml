@@ -11,6 +11,11 @@
 	<alias type="long" names="roleid"/>
 	<alias type="Task1" names="任务1"/>
 	<alias type="Task2" names="任务2"/>
+	
+	<enum name="ItemType">
+		<case name="AAA" alias="类型1:类型A" value="11111"/>
+		<case name="BBB" alias="类型2:类型B" value="22222"/>
+	</enum>
 
 	<config name="Name" input="names.csv" indexs="id" output="names.data">
 		<field name="id" type="int"/>
@@ -50,8 +55,9 @@
 				</struct>	
 	</struct>
 	
-	<config name="Test" input="test.data.xml" indexs="xid" output="test.data">
+	<config name="Test" input="test.xlsx" indexs="xid" output="test.data">
 		<field name="xid" type="int" />
+		<field name="en" type="ItemType"/>
 		<field name="b" type="bool"/>
 		<field name="id" type="Task" groups="server"/>
 		<field name="d2" type="Task" groups="server"/>

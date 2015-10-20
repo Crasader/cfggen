@@ -13,7 +13,8 @@ public final class Const {
 		name = data.getAttribute("name");
 		if(name.isEmpty())
 			error("name miss");
-		type = data.getAttribute("type");
+		final String strType = data.getAttribute("type");
+		type = strType.isEmpty() ? "int" : strType;
 		if(!Field.isRaw(type))
 			error("const type:" + type + " must be raw type! ");
 		value = data.getAttribute("value");

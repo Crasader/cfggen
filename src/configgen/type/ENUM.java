@@ -42,18 +42,18 @@ public final class ENUM {
 			error("duplicate name!");
 		put(name, this);
 		
-		for(Element c : Utils.getChildsByTagName(ele, "case")) {
+		for(Element c : Utils.getChildsByTagName(ele, "const")) {
 			final String cname = c.getAttribute("name");
 			final String strValue = c.getAttribute("value");
 			if(strValue.isEmpty())
-				error(String.format("case:%s value missing", cname));
+				error(String.format("const:%s value missing", cname));
 			final int value = Integer.parseInt(c.getAttribute("value"));
 			if(cases.put(cname, value) != null)
-				error(String.format("case %s duplicate!", cname));
+				error(String.format("const:%s duplicate!", cname));
 			aliass.put(cname, cname);
 			for(String aliasName : Utils.split(c, "alias")) {
 				if(aliass.put(aliasName, cname) != null)
-					error(String.format("enum case alias<%s, %s> duplicate!", cname, aliasName));
+					error(String.format("enum const alias<%s, %s> duplicate!", cname, aliasName));
 			}
 		}
 	}
