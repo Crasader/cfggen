@@ -13,8 +13,8 @@
 	<alias type="Task2" names="任务2"/>
 	
 	<enum name="ItemType">
-		<case name="AAA" alias="类型1:类型A" value="11111"/>
-		<case name="BBB" alias="类型2:类型B" value="22222"/>
+		<const name="AAA" alias="类型1:类型A" value="11111"/>
+		<const name="BBB" alias="类型2:类型B" value="22222"/>
 	</enum>
 
 	<config name="Name" input="names.csv" indexs="id" output="names.data">
@@ -81,5 +81,7 @@
 		<const name="x1" type="int" value="7"/>
 		<const name="x2" type="float" value="8.5"/>
 		<const name="x3" type="string" value="sd"/>
+		<struct name="Test1"/>
+		<struct name="Test2"/>
 	</config>
 </configs>

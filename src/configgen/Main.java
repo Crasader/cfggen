@@ -109,6 +109,7 @@ public final class Main {
         Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(cfgxml).getDocumentElement();
         
         loadDefine(root, "");
+        dumpDefine();
         verifyDefine();
         Config.collectRefStructs();
         

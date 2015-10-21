@@ -201,7 +201,11 @@ public class CodeGen implements Generator {
 			ls.add(String.format("%s.clear();", c.getName()));
 			ls.add(String.format("DataStream fs =DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding);", c.getOutputDataFile()));
 			ls.add("for(int n = fs.getInt() ; n-- > 0 ; ) {");
-			ls.add(String.format("final %s v = (%s)create(\"%s\", fs);", c.getType(), c.getType(), c.getType()));
+			if(Struct.isDynamic(c.getType())) {
+				ls.add(String.format("final %s v = (%s)create(fs.getString(), fs);", c.getType(), c.getType()));
+			} else {
+				ls.add(String.format("final %s v = (%s)create(\"%s\", fs);", c.getType(), c.getType(), c.getType()));
+			}
 			ls.add(String.format("%s.put(v.%s, v);", c.getName(), c.getIndex()));
 			ls.add("}}");
 		});

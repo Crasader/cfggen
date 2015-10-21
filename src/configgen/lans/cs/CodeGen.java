@@ -195,7 +195,11 @@ public class CodeGen implements Generator {
 				ls.add(String.format("%s.Clear();", c.getName()));
 				ls.add(String.format("var fs =DataStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding);", c.getOutputDataFile()));
 				ls.add("for(var n = fs.GetInt() ; n-- > 0 ; ) {");
-				ls.add(String.format("var v = (%s)Create(\"%s\", fs);", c.getType(), c.getType()));
+				if(Struct.isDynamic(c.getType())) {
+					ls.add(String.format("var v = (%s)Create(fs.GetString(), fs);", c.getType()));
+				} else {
+					ls.add(String.format("var v = (%s)Create(\"%s\", fs);", c.getType(), c.getType()));
+				}
 				ls.add(String.format("%s.Add(v.%s, v);", c.getName(), c.getIndex()));
 				ls.add("}}");
 			});

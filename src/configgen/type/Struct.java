@@ -56,6 +56,7 @@ public final class Struct {
 	
 	public Struct(Element data, String base) {
 		name = data.getAttribute("name");
+		System.out.println("== struct:" + name);
 		this.base = base;
 		if(Utils.existType(name)) {
 			error(" is duplicate!");
@@ -116,7 +117,7 @@ public final class Struct {
 	
 	public static boolean isDeriveFrom(String child, String ancestor) {
 		while(true) {
-			if(child == ancestor) return true;
+			if(child.equals(ancestor)) return true;
 			if(child.isEmpty()) return false;
 			child = Struct.get(child).getBase();
 		}
