@@ -152,8 +152,8 @@ public class CodeGen implements Generator {
 		ls.add("for i = 1, fs:get_int() do");
 		ls.add("local v = fs['get_' .. s.type](fs)");
 		ls.add("c[v[s.index]] = v");
-		ls.add("cfgs[s.name] = c");
 		ls.add("end");
+		ls.add("cfgs[s.name] = c");
 		ls.add("end");
 		
 		ls.add("return cfgs");

@@ -15,7 +15,7 @@ public final class Group {
 	}
 	
 	public static void load(Element data) {
-		for(String name : Utils.split(data, "names")) {
+		for(String name : Utils.split(data, "name")) {
 			groups.add(name);
 		}
 	}

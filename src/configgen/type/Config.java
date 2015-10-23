@@ -48,12 +48,12 @@ public class Config {
 			Utils.error("config:%s output miss", name);
 		outputFile = Utils.combine(dir, data.getAttribute("output"));
 		
-		groups = Utils.split(data, "groups");
+		groups = Utils.split(data, "group");
 		hsGroups.addAll(Arrays.asList(groups));
 		if(hsGroups.isEmpty())
 			hsGroups.add("all");
 		
-		indexs = Utils.split(data, "indexs");
+		indexs = Utils.split(data, "index");
 		if(indexs.length != 1)
 			Utils.error("config:%s indexs can only have one!", type);
 		manager = !data.getAttribute("manager").equals("false");

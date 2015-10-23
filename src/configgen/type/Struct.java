@@ -56,13 +56,13 @@ public final class Struct {
 	
 	public Struct(Element data, String base) {
 		name = data.getAttribute("name");
-		System.out.println("== struct:" + name);
+		System.out.printf("== xml:%s struct:%s\n", Main.curXml, name);
 		this.base = base;
 		if(Utils.existType(name)) {
 			error(" is duplicate!");
 		}
 		put(name, this);
-		groups.addAll(Arrays.asList(Utils.split(data, "groups")));
+		groups.addAll(Arrays.asList(Utils.split(data, "group")));
 		if(groups.isEmpty())
 			groups.add("all");
 		final NodeList nodes = data.getChildNodes();

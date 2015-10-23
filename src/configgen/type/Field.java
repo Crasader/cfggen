@@ -68,9 +68,9 @@ public final class Field {
 			data.getAttribute("name"),
 			data.getAttribute("type"),
 			Utils.split(data, "type"),
-			Utils.split(data, "indexs"),
+			Utils.split(data, "index"),
 			Utils.split(data, "ref"),
-			Utils.split(data, "groups")
+			Utils.split(data, "group")
 			);	
 	}
 	

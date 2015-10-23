@@ -108,6 +108,7 @@ public final class Main {
         csvDir = parent != null ? parent.toString() : ".";
         Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(cfgxml).getDocumentElement();
         
+        curXml = xmlSchemeFile;
         loadDefine(root, "");
         dumpDefine();
         verifyDefine();
@@ -143,6 +144,7 @@ public final class Main {
         }
 	}
 
+	public static String curXml = "";
 	public static void loadDefine(Element root, String relateDir) throws Exception {
         for(Element ele : Utils.getChildsByTagName(root, "group")) {
         	Group.load(ele);
@@ -167,10 +169,13 @@ public final class Main {
         
         for(Element ele : Utils.getChildsByTagName(root, "import")) {
         	for(String file : Utils.split(ele, "input")) {
+        		final String oldXml = curXml;
+        		curXml = file;
         		final String newRelateDir = file.contains("/") ? Utils.combine(relateDir, file.substring(0, file.lastIndexOf('/'))) : relateDir;
         		loadDefine(DocumentBuilderFactory.newInstance().newDocumentBuilder().
         			parse(csvDir + "/" + file).getDocumentElement()
         			, newRelateDir);
+        		curXml = oldXml;
         	}
         }
         
@@ -209,8 +214,8 @@ public final class Main {
 	}
 	
 	public static void addLastLoadData(Object data) {
-		if(lastLoadDatas.size() > 100) {
-			lastLoadDatas = lastLoadDatas.subList(50, lastLoadDatas.size());
+		if(lastLoadDatas.size() > 10) {
+			lastLoadDatas = lastLoadDatas.subList(5, lastLoadDatas.size());
 		}
 		lastLoadDatas.add(data);
 	}

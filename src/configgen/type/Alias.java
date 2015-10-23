@@ -13,7 +13,7 @@ public final class Alias {
 	
 	public static void load(Element data) {
 		final String type = data.getAttribute("type");
-		final String[] names = Utils.split(data, "names");;
+		final String[] names = Utils.split(data, "name");;
 		for(String name : names) {
 			alias2orgin.put(name, type);
 		}

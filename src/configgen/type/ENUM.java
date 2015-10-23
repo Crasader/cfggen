@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.w3c.dom.Element;
 
+import configgen.Main;
 import configgen.Utils;
 
 public final class ENUM {
@@ -38,6 +39,7 @@ public final class ENUM {
 	private final HashMap<String, String> aliass = new HashMap<>();
 	public ENUM(Element ele) {
 		name = ele.getAttribute("name");
+		System.out.printf("== xml:%s enum:%s\n", Main.curXml, name);
 		if(Utils.existType(name))
 			error("duplicate name!");
 		put(name, this);
