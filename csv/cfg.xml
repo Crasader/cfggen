@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="UTF8"?>
 <configs>
-	<group names="server:client"/>
+	<group name="server:client"/>
 	
 	<import input="item/item.xml"/>
 	<import input="skill.xml"/>
 	
-	<alias type="Task" names="傻子:你好"/>
-	<alias type="int" names="整数:个数"/>
-	<alias type="long" names="角色id"/>
-	<alias type="long" names="roleid"/>
-	<alias type="Task1" names="任务1"/>
-	<alias type="Task2" names="任务2"/>
+	<alias type="Task" name="傻子:你好"/>
+	<alias type="int" name="整数:个数"/>
+	<alias type="long" name="角色id"/>
+	<alias type="long" name="roleid"/>
+	<alias type="Task1" name="任务1"/>
+	<alias type="Task2" name="任务2"/>
 	
 	<enum name="ItemType">
 		<const name="AAA" alias="类型1:类型A" value="11111"/>
 		<const name="BBB" alias="类型2:类型B" value="22222"/>
 	</enum>
 
-	<config name="Name" input="names.csv" indexs="id" output="names.data">
+	<config name="Name" input="names.csv" index="id" output="names.data">
 		<field name="id" type="int"/>
 		<field name="name" type="string"/>
 	</config>
 	
-	<config name="Index" type="IndexCfg" input="indexs.csv" indexs="id" output="index.data">
+	<config name="Index" type="IndexCfg" input="indexs.csv" index="id" output="index.data">
 		<field name="id" type="int"/>
 		<field name="d1" type="int" ref="item"/>
 		<field name="d2" type="int" ref="item"/>
@@ -55,7 +55,7 @@
 				</struct>	
 	</struct>
 	
-	<config name="Test" input="test.xlsx" indexs="xid" output="test.data">
+	<config name="Test" input="test.xlsx" index="xid" output="test.data">
 		<field name="xid" type="int" />
 		<field name="en" type="ItemType"/>
 		<field name="b" type="bool"/>
@@ -78,7 +78,7 @@
 		<field name="m2" type="map:int:string"/>
 		<field name="m3" type="map:int:Task"/>
 		
-		<const name="x1" type="int" value="7"/>
+		<const name="x1" value="7"/>
 		<const name="x2" type="float" value="8.5"/>
 		<const name="x3" type="string" value="sd"/>
 		<struct name="Test1"/>

@@ -60,7 +60,7 @@ public class FSet extends Type {
 		HashSet<Type> validValues = Config.getData(ref);
 		for(Type d : values) {
 			if(!validValues.contains(d))
-				System.out.println("field:" + define.getName() + " value:" + d + " can't find in index:" + ref);
+				errorRef(d);
 		}
 	}
 }

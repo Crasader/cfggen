@@ -67,7 +67,7 @@ public class FMap extends Type {
 			HashSet<Type> validValues = Config.getData(keyRef);
 			for(Type d : values.keySet()) {
 				if(!validValues.contains(d))
-					System.out.println("field:" + define.getName() + " value:" + d + " can't find in index:" + keyRef);
+					System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + d + " can't find in config:" + keyRef);
 			}
 		}
 		
@@ -76,7 +76,7 @@ public class FMap extends Type {
 			HashSet<Type> validValues = Config.getData(valueRef);
 			for(Type d : values.values()) {
 				if(!validValues.contains(d))
-					System.out.println("field:" + define.getName() + " value:" + d + " can't find in index:" + valueRef);
+					System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + d + " can't find in config:" + valueRef);
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF8"?>
 <configs>
-	<config name="Item" input="items.csv" indexs="id1" output="items.data">
+	<config name="Item" input="items.csv" index="id1" output="items.data">
 		<field name="id1" type="int"/>
 		<field name="id2" type="int"/>
 		<field name="x" type="int"/>

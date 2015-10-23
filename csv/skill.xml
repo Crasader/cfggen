@@ -2,7 +2,7 @@
 
 <configs>
 
-	<config name="Skill" indexs="id" groups="client" input="skills" output="skill.data">
+	<config name="Skill" index="id" groups="client" input="skills" output="skill.data">
 		<const name="TARGET_ENERMY" type="int" value="1"/>
 		<const name="TARGET_TEAMMATE" type="int" value="2"/>
 		<const name="TARGET_SELF" type="int" value="3"/>

@@ -131,13 +131,17 @@ public abstract class Type {
 	}
 	
 	public abstract void accept(Visitor visitor);
+	
+	public void errorRef(Type value) {
+		System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + value + " can't find in config:" + define.getRef());
+	}
 
 	public void verifyData() {
 		final String ref = define.getRef();
 		if(ref.isEmpty()) return;
 		HashSet<Type> validValues = Config.getData(ref);
 		if(!validValues.contains(this))
-				System.out.println("field:" + define.getName() + " value:" + this + " can't find in index:" + ref);
+			errorRef(this);	
 	}
 
 	

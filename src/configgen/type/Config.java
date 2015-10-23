@@ -189,6 +189,7 @@ public class Config {
 	
 	public void verifyData() {
 		if(inputFile.isEmpty()) return;
+		System.out.println("==verify config:" + name);
 		data.verifyData();
 	}
 	
