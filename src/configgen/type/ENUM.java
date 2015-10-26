@@ -2,6 +2,7 @@ package configgen.type;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import org.w3c.dom.Element;
 
@@ -35,7 +36,7 @@ public final class ENUM {
 	}
 	
 	private final String name;
-	private final HashMap<String, Integer> cases = new HashMap<>();
+	private final HashMap<String, Integer> cases = new LinkedHashMap<>();
 	private final HashMap<String, String> aliass = new HashMap<>();
 	public ENUM(Element ele) {
 		name = ele.getAttribute("name");
@@ -44,14 +45,17 @@ public final class ENUM {
 			error("duplicate name!");
 		put(name, this);
 		
+		int enumValue = 0;
 		for(Element c : Utils.getChildsByTagName(ele, "const")) {
 			final String cname = c.getAttribute("name");
 			final String strValue = c.getAttribute("value");
-			if(strValue.isEmpty())
-				error(String.format("const:%s value missing", cname));
-			final int value = Integer.parseInt(c.getAttribute("value"));
-			if(cases.put(cname, value) != null)
+			if(!strValue.isEmpty()) {
+				//error(String.format("const:%s value missing", cname));
+				enumValue = Integer.parseInt(c.getAttribute("value"));
+			}
+			if(cases.put(cname, enumValue) != null)
 				error(String.format("const:%s duplicate!", cname));
+			enumValue++;
 			aliass.put(cname, cname);
 			for(String aliasName : Utils.split(c, "alias")) {
 				if(aliass.put(aliasName, cname) != null)

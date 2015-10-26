@@ -159,7 +159,7 @@ public class CodeGen implements Generator {
 	}
 	
 	public String toJavaType(String rawType) {
-		return rawType;
+		return ENUM.isEnum(rawType) ? "int" : rawType;
 	}
 	
 	String toJavaValue(String type, String value) {
@@ -168,11 +168,11 @@ public class CodeGen implements Generator {
 		case "float": return value + "f";
 		default: return value;
 		}
-
 	}
 	
 	String getIndexType(Config c) {
-		return Struct.get(c.getType()).getField(c.getIndex()).getType();
+		final String type = Struct.get(c.getType()).getField(c.getIndex()).getType();
+		return ENUM.isEnum(type) ? "int" : type;
 	}
 	
 	void genConfig() {

@@ -55,8 +55,15 @@
 				</struct>	
 	</struct>
 	
+	<enum name="TestKey">
+		<const name="Key1" />
+		<const name="Key2"/>
+		<const name="Key4" value="4"/>
+		<const name="Key5"/>
+	</enum>
+	
 	<config name="Test" input="test.xlsx" index="xid" output="test.data">
-		<field name="xid" type="int" />
+		<field name="xid" type="TestKey" />
 		<field name="en" type="ItemType"/>
 		<field name="b" type="bool"/>
 		<field name="id" type="Task" groups="server"/>
@@ -84,4 +91,7 @@
 		<struct name="Test1"/>
 		<struct name="Test2"/>
 	</config>
+	
+	
+	
 </configs>

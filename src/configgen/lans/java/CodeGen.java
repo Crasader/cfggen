@@ -169,7 +169,7 @@ public class CodeGen implements Generator {
 		case "bool" : return "boolean";
 		case "string" : return "String";
 		}
-		return rawType;
+		return ENUM.isEnum(rawType) ? "int" : rawType;
 	}
 	
 	public String toBoxType(String type) {
@@ -178,12 +178,15 @@ public class CodeGen implements Generator {
 		case "int": return "Integer";
 		case "long": return "Long";
 		case "float": return "Float";
-		default: return type;
+		default : return type;
 		}
+
+
 	}
 	
 	String getIndexType(Config c) {
-		return toBoxType(Struct.get(c.getType()).getField(c.getIndex()).getType());
+		final String type = toBoxType(Struct.get(c.getType()).getField(c.getIndex()).getType());
+		return ENUM.isEnum(type) ? "Integer" : type;
 	}
 	
 	void genConfig() {
