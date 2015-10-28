@@ -93,6 +93,8 @@ public class CodeGen implements Generator {
 		ls.add("local insert = table.insert");
 		ls.add("local ipairs = ipairs");
 		ls.add("local setmetatable = setmetatable");
+		ls.add("local find = string.find");
+		ls.add("local sub = string.sub");
 		
 		ls.add("local function get_or_create(namespace)");
 		ls.add("local t = _G");
@@ -128,7 +130,7 @@ public class CodeGen implements Generator {
 			for(Const c : struct.getConsts()) {
 				ls.add(String.format("meta.%s = %s", c.getName(), toLuaValue(c.getType(), c.getValue())));
 			}
-			ls.add(String.format("get_or_create('%s')['%s'] = meta", namespace, name));
+			ls.add(String.format("get_or_create('%s')['%s'] = meta", struct.getNamespace(), name));
 			
 			ls.add(String.format("function os:get_%s()", fullname.replace('.', '_')));
 			if(struct.isDynamic()) {
@@ -144,7 +146,7 @@ public class CodeGen implements Generator {
 		
 		for(ENUM e : ENUM.getExports()) {
 			final String name = e.getName();
-			ls.add(String.format("get_or_create('%s')['%s'] = {", namespace, name));
+			ls.add(String.format("get_or_create('%s')['%s'] = {", e.getNamespace(), name));
 			for(Map.Entry<String, Integer> me : e.getCases().entrySet()) {
 				ls.add(String.format("%s = %d,", me.getKey(), me.getValue()));
 			}
