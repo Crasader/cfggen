@@ -17,12 +17,12 @@
 		<const name="BBB" alias="类型2:类型B" value="22222"/>
 	</enum>
 
-	<config name="Name" input="names.csv" index="id" output="names.data">
+	<config name="Name" input="names.csv" output="names.data">
 		<field name="id" type="int"/>
 		<field name="name" type="string"/>
 	</config>
 	
-	<config name="Index" type="IndexCfg" input="indexs.csv" index="id" output="index.data">
+	<config name="Index"  input="indexs.csv">
 		<field name="id" type="int"/>
 		<field name="d1" type="int" ref="item"/>
 		<field name="d2" type="int" ref="item"/>

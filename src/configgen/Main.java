@@ -69,7 +69,7 @@ public final class Main {
         "      <field name='itemid' type='int'/>\n" +
         " </struct>\n" + 
         
-        " <config name='Bag' index='id' input='bag.xml' output='bag.data' />\n" +
+        " <config name='Bag' input='bag.xml' output='bag.data' />不指定index的话以第一个字段为index, 不指定output的话以 <name.tolowercase()>.data为输出文件名\n" +
         "    <field name='id' type='int'/>\n" +
         "    <field name='id2' type='int'/>\n" +
         "    <field name='type' type='int'/>\n" +

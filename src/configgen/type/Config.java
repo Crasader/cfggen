@@ -22,7 +22,6 @@ import configgen.data.Type;
 
 public class Config {
 	public final static HashMap<String, Config> configs = new HashMap<String, Config>();
-	public final static HashSet<String> refStructs = new HashSet<String>();
 	
 	private final String namespace;
 	private final String name;
@@ -30,7 +29,7 @@ public class Config {
 	private final String dir;
 	private final String inputFile;
 	private final String outputFile;
-	private final String[] indexs;
+	private String[] indexs;
 	private final String[] groups;
 	private final HashSet<String> hsGroups = new HashSet<>();
 	private final boolean manager; // 是否出现在CfgMgr的加载列表里
@@ -47,9 +46,8 @@ public class Config {
 		}
 		
 		inputFile = Utils.combine(dir, data.getAttribute("input"));
-		if(data.getAttribute("output").isEmpty())
-			Utils.error("config:%s output miss", name);
-		outputFile = Utils.combine(dir, data.getAttribute("output"));
+		final String outputStr = data.getAttribute("output");
+		outputFile = Utils.combine(dir, outputStr.isEmpty() ? name + ".data" : outputStr);
 		
 		groups = Utils.split(data, "group");
 		hsGroups.addAll(Arrays.asList(groups));
@@ -57,8 +55,10 @@ public class Config {
 			hsGroups.add("all");
 		
 		indexs = Utils.split(data, "index");
-		if(indexs.length != 1)
+		if(indexs.length > 1)
 			Utils.error("config:%s indexs can only have one!", type);
+		else
+			indexs = new String[] { Struct.get(type).getFields().get(0).getName() };
 		manager = !data.getAttribute("manager").equals("false");
 	}
 	
