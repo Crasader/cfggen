@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf8"?>
 
-<configs>
+<configs namespace="cfg.skill">
 
 	<config name="Skill" index="id" groups="client" input="skills" output="skill.data">
 		<const name="TARGET_ENERMY" type="int" value="1"/>

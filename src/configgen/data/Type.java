@@ -4,7 +4,6 @@ import java.util.HashSet;
 
 import org.w3c.dom.Element;
 import configgen.FlatStream;
-import configgen.type.Alias;
 import configgen.type.Config;
 import configgen.type.Field;
 import configgen.type.Struct;
@@ -61,17 +60,13 @@ public abstract class Type {
 			final String baseType = define.getType();
 			final Struct base = Struct.get(define.getType());
 			if(base.isDynamic()) {
-				final String subType = is.getString();
-				final String realType = Alias.getOriginName(subType);
-				if(realType == null) {
-					error("dynamic sub type:" + subType + " unknown");
-				}
-				Struct real = Struct.get(realType);
+				final String subType = base.getNamespace() + "." + is.getString();
+				Struct real = Struct.get(subType);
 				if(real == null)
-					error("dynamic type:" + realType + " unknown");
-				if(!Struct.isDeriveFrom(realType, baseType))
-					error("dynamic type:" + realType + " isn't sub type of:" + baseType);
-				return new FStruct(host, define, realType, is);
+					error("dynamic type:" + subType + " unknown");
+				if(!Struct.isDeriveFrom(subType, baseType))
+					error("dynamic type:" + subType + " isn't sub type of:" + baseType);
+				return new FStruct(host, define, subType, is);
 			} else {
 				return new FStruct(host, define, baseType, is);
 			}
@@ -110,17 +105,13 @@ public abstract class Type {
 			final String baseType = define.getType();
 			final Struct base = Struct.get(define.getType());
 			if(base.isDynamic()) {
-				final String subType = node.getAttribute("type");
-				final String realType = Alias.getOriginName(subType);
-				if(realType == null) {
-					error("dynamic sub type:" + subType + " unknown");
-				}
-				Struct real = Struct.get(realType);
+				final String subType = base.getNamespace() + "." + node.getAttribute("type");
+				Struct real = Struct.get(subType);
 				if(real == null)
-					error("dynamic type:" + realType + " unknown");
-				if(!Struct.isDeriveFrom(realType, baseType))
-					error("dynamic type:" + realType + " isn't sub type of:" + baseType);
-				return new FStruct(host, define, realType, node);
+					error("dynamic type:" + subType + " unknown");
+				if(!Struct.isDeriveFrom(subType, baseType))
+					error("dynamic type:" + subType + " isn't sub type of:" + baseType);
+				return new FStruct(host, define, subType, node);
 			} else {
 				return new FStruct(host, define, baseType, node);
 			}

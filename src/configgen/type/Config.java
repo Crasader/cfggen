@@ -24,6 +24,7 @@ public class Config {
 	public final static HashMap<String, Config> configs = new HashMap<String, Config>();
 	public final static HashSet<String> refStructs = new HashSet<String>();
 	
+	private final String namespace;
 	private final String name;
 	private String type;
 	private final String dir;
@@ -35,10 +36,12 @@ public class Config {
 	private final boolean manager; // 是否出现在CfgMgr的加载列表里
 	
 	private FList data;
-	public Config(Element data, String csvDir) {
+	public Config(String namespace, Element data, String csvDir) {
+		this.namespace = namespace;
 		dir = csvDir;
-		type = data.getAttribute("name");
-		name = type.toLowerCase();
+		final String nameStr = data.getAttribute("name");
+		type = namespace + "." + nameStr;
+		name = nameStr.toLowerCase();
 		if(configs.put(name, this) != null) {
 			Utils.error("config:" + name + " is duplicate!");
 		}
@@ -83,6 +86,9 @@ public class Config {
 		return manager;
 	}
 
+	public final String getNamespace() {
+		return namespace;
+	}
 
 	@Override
 	public String toString() {
@@ -97,11 +103,9 @@ public class Config {
 		if(name.isEmpty()) {
 			throw new RuntimeException("Config name is missing");
 		}
-		final String t = Alias.getOriginName(type);
-		if(t == null || !Field.isStruct(t)) {
-			throw new RuntimeException("config:" + name + " type:" + t + "isn't struct!");
+		if(type == null || !Field.isStruct(type)) {
+			throw new RuntimeException("config:" + name + " type:" + type + "isn't struct!");
 		}
-		type = t;
 	}
 	
 	public void loadData() throws Exception {
@@ -110,7 +114,7 @@ public class Config {
 		final String fullPath = Utils.combine(Main.csvDir, inputFile);
 		final File f = new File(fullPath);
 		if(f.isDirectory()) {
-			data = new FList(null, new Field(".", name, "list:" + type, 
+			data = new FList(null, new Field(null, name, "list:" + type, 
 					new String[]{"list", type},
 					indexs,
 					new String[]{},
@@ -118,14 +122,14 @@ public class Config {
 					f);
 		} else if(!inputFile.endsWith(".xml")) { 
 			final FlatStream fs = new RowColumnStream(Utils.parse(fullPath));
-			data = new FList(null, new Field(".", name, "list:" + type, 
+			data = new FList(null, new Field(null, name, "list:" + type, 
 					new String[]{"list", type},
 					indexs,
 					new String[]{},
 					groups),
 					fs);
 		} else {
-			data = new FList(null, new Field(".", name, "list:" + type, 
+			data = new FList(null, new Field(null, name, "list:" + type, 
 					new String[]{"list", type},
 					indexs,
 					new String[]{},

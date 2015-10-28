@@ -35,15 +35,24 @@ public final class ENUM {
 		return cases;
 	}
 	
+	public String getNamespace() {
+		return namespace;
+	}
+	
+	private final String namespace;
 	private final String name;
 	private final HashMap<String, Integer> cases = new LinkedHashMap<>();
 	private final HashMap<String, String> aliass = new HashMap<>();
-	public ENUM(Element ele) {
+	
+	private final String fullname;
+	public ENUM(String namespace, Element ele) {
+		this.namespace = namespace;
 		name = ele.getAttribute("name");
-		System.out.printf("== xml:%s enum:%s\n", Main.curXml, name);
-		if(Utils.existType(name))
+		this.fullname = namespace + "." + name;
+		System.out.printf("== xml:%s enum:%s\n", Main.curXml, fullname);
+		if(Utils.existType(fullname))
 			error("duplicate name!");
-		put(name, this);
+		put(fullname, this);
 		
 		int enumValue = 0;
 		for(Element c : Utils.getChildsByTagName(ele, "const")) {

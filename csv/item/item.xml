@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF8"?>
-<configs>
+<configs namespace="cfg.item">
 	<config name="Item" input="items.csv" index="id1" output="items.data">
 		<field name="id1" type="int"/>
 		<field name="id2" type="int"/>

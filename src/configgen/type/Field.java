@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
 import configgen.Utils;
 
 public final class Field {
-	private final String parent;
+	private final Struct parent;
 	private final String name;
 	private final String fullType;
 	private final List<String> types;
@@ -23,13 +23,19 @@ public final class Field {
 	public final static HashSet<String> RawTypes = new HashSet<String>(Arrays.asList("bool", "int", "float", "long", "string"));
 	public final static HashSet<String> ConTypes = new HashSet<String>(Arrays.asList("list", "set", "map"));
 	
-	public Field(String parent, String name, String fulltype, String[] types, String[] indexs, String[] refs, String[] groups) {
+	public Field(Struct parent, String name, String fulltype, String[] types, String[] indexs, String[] refs, String[] groups) {
 		this.parent = parent;
 		this.name = name;
 		this.fullType = fulltype;
 		this.types = Arrays.asList(types);
 		if(this.types.isEmpty())
 			error("type miss");
+		
+		for(int i = 0 ; i < types.length ; i++) {
+			String t = types[i];
+			if(!isRaw(t) && !isContainer(t) && t.indexOf(".") < 0)
+				types[i] = parent.getNamespace() + "." + types[i];
+		}
 
 		if(name.isEmpty())
 			error("name miss");
@@ -62,7 +68,7 @@ public final class Field {
 			this.groups.add("all");
 	}
 	
-	public Field(String parent, Element data) {
+	public Field(Struct parent, Element data) {
 		this(
 			parent, 
 			data.getAttribute("name"),
@@ -74,7 +80,7 @@ public final class Field {
 			);	
 	}
 	
-	private Field(String parent, String name, String fullType, List<String> types, HashSet<String> groups) {
+	private Field(Struct parent, String name, String fullType, List<String> types, HashSet<String> groups) {
 		this.parent = parent;
 		this.name = name;
 		this.fullType = fullType;
@@ -87,7 +93,7 @@ public final class Field {
 		return new Field(parent, name, fullType, newTypes, groups);
 	}
 	
-	public final String getParent() {
+	public final Struct getParent() {
 		return parent;
 	}
 
@@ -196,13 +202,6 @@ public final class Field {
 	public void checkType(int idx) {
 		if(types.size() <= idx)
 			error("type miss");
-		final String origName = types.get(idx);
-		final String realType = Alias.getOriginName(origName);
-		if(realType != null) {
-			types.set(idx, realType);
-		} else {
-			error("invalid type:" + origName);
-		}
 	}
 	
 	public void error(String err) {
@@ -234,6 +233,8 @@ public final class Field {
 					}
 				}
 			}
+		} else {
+			//error("unknown type:" + type);
 		}
 		for(String name : groups) {
 			if(!Group.isGroup(name))

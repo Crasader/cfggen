@@ -15,7 +15,6 @@ import configgen.type.Field;
 import configgen.type.Struct;
 
 public class CodeGen implements Generator {
-	public final String namespace = "cfg";
 	@Override
 	public void gen() {
 		Struct.getExports().forEach(s -> genStruct(s));
@@ -39,9 +38,9 @@ public class CodeGen implements Generator {
 			default: {
 				Struct struct = Struct.get(type);
 				if(struct.isDynamic())
-					return String.format("(%s)CfgMgr.create(fs.getString(), fs)", type);
+					return String.format("(%s)cfg.CfgMgr.create(fs.getString(), fs)", type);
 				else
-					return "(" + type + ")CfgMgr.create(\"" + type + "\", fs)";
+					return "(" + type + ")cfg.CfgMgr.create(\"" + type + "\", fs)";
 			}
 		}
 	}
@@ -57,6 +56,7 @@ public class CodeGen implements Generator {
 	
 	void genEnum(ENUM e) {
 		final ArrayList<String> ls = new ArrayList<String>();
+		final String namespace = e.getNamespace();
 		ls.add("package " + namespace + ";");
 		final String name = e.getName();
 		ls.add(String.format("public final class %s {", name));
@@ -66,12 +66,13 @@ public class CodeGen implements Generator {
 		ls.add("}");
 		final String code = ls.stream().collect(Collectors.joining("\n"));
 		//Main.println(code);
-		final String outFile = String.format("%s/%s/%s.java", Main.codeDir, namespace, name);
+		final String outFile = String.format("%s/%s/%s.java", Main.codeDir, namespace.replace('.', '/'), name);
 		Utils.save(outFile, code);
 	}
 	
 	void genStruct(Struct struct) {
 		final ArrayList<String> ls = new ArrayList<String>();
+		final String namespace = struct.getNamespace();
 		ls.add("package " + namespace + ";");
 		
 		final String base = struct.getBase();
@@ -85,7 +86,7 @@ public class CodeGen implements Generator {
 		
 		final ArrayList<String> ds = new ArrayList<String>();
 		final ArrayList<String> cs = new ArrayList<String>();
-		cs.add(String.format("public %s(DataStream fs) {", name));
+		cs.add(String.format("public %s(cfg.DataStream fs) {", name));
 		
 		if(!base.isEmpty()) {
 			cs.add("super(fs);");
@@ -149,6 +150,8 @@ public class CodeGen implements Generator {
 							break;
 						}
 					}
+				} else {
+					Utils.error("unknown type:" + ftype);
 				}
 			}
 		}
@@ -160,7 +163,7 @@ public class CodeGen implements Generator {
 		ls.add("}");
 		final String code = ls.stream().collect(Collectors.joining("\n"));
 		//Main.println(code);
-		final String outFile = String.format("%s/%s/%s.java", Main.codeDir, namespace, name);
+		final String outFile = String.format("%s/%s/%s.java", Main.codeDir, namespace.replace('.', '/'), name);
 		Utils.save(outFile, code);
 	}
 	
@@ -192,6 +195,8 @@ public class CodeGen implements Generator {
 	void genConfig() {
 		final List<Config> exportConfigs = Config.getExportConfigs();
 		final ArrayList<String> ls = new ArrayList<String>();
+		final String namespace = "cfg";
+		
 		ls.add("package " + namespace + ";");
 		ls.add("public class CfgMgr {");
 		ls.add("public static class DataDir { public static String dir; public static String encoding; }");
@@ -202,7 +207,7 @@ public class CodeGen implements Generator {
 			c -> {
 			ls.add("{");
 			ls.add(String.format("%s.clear();", c.getName()));
-			ls.add(String.format("DataStream fs =DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding);", c.getOutputDataFile()));
+			ls.add(String.format("cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding);", c.getOutputDataFile()));
 			ls.add("for(int n = fs.getInt() ; n-- > 0 ; ) {");
 			if(Struct.isDynamic(c.getType())) {
 				ls.add(String.format("final %s v = (%s)create(fs.getString(), fs);", c.getType(), c.getType()));
@@ -214,16 +219,16 @@ public class CodeGen implements Generator {
 		});
 		ls.add("}");
 		
-		ls.add("public static Object create(String name, DataStream fs) {");
+		ls.add("public static Object create(String name, cfg.DataStream fs) {");
 		ls.add("try {");
-		ls.add("return Class.forName(\"cfg.\" + name).getConstructor(DataStream.class).newInstance(fs);");
+		ls.add("return Class.forName(name).getConstructor(cfg.DataStream.class).newInstance(fs);");
 		ls.add("} catch (Exception e) {");
 		ls.add("e.printStackTrace();");
 		ls.add("return null;");
 		ls.add("}");
 		ls.add("}");
 		ls.add("}");
-		final String outFile = String.format("%s/%s/CfgMgr.java", Main.codeDir, namespace);
+		final String outFile = String.format("%s/%s/CfgMgr.java", Main.codeDir, namespace.replace('.', '/'));
 		final String code = ls.stream().collect(Collectors.joining("\n"));
 		Utils.save(outFile, code);
 	}

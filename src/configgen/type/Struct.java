@@ -42,26 +42,29 @@ public final class Struct {
 	public static List<Struct> getExports() {
 		return structs.values().stream().filter(s -> s.checkInGroup(Main.groups)).collect(Collectors.toList());
 	}
-	
+	private final String namespace;
 	private final String name;
+	private final String fullname;
 	private final String base;
 	private final ArrayList<Field> fields = new ArrayList<>();
 	private final ArrayList<Const> consts = new ArrayList<>();
 	private final HashSet<Struct> subs = new HashSet<>();
 	private final HashSet<String> groups = new HashSet<>();
 	
-	public Struct(Element data) {
-		this(data, "");
+	public Struct(String namespace, Element data) {
+		this(namespace, data, "");
 	}
 	
-	public Struct(Element data, String base) {
+	public Struct(String namespace, Element data, String base) {
+		this.namespace = namespace;
 		name = data.getAttribute("name");
-		System.out.printf("== xml:%s struct:%s\n", Main.curXml, name);
+		this.fullname = namespace + "." + name;
+		System.out.printf("== xml:%s struct:%s\n", Main.curXml, fullname);
 		this.base = base;
 		if(Utils.existType(name)) {
 			error(" is duplicate!");
 		}
-		put(name, this);
+		put(fullname, this);
 		groups.addAll(Arrays.asList(Utils.split(data, "group")));
 		if(groups.isEmpty())
 			groups.add("all");
@@ -72,15 +75,19 @@ public final class Struct {
 			Element ele = (Element)node;
 			final String nodeName = ele.getNodeName();
 			if(nodeName.equals("field")) {
-				fields.add(new Field(name, ele));
+				fields.add(new Field(this, ele));
 			} else if(nodeName.equals("struct")){
-				subs.add(new Struct(ele, name));
+				subs.add(new Struct(namespace, ele, fullname));
 			} else if(nodeName.equals("const")) {
 				consts.add(new Const(name, ele));
 			} else {
 				error("element:" + nodeName + " unknown");
 			}
 		}
+	}
+	
+	public String getFullName() {
+		return fullname;
 	}
 	
 	public String getName() {
@@ -111,6 +118,10 @@ public final class Struct {
 		return null;
 	}
 	
+	public final String getNamespace() {
+		return namespace;
+	}
+
 	public final ArrayList<Const> getConsts() {
 		return consts;
 	}

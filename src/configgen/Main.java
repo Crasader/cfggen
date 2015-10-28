@@ -5,7 +5,6 @@ package configgen;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Element;
 import configgen.data.DataGen;
-import configgen.type.Alias;
 import configgen.type.Config;
 import configgen.type.ENUM;
 import configgen.type.Group;
@@ -146,25 +145,24 @@ public final class Main {
 
 	public static String curXml = "";
 	public static void loadDefine(Element root, String relateDir) throws Exception {
+		final String namespace = root.getAttribute("namespace");
+		if(namespace.isEmpty())
+			Utils.error("xml:%s configs's attribute<namespace> missing", curXml);
         for(Element ele : Utils.getChildsByTagName(root, "group")) {
         	Group.load(ele);
         }
         
-        for(Element ele : Utils.getChildsByTagName(root, "alias")) {
-        	Alias.load(ele);
-        }
-        
         for(Element ele : Utils.getChildsByTagName(root, "enum")) {
-        	new ENUM(ele);
+        	new ENUM(namespace, ele);
         }
         
         for(Element ele : Utils.getChildsByTagName(root, "struct")) {
-        	new Struct(ele);
+        	new Struct(namespace, ele);
         }
   
         for(Element ele : Utils.getChildsByTagName(root, "config")) {
-        	new Struct(ele);
-        	new Config(ele, relateDir);
+        	new Struct(namespace, ele);
+        	new Config(namespace, ele, relateDir);
         }
         
         for(Element ele : Utils.getChildsByTagName(root, "import")) {
@@ -190,13 +188,11 @@ public final class Main {
 	
 	public static void dumpDefine() {
 		println("groups:" + Group.groups);
-		println("alias:" + Alias.alias2orgin);
 		Config.configs.values().forEach(c -> println(c.toString()));
 		Struct.getStructs().values().forEach(s -> println(s.toString()));	
 	}
 	
 	private static void verifyDefine() {
-		Alias.verityDefine();
 		Struct.getStructs().values().forEach(s -> s.verityDefine());
 		Config.configs.values().forEach(c -> c.verifyDefine());
 	}
