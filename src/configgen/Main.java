@@ -111,7 +111,6 @@ public final class Main {
         loadDefine(root, "");
         dumpDefine();
         verifyDefine();
-        Config.collectRefStructs();
         
         if(!csmarshalcodeDir.isEmpty()) {
         	(new configgen.lans.cs.CodeGen()).genMarshallCode();

@@ -229,7 +229,13 @@ public class CodeGen implements Generator {
 	}
 
 	public void genMarshallCode() {
-		Config.refStructs.forEach(s -> genStructMarshallCode(Struct.get(s)));
+		Struct.getExports().forEach(s -> genStructMarshallCode(s));
+	}
+	
+	
+	public String toMarshalType(String type) {
+		int idx = type.lastIndexOf('.');
+		return idx < 0 ? type : type.substring(0, idx) + ".marshal" + type.substring(idx);
 	}
 
 	private void genStructMarshallCode(Struct struct) {
@@ -240,13 +246,13 @@ public class CodeGen implements Generator {
 		
 		final String base = struct.getBase();
 		final String name = struct.getName();
-		ls.add(String.format("public %s class %s %s {", struct.isDynamic() ? "abstract" : "sealed", name, (base.isEmpty() ? ": IMarshaller" : ": " + base)));
+		ls.add(String.format("public %s class %s %s {", struct.isDynamic() ? "abstract" : "sealed", name, (base.isEmpty() ? ": cfg.marshal.IMarshaller" : ": " + toMarshalType(base))));
 
 		
 		final ArrayList<String> ds = new ArrayList<String>();
 		final ArrayList<String> cs = new ArrayList<String>();
 		final String adorn = base.isEmpty() ? (struct.isDynamic() ? "virtual" : "") : "override";
-		cs.add(String.format("public %s void Write(cfg.DataWriter dw) {", adorn));
+		cs.add(String.format("public %s void Write(cfg.marshal.DataWriter dw) {", adorn));
 		if(!base.isEmpty())
 			cs.add("base.Write(dw);");
 		
@@ -263,26 +269,26 @@ public class CodeGen implements Generator {
 					
 				} else if(f.isStruct()) {
 					cs.add(String.format("dw.Write(this.%s, %s);", fname, Struct.isDynamic(jtype)));
-					ds.add(String.format("public %s %s;", jtype, fname));
+					ds.add(String.format("public %s %s;", toMarshalType(jtype), fname));
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {
 							final String valueType = toJavaType(ftypes.get(1));
 							cs.add(String.format("dw.Write(this.%s, %s);", fname, Struct.isDynamic(valueType)));
-							ds.add(String.format("public readonly System.Collections.Generic.List<%s> %s = new System.Collections.Generic.List<%s>();", valueType, fname, valueType));
+							ds.add(String.format("public readonly System.Collections.Generic.List<%s> %s = new System.Collections.Generic.List<%s>();", toMarshalType(valueType), fname, toMarshalType(valueType)));
 							break;
 						}
 						case "set": {
 							final String valueType = toJavaType(ftypes.get(1));
 							cs.add(String.format("dw.Write(this.%s, %s);", fname, Struct.isDynamic(valueType)));
-							ds.add(String.format("public readonly System.Collections.Generic.HashSet<%s> %s = new System.Collections.Generic.HashSet<%s>();", valueType, fname, valueType));
+							ds.add(String.format("public readonly System.Collections.Generic.HashSet<%s> %s = new System.Collections.Generic.HashSet<%s>();", toMarshalType(valueType), fname, toMarshalType(valueType)));
 							break;
 						}
 						case "map": {
 							final String keyType = toJavaType(ftypes.get(1));
 							final String valueType = toJavaType(ftypes.get(2));
 							cs.add(String.format("dw.Write(this.%s, %s, %s);", fname, Struct.isDynamic(keyType), Struct.isDynamic(valueType)));
-							ds.add(String.format("public readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();", keyType, valueType, fname, keyType, valueType));
+							ds.add(String.format("public readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();", toMarshalType(keyType), toMarshalType(valueType), fname, toMarshalType(keyType), toMarshalType(valueType)));
 							break;
 						}
 					}

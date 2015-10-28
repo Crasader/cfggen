@@ -140,32 +140,6 @@ public class Config {
 		Main.println(data);
 	}
 	
-	public static void collectRefStructs() {
-		for(Struct s : Struct.getStructs().values()) {
-			refStructs.add(s.getName());
-		}
-		//configs.values().forEach(c -> collectRef(c.getType()));
-		//Main.println(refStructs);
-	}
-	
-	static void collectRef(String struct) {
-		if(!refStructs.add(struct)) return;
-		Struct s = Struct.get(struct);
-		for(Field f : s.getFields()) {
-			for(String t : f.getTypes()) {
-				if(Field.isStruct(t)) {
-					collectRef(t);
-				}
-			}
-		}
-		for(Struct sub : s.getSubTypes()) {
-			collectRef(sub.getName());
-		}
-		if(!s.getBase().isEmpty()) {
-			collectRef(s.getBase());
-		}
-	}
-	
 	public static HashSet<Type> getData(String name) {
 		try {
 			return configs.get(name).data.indexs.values().iterator().next();
