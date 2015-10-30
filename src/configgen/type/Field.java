@@ -234,7 +234,7 @@ public final class Field {
 				}
 			}
 		} else {
-			//error("unknown type:" + type);
+			error("unknown type:" + type);
 		}
 		for(String name : groups) {
 			if(!Group.isGroup(name))
