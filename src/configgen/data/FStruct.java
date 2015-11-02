@@ -70,12 +70,20 @@ public class FStruct extends Type {
 			load(Struct.get(base), ele);
 		}
 		for(Field f : self.getFields()) {
-			List<Element> ns = Utils.getChildsByTagName(ele, f.getName());
-			if(ns.isEmpty())
-				Utils.error("type:%s field:%s missing", self.getName(), f.getName());
-			else if(ns.size() > 1)
-				Utils.error("type:%s field:%s duplicate", self.getName(), f.getName());
-			values.add(Type.create(this, f, (Element)ns.get(0)));
+			final String fname = f.getName();
+			List<Element> ns = Utils.getChildsByTagName(ele, fname);
+			if(ns.isEmpty()) {
+				// type 属性被保留作 多态类的类名.
+				if(!f.getName().equals("type") && ele.hasAttribute(fname)) {
+					values.add(Type.create(this, f, ele.getAttribute(fname)));
+				} else {
+					Utils.error("type:%s field:%s missing", self.getName(), fname);
+				}
+			} else if(ns.size() > 1) {
+				Utils.error("type:%s field:%s duplicate", self.getName(), fname);
+			} else {
+				values.add(Type.create(this, f, (Element)ns.get(0)));
+			}
 		}
 		// 最近一条读取的数据.便于分析
 		if(!self.isDynamic())

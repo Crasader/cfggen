@@ -6,7 +6,11 @@ import configgen.FlatStream;
 import configgen.type.Field;
 
 public class FFloat extends Type {
-
+	public FFloat(FStruct host, Field define, String is) {
+		super(host, define);
+		value = Float.parseFloat(is);
+	}
+	
 	public FFloat(FStruct host, Field define, FlatStream is) {
 		super(host, define);
 		value = is.getFloat();

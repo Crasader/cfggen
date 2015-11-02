@@ -5,13 +5,6 @@
 	<import input="item/item.xml"/>
 	<import input="skill.xml"/>
 	
-	<alias type="Task" name="傻子:你好"/>
-	<alias type="int" name="整数:个数"/>
-	<alias type="long" name="角色id"/>
-	<alias type="long" name="roleid"/>
-	<alias type="Task1" name="任务1"/>
-	<alias type="Task2" name="任务2"/>
-	
 	<enum name="ItemType">
 		<const name="AAA" alias="类型1:类型A" value="11111"/>
 		<const name="BBB" alias="类型2:类型B" value="22222"/>
@@ -35,7 +28,7 @@
 		<field name="e5" type="map:int:int" ref="item:name"/>
 	</config>
 	
-	<struct name="Task" alias="任务:将军">
+	<struct name="Task">
 		<field name="id" type="int" />
 			<struct name="Task1" typeid="1">
 				<field name="x" type="float" />

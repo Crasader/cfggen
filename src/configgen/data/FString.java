@@ -6,7 +6,11 @@ import configgen.FlatStream;
 import configgen.type.Field;
 
 public class FString extends Type {
-
+	public FString(FStruct host, Field define, String is) {
+		super(host, define);
+		value = is;
+	}
+	
 	public FString(FStruct host, Field define, FlatStream is) {
 		super(host, define);
 		value = is.getString();

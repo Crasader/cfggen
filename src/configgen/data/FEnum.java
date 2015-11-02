@@ -7,7 +7,12 @@ import configgen.type.ENUM;
 import configgen.type.Field;
 
 public final class FEnum extends Type {
-
+	public FEnum(FStruct host, Field define, String is) {
+		super(host, define);
+		enumName = is;
+		value = ENUM.get(define.getType()).getEnumValueByName(is);
+	}
+	
 	public FEnum(FStruct host, Field define, FlatStream is) {
 		super(host, define);
 		enumName = is.getString();

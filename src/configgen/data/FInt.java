@@ -6,7 +6,11 @@ import configgen.FlatStream;
 import configgen.type.Field;
 
 public final class FInt extends Type {
-
+	public FInt(FStruct host, Field define, String is) {
+		super(host, define);
+		value = Integer.parseInt(is);
+	}
+	
 	public FInt(FStruct host, Field define, FlatStream is) {
 		super(host, define);
 		value = is.getInt();

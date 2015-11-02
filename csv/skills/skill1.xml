@@ -1,8 +1,6 @@
 
-<data>
-	<id>1000</id>
+<data id="1000352" name="monkey">
 	<searchname></searchname>
-	<name></name>
 	<icon></icon>
 	<type>0</type>
 	<actionfile></actionfile>

@@ -76,6 +76,28 @@ public abstract class Type {
 		return null;
 	}
 	
+	public static Type create(FStruct host, Field define, String value) {
+		final String type = define.getType();
+		if(define.isRaw()) {
+			if(type.equals("bool")) {
+				return new FBool(host, define, value);
+			} else if(type.equals("int")) {
+				return new FInt(host, define, value);
+			} else if(type.equals("long")) {
+				return new FLong(host, define, value);
+			} else if(type.equals("float")) {
+				return new FFloat(host, define, value);
+			} else if(type.equals("string")) {
+				return new FString(host, define, value);
+			}
+		} else if(define.isEnum()) {
+			return new FEnum(host, define, value);
+		} else {
+			error("unknown type:" + type);
+		}
+		return null;
+	}
+	
 
 	public static Type create(FStruct host, Field define, Element node) {
 		final String type = define.getType();

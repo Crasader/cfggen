@@ -6,7 +6,11 @@ import configgen.FlatStream;
 import configgen.type.Field;
 
 public final class FLong extends Type {
-
+	public FLong(FStruct host, Field define, String is) {
+		super(host, define);
+		value = Long.parseLong(is);
+	}
+	
 	public FLong(FStruct host, Field define, FlatStream is) {
 		super(host, define);
 		value = is.getLong();
