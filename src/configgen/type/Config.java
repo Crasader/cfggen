@@ -35,6 +35,7 @@ public class Config {
 	private final boolean manager; // 是否出现在CfgMgr的加载列表里
 	
 	private FList data;
+	private final boolean needLoad;
 	public Config(String namespace, Element data, String csvDir) {
 		this.namespace = namespace;
 		dir = csvDir;
@@ -45,6 +46,7 @@ public class Config {
 			Utils.error("config:" + name + " is duplicate!");
 		}
 		
+		needLoad = !data.getAttribute("input").isEmpty();
 		inputFile = Utils.combine(dir, data.getAttribute("input"));
 		final String outputStr = data.getAttribute("output");
 		outputFile = Utils.combine(dir, outputStr.isEmpty() ? name + ".data" : outputStr);
@@ -110,7 +112,7 @@ public class Config {
 	
 	public void loadData() throws Exception {
 		System.out.println("==load config:" + name);
-		if(inputFile.isEmpty()) return;
+		if(!needLoad) return;
 		final String fullPath = Utils.combine(Main.csvDir, inputFile);
 		final File f = new File(fullPath);
 		if(f.isDirectory()) {
@@ -158,7 +160,7 @@ public class Config {
 	}
 	
 	public void save(Set<String> groups) {
-		if(inputFile.isEmpty() || !checkInGroup(groups)) return;
+		if(!needLoad || !checkInGroup(groups)) return;
 		final DataVisitor vs = new DataVisitor(groups);
 		data.accept(vs);	
 		final String outDataFile = Utils.combine(Main.dataDir, getOutputDataFile());
@@ -166,7 +168,7 @@ public class Config {
 	}
 	
 	public void verifyData() {
-		if(inputFile.isEmpty()) return;
+		if(!needLoad) return;
 		System.out.println("==verify config:" + name);
 		data.verifyData();
 	}

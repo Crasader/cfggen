@@ -73,8 +73,9 @@ public class FStruct extends Type {
 			final String fname = f.getName();
 			List<Element> ns = Utils.getChildsByTagName(ele, fname);
 			if(ns.isEmpty()) {
-				// type 属性被保留作 多态类的类名.
-				if(!f.getName().equals("type") && ele.hasAttribute(fname)) {
+				// 如果是简单类型,子element找不到时,尝试从attribue时找
+				// type 属性被保留作 多态类的类名,唯一例外.
+				if((f.isRaw() || f.isEnum()) && !f.getName().equals("type") && ele.hasAttribute(fname)) {
 					values.add(Type.create(this, f, ele.getAttribute(fname)));
 				} else {
 					Utils.error("type:%s field:%s missing", self.getName(), fname);

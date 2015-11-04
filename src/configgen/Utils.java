@@ -158,8 +158,12 @@ public final class Utils {
 	}
 	
 	public static String niceConvert(double value) {
-		final String s = Double.toString(value);
-		return s.endsWith(".0") ? s.substring(0, s.length() - 2) : s;
+		final long lvalue = (long)value;
+		if(lvalue == value) {
+			return Long.toString(lvalue);
+		} else {
+			return Double.toString(value);
+		}
 		
 	}
 	

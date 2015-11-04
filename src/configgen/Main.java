@@ -219,7 +219,7 @@ public final class Main {
         		curXml = file;
         		final String newRelateDir = file.contains("/") ? Utils.combine(relateDir, file.substring(0, file.lastIndexOf('/'))) : relateDir;
         		loadDefine(DocumentBuilderFactory.newInstance().newDocumentBuilder().
-        			parse(csvDir + "/" + file).getDocumentElement()
+        			parse(Utils.combine(csvDir, relateDir) + "/" + file).getDocumentElement()
         			, newRelateDir);
         		curXml = oldXml;
         	}
