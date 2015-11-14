@@ -41,7 +41,7 @@ public final class Field {
 			error("name miss");
 		
 		for(String idx : indexs)
-			this.indexs.add(idx.toLowerCase());
+			this.indexs.add(idx);
 		
 		if(types[0].equals("list")) {
 			final String valueType = types[1];

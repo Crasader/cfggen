@@ -42,6 +42,9 @@ public final class Struct {
 	public static List<Struct> getExports() {
 		return structs.values().stream().filter(s -> s.checkInGroup(Main.groups)).collect(Collectors.toList());
 	}
+	
+	private static int NEXT_TYPE_ID = (int)(System.currentTimeMillis());
+	private final int typeid;
 	private final String namespace;
 	private final String name;
 	private final String fullname;
@@ -56,6 +59,7 @@ public final class Struct {
 	}
 	
 	public Struct(String namespace, Element data, String base) {
+		this.typeid = NEXT_TYPE_ID++;
 		this.namespace = namespace;
 		name = data.getAttribute("name");
 		this.fullname = namespace + "." + name;
@@ -96,6 +100,10 @@ public final class Struct {
 	
 	public String getBase() {
 		return base;
+	}
+	
+	public int getTypeId() {
+		return typeid;
 	}
 	
 	public boolean isDynamic() {

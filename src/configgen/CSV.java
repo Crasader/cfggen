@@ -1,13 +1,7 @@
 package configgen;
 
 import java.io.*;
-import java.lang.reflect.Method;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.zip.CRC32;
-import java.util.zip.CheckedInputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public final class CSV {
 
@@ -231,80 +225,5 @@ public final class CSV {
         }
 
         return list;
-    }
-
-    public static boolean parseBoolean(String s) {
-        String t = s.trim();
-        return !t.isEmpty() && ( t.equals("1") || t.equalsIgnoreCase("true") );
-    }
-
-    public static float parseFloat(String s) {
-        String t = s.trim();
-        return t.isEmpty() ? 0.f : Float.parseFloat(t);
-    }
-
-    public static int parseInt(String s) {
-        String t = s.trim();
-        return t.isEmpty() ? 0 : Integer.decode(t);
-    }
-
-    public static long parseLong(String s) {
-        String t = s.trim();
-        return t.isEmpty() ? 0 : Long.parseLong(t);
-    }
-
-    static String path2Name(String p) {
-        String[] res = p.split("\\\\|/");
-        if (res.length > 0) {
-            String last = res[res.length-1];
-            res[res.length-1] = last.substring(0, last.length() - 4);
-        }
-        return String.join(".", res);
-    }
-
-    private static String[] name2ClassPath(String name) {
-        String[] seps = name.split("\\.");
-        if (seps.length > 0) {
-            String c = seps[seps.length - 1];
-            seps[seps.length - 1] = c.substring(0, 1).toUpperCase() + c.substring(1).toLowerCase();
-        }
-        return seps;
-    }
-
-    static Set<String> load(Path zipPath, String charsetName) throws Exception {
-        Set<String> loaded = new HashSet<>();
-        String packageName = CSV.class.getPackage().getName();
-        try (ZipInputStream zis = new ZipInputStream(new CheckedInputStream(new FileInputStream(zipPath.toFile()), new CRC32()))) {
-            ZipEntry entry;
-            Collection<Class<?>> classList = new ArrayList<>();
-            while ((entry = zis.getNextEntry()) != null) {
-                if (entry.getName().endsWith(".csv")) {
-                    String name = path2Name(entry.getName());
-                    try {
-                        String clzname = packageName + "." + String.join(".", name2ClassPath(name));
-                        Class<?> clz = Class.forName(clzname);
-                        if (clz != null) {
-                            classList.add(clz);
-                            Method initialize = clz.getDeclaredMethod("initialize", List.class);
-                            initialize.setAccessible(true);
-                            List<List<String>> res = parse(new BufferedReader(new InputStreamReader(zis, charsetName)));
-                            initialize.invoke(null, res.subList(2, res.size()));
-                            loaded.add(name);
-                        }
-                    } catch (ClassNotFoundException ignore) {
-                    }
-                }
-            }
-
-            for (Class<?> clz : classList) {
-                try {
-                    Method resolve = clz.getDeclaredMethod("resolve");
-                    resolve.setAccessible(true);
-                    resolve.invoke(null);
-                } catch (NoSuchMethodException ignore) {
-                }
-            }
-        }
-        return loaded;
     }
 }

@@ -70,7 +70,17 @@ public class CodeGen implements Generator {
 		
 		final String base = struct.getBase();
 		final String name = struct.getName();
-		ls.add(String.format("public %s class %s %s {", struct.isDynamic() ? "abstract" : "sealed", name, (base.isEmpty() ? "" : ": " + base)));
+		final boolean isDynamic = struct.isDynamic() ;
+		ls.add(String.format("public %s class %s %s {", isDynamic ? "abstract" : "sealed", name, (base.isEmpty() ? "" : ": " + base)));
+		
+		if(isDynamic) {
+			if(base.isEmpty()) {
+				ls.add("public abstract int GetTypeId();");
+			}
+		} else {
+			ls.add(String.format("public const int TYPEID = %s;", struct.getTypeId()));
+			ls.add("public override int GetTypeId() { return TYPEID; }");
+		}
 		
 		for(Const c : struct.getConsts()) {
 			ls.add(String.format("public const %s %s = %s;",
@@ -246,9 +256,9 @@ public class CodeGen implements Generator {
 		
 		final String base = struct.getBase();
 		final String name = struct.getName();
-		ls.add(String.format("public %s class %s %s {", struct.isDynamic() ? "abstract" : "sealed", name, (base.isEmpty() ? ": cfg.marshal.IMarshaller" : ": " + toMarshalType(base))));
+		final boolean isDynamic = struct.isDynamic();
+		ls.add(String.format("public %s class %s %s {", isDynamic ? "abstract" : "sealed", name, (base.isEmpty() ? ": cfg.marshal.IMarshaller" : ": " + toMarshalType(base))));
 
-		
 		final ArrayList<String> ds = new ArrayList<String>();
 		final ArrayList<String> cs = new ArrayList<String>();
 		final String adorn = base.isEmpty() ? (struct.isDynamic() ? "virtual" : "") : "override";
