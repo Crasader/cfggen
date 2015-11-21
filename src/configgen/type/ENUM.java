@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 
 import org.w3c.dom.Element;
 
-import configgen.Main;
 import configgen.Utils;
 
 public final class ENUM {
@@ -35,6 +34,11 @@ public final class ENUM {
 		return cases;
 	}
 	
+	public final String getConstValue(String name) {
+		Integer value = cases.get(name);
+		return value != null ? value.toString() : null;
+	}
+	
 	public String getNamespace() {
 		return namespace;
 	}
@@ -49,7 +53,7 @@ public final class ENUM {
 		this.namespace = namespace;
 		name = ele.getAttribute("name");
 		this.fullname = namespace + "." + name;
-		System.out.printf("== xml:%s enum:%s\n", Main.curXml, fullname);
+		//System.out.printf("== xml:%s enum:%s\n", Main.curXml, fullname);
 		if(Utils.existType(fullname))
 			error("duplicate name!");
 		put(fullname, this);

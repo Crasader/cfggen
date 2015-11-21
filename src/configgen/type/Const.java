@@ -7,7 +7,7 @@ public final class Const {
 	private final String name;
 	private final String type;
 	
-	private final String value;
+	private String value;
 	public Const(String parent, Element data) {
 		this.parent = parent;
 		name = data.getAttribute("name");
@@ -51,7 +51,31 @@ public final class Const {
 	}
 	
 	public void verifyDefine() {
-		
+		if(type.equals("int")) {
+			try {
+				Integer.parseInt(value);
+			} catch (Exception ex) {
+				// 表明它是常量引用
+				final int idx = value.lastIndexOf('.');
+				final String clsName = idx >= 0 ? value.substring(0, idx) : parent;
+				final String cstName = idx >= 0 ? value.substring(idx + 1) : value;
+				final Struct struct = Struct.get(clsName);
+				if(struct != null) {
+					String v = struct.getConstValue(cstName);
+					if(v == null)
+						error(String.format("const %s not define!", this.value));
+					value = v;
+				} else {
+					final ENUM e = ENUM.get(clsName);
+					if(e == null)
+						error(String.format("const %s not define!", this.value));
+					String v = e.getConstValue(cstName);
+					if(v == null)
+						error(String.format("const %s not define!", this.value));
+					value = v;
+				}
+			}
+		}
 	}
 	
 	public void verifyData() {

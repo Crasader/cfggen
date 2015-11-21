@@ -63,7 +63,7 @@ public final class Struct {
 		this.namespace = namespace;
 		name = data.getAttribute("name");
 		this.fullname = namespace + "." + name;
-		System.out.printf("== xml:%s struct:%s\n", Main.curXml, fullname);
+		//System.out.printf("== xml:%s struct:%s\n", Main.curXml, fullname);
 		this.base = base;
 		if(Utils.existType(name)) {
 			error(" is duplicate!");
@@ -83,7 +83,7 @@ public final class Struct {
 			} else if(nodeName.equals("struct")){
 				subs.add(new Struct(namespace, ele, fullname));
 			} else if(nodeName.equals("const")) {
-				consts.add(new Const(name, ele));
+				consts.add(new Const(this.fullname, ele));
 			} else {
 				error("element:" + nodeName + " unknown");
 			}
@@ -134,6 +134,14 @@ public final class Struct {
 		return consts;
 	}
 	
+	public final String getConstValue(String name) {
+		for(Const c : consts) {
+			if(c.getName().equals(name))
+				return c.getValue();
+		}
+		return null;
+	}
+	
 	public static boolean isDeriveFrom(String child, String ancestor) {
 		while(true) {
 			if(child.equals(ancestor)) return true;
@@ -180,6 +188,7 @@ public final class Struct {
 		for(Const c : consts) {
 			if(!fnames.add(c.getName()))
 				error("duplicate const:" + c.getName());
+			c.verifyDefine();
 		}
 		
 //		if(!base.isEmpty()) {
