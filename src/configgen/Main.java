@@ -27,7 +27,7 @@ public final class Main {
 	public static String outputEncoding = "utf8";
 	public static String inputEncoding = "GBK";
 	public static boolean verbose = false;
-	public static boolean noverify = false;
+	public static boolean check = false;
 	
 	public static final Set<String> languages = new HashSet<String>();
 	public static final Set<String> groups = new HashSet<String>();
@@ -47,7 +47,7 @@ public final class Main {
         System.out.println("    -outputencoding  output encoding. default utf8");
         System.out.println("    -inputencoding   input encoding. default GBK");
         System.out.println("    -verbose  show detail. default not");
-        System.out.println("    -noverify no verify reference");
+        System.out.println("    -check load and check even not set -datadir");
         System.out.println("    --help show usage");
         System.out.println("===============example.xml==============:");
         System.out.println(
@@ -132,8 +132,8 @@ public final class Main {
 			case "-verbose":
 				verbose = true;
 				break;
-			case "-noverify":
-				noverify = true;
+			case "-check":
+				check = true;
 				break;
 			case "--help":
 				usage("");
@@ -146,10 +146,13 @@ public final class Main {
 
 		if(xmlSchemeFile.isEmpty())
 			usage("-configxml miss");
-		if(groups.isEmpty() && csmarshalcodeDir.isEmpty())
+		if(groups.isEmpty())
 			usage("-group miss");
 		if(codeDir.isEmpty() && !languages.isEmpty())
 			usage("-codedir miss");
+		
+		if(codeDir.isEmpty() && dataDir.isEmpty() && csmarshalcodeDir.isEmpty() && !check)
+			usage("needs -codeDir or -dataDir or csmarshalcodedir or -check");
 
         final File cfgxml = new File(xmlSchemeFile);
         final Path parent = cfgxml.toPath().getParent();
@@ -161,32 +164,33 @@ public final class Main {
         dumpDefine();
         verifyDefine();
         
-        if(!csmarshalcodeDir.isEmpty()) {
-        	(new configgen.lans.cs.CodeGen()).genMarshallCode();
-        	return;
-        }
-        
-        try {
-        	loadData();
-        } catch(Exception e) {
-        	System.out.println("=================last datas=====================");
-        	lastLoadDatas.forEach(d ->System.out.println(d));
-        	System.out.println("=================last datas=====================");
-        	e.printStackTrace();
-        	System.exit(1);
-        }
-        
-        if(!noverify)
-        	verifyData();
-        if(!dataDir.isEmpty()) {
-        	new DataGen().gen();
-        }
-        
         if(!codeDir.isEmpty() && !languages.isEmpty()) {
 	        for(String lan : languages) {
 	        		Class<?> cls =  Class.forName("configgen.lans." + lan + ".CodeGen");
 	            	Generator generator = (Generator)cls.newInstance();
 	            	generator.gen();
+	        }
+        }
+        
+        if(!csmarshalcodeDir.isEmpty()) {
+        	(new configgen.lans.cs.CodeGen()).genMarshallCode();
+        	return;
+        }
+        
+        if(!dataDir.isEmpty() || check) {
+	        try {
+	        	loadData();
+	        	verifyData();
+	        } catch(Exception e) {
+	        	System.out.println("=================last datas=====================");
+	        	lastLoadDatas.forEach(d ->System.out.println(d));
+	        	System.out.println("=================last datas=====================");
+	        	e.printStackTrace();
+	        	System.exit(1);
+	        }
+
+	        if(!dataDir.isEmpty()) {
+	        	new DataGen().gen();
 	        }
         }
 	}
