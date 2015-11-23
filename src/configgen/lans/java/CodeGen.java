@@ -51,7 +51,6 @@ public class CodeGen implements Generator {
 		case "float": return value + "f";
 		default: return value;
 		}
-
 	}
 	
 	void genEnum(ENUM e) {
@@ -90,8 +89,24 @@ public class CodeGen implements Generator {
 		}
 		
 		for(Const c : struct.getConsts()) {
-			ls.add(String.format("	public static final %s %s = %s;",
-				toJavaType(c.getType()), c.getName(), toJavaValue(c.getType(), c.getValue())));
+			final String type = c.getType();
+			final String value = c.getValue();
+			final String cname = c.getName();
+			if(Field.isRaw(type)) {
+				ls.add(String.format("	public static final %s %s = %s;",
+						toJavaType(type), cname, toJavaValue(type, value)));
+			} else {
+				switch(type) {
+					case "list:int" :
+						ls.add(String.format("	public static final int[] %s = {%s};", cname, value));
+						break;
+					case "list:float" :
+						ls.add(String.format("	public static final double[] %s = {%s};", cname, value));
+						break;
+					default:
+						Utils.error("unknow const type:" + type);	
+				}
+			}
 		}
 		
 		final ArrayList<String> ds = new ArrayList<String>();

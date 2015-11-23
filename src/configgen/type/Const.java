@@ -15,8 +15,6 @@ public final class Const {
 			error("name miss");
 		final String strType = data.getAttribute("type");
 		type = strType.isEmpty() ? "int" : strType;
-		if(!Field.isRaw(type))
-			error("const type:" + type + " must be raw type! ");
 		value = data.getAttribute("value");
 		
 		if(value.isEmpty() && !type.equals("string")) {

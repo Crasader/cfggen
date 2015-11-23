@@ -80,6 +80,8 @@ public class CodeGen implements Generator {
 	String toLuaValue(String type, String value) {
 		switch(type) {
 		case "string": return "\"" + value + "\"";
+		case "list:int":
+		case "list:float": return "{" + value + "}";
 		default: return value;
 		}
 

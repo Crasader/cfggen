@@ -79,12 +79,28 @@ public class CodeGen implements Generator {
 			}
 		} else {
 			ls.add(String.format("public const int TYPEID = %s;", struct.getTypeId()));
-			ls.add("public override int GetTypeId() { return TYPEID; }");
+			ls.add(String.format("public %s int GetTypeId() { return TYPEID; }", (base.isEmpty() ? "" : "override")));
 		}
 		
 		for(Const c : struct.getConsts()) {
-			ls.add(String.format("public const %s %s = %s;",
-				toJavaType(c.getType()), c.getName(), toJavaValue(c.getType(), c.getValue())));
+			final String type = c.getType();
+			final String value = c.getValue();
+			final String cname = c.getName();
+			if(Field.isRaw(type)) {
+				ls.add(String.format("	public const %s %s = %s;",
+						toJavaType(type), cname, toJavaValue(type, value)));
+			} else {
+				switch(type) {
+					case "list:int" :
+						ls.add(String.format("	public static readonly int[] %s = {%s};", cname, value));
+						break;
+					case "list:float" :
+						ls.add(String.format("	public static readonly double[] %s = {%s};", cname, value));
+						break;
+					default:
+						Utils.error("unknow const type:" + type);	
+				}
+			}
 		}
 		
 		final ArrayList<String> ds = new ArrayList<String>();
