@@ -152,8 +152,6 @@ public final class RowColumnStream extends FlatStream {
 	public String getString() {
 		final String s = getNextAndCheckNotEmpty();
 		if(s.equals(EMPTY)) return "";
-		if(s.indexOf('\n') >= 0)
-			error("can't contain \n in string! please choose alternative char.");
 		// 因为null用来表示空字符串,%n 存在的意义是为了能够在 string 里配出 null.
 		return s.indexOf('%') >= 0 ? s.replace("%#", "#").replace("%]", "]").replace("%n", "n") : s;
 	}

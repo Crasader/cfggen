@@ -42,8 +42,7 @@ public final class Struct {
 	public static List<Struct> getExports() {
 		return structs.values().stream().filter(s -> s.checkInGroup(Main.groups)).collect(Collectors.toList());
 	}
-	
-	private static int NEXT_TYPE_ID = (int)(System.currentTimeMillis());
+
 	private final int typeid;
 	private final String namespace;
 	private final String name;
@@ -54,15 +53,20 @@ public final class Struct {
 	private final HashSet<Struct> subs = new HashSet<>();
 	private final HashSet<String> groups = new HashSet<>();
 	
+	private final static HashSet<Integer> typeids = new HashSet<>();
+	
 	public Struct(String namespace, Element data) {
 		this(namespace, data, "");
 	}
 	
 	public Struct(String namespace, Element data, String base) {
-		this.typeid = NEXT_TYPE_ID++;
 		this.namespace = namespace;
 		name = data.getAttribute("name");
 		this.fullname = namespace + "." + name;
+		int newTypeid = this.fullname.hashCode();
+		while(!typeids.add(newTypeid))
+			newTypeid++;
+		this.typeid = newTypeid;
 		//System.out.printf("== xml:%s struct:%s\n", Main.curXml, fullname);
 		this.base = base;
 		if(Utils.existType(name)) {
