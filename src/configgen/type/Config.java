@@ -36,7 +36,6 @@ public class Config {
 	private final boolean single;
 	
 	private FList data;
-	private final boolean needLoad;
 	public Config(String namespace, Element data, String csvDir) {
 		this.namespace = namespace;
 		dir = csvDir;
@@ -47,8 +46,11 @@ public class Config {
 			Utils.error("config:" + name + " is duplicate!");
 		}
 		
-		needLoad = !data.getAttribute("input").isEmpty();
-		inputFile = Utils.combine(dir, data.getAttribute("input"));
+		final String inputStr = data.getAttribute("input");
+		if(inputStr.isEmpty()) {
+			Utils.error("config:%s input is missing!", name);
+		}
+		inputFile = Utils.combine(dir, inputStr);
 		final String outputStr = data.getAttribute("output");
 		outputFile = Utils.combine(dir, outputStr.isEmpty() ? name + ".data" : outputStr);
 		
@@ -118,7 +120,6 @@ public class Config {
 	
 	public void loadData() throws Exception {
 		System.out.println("==load config:" + name);
-		if(!needLoad) return;
 		final String fullPath = Utils.combine(Main.csvDir, inputFile);
 		final File f = new File(fullPath);
 		if(f.isDirectory()) {
@@ -168,7 +169,7 @@ public class Config {
 	}
 	
 	public void save(Set<String> groups) {
-		if(!needLoad || !checkInGroup(groups)) return;
+		if(!checkInGroup(groups)) return;
 		final DataVisitor vs = new DataVisitor(groups);
 		data.accept(vs);	
 		final String outDataFile = Utils.combine(Main.dataDir, getOutputDataFile());
@@ -176,7 +177,6 @@ public class Config {
 	}
 	
 	public void verifyData() {
-		if(!needLoad) return;
 		System.out.println("==verify config:" + name);
 		data.verifyData();
 	}
