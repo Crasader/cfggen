@@ -172,17 +172,24 @@ public class CodeGen implements Generator {
 		ls.add("local create_datastream = create_datastream");
 		ls.add("local cfgs = {}");
 		ls.add("for _, s in ipairs({");
-		exportConfigs.forEach(c -> ls.add(String.format("{name='%s', type='%s', index='%s', output='%s'},",
-			c.getName(), c.getType(), c.getIndex(), c.getOutputDataFile())));
+		exportConfigs.forEach(c -> ls.add(String.format("{name='%s', type='%s', index='%s', output='%s', single='%s'},",
+			c.getName(), c.getType(), c.getIndex(), c.getOutputDataFile(), c.isSingle())));
 		ls.add("}) do");
 		
+
+		ls.add(String.format("local fs = create_datastream(s.output)"));
+		ls.add("local method = 'get_' .. s.type:gsub('%.', '_')");
+		ls.add("if not s.single then");
 		ls.add("local c = {}");
-		ls.add(String.format("local fs = create_datastream(s.output);"));
 		ls.add("for i = 1, fs:get_int() do");
-		ls.add("local v = fs['get_' .. s.type:gsub('%.', '_')](fs)");
+		ls.add("local v = fs[method](fs)");
 		ls.add("c[v[s.index]] = v");
 		ls.add("end");
 		ls.add("cfgs[s.name] = c");
+		ls.add("else");
+		ls.add("if fs:get_int() ~= 1 then error('single config size != 1') end");
+		ls.add("cfgs[s.name] = fs[method](fs)");
+		ls.add("end");
 		ls.add("end");
 		
 		ls.add("return cfgs");

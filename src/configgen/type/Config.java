@@ -33,6 +33,7 @@ public class Config {
 	private final String[] groups;
 	private final HashSet<String> hsGroups = new HashSet<>();
 	private final boolean manager; // 是否出现在CfgMgr的加载列表里
+	private final boolean single;
 	
 	private FList data;
 	private final boolean needLoad;
@@ -62,6 +63,7 @@ public class Config {
 		else
 			indexs = new String[] { Struct.get(type).getFields().get(0).getName() };
 		manager = !data.getAttribute("manager").equals("false");
+		single = data.getAttribute("single").equals("true");
 	}
 	
 	public String getName() {
@@ -86,6 +88,10 @@ public class Config {
 	
 	public boolean inManager() {
 		return manager;
+	}
+
+	public final boolean isSingle() {
+		return single;
 	}
 
 	public final String getNamespace() {
@@ -139,6 +145,8 @@ public class Config {
 					DocumentBuilderFactory.newInstance().newDocumentBuilder().
         			parse(fullPath).getDocumentElement());
 		}
+		if(isSingle() && data.values.size() != 1)
+			Utils.error("config:%s is single. but size=%d", name, data.values.size());
 		Main.println(data);
 	}
 	

@@ -225,22 +225,38 @@ public class CodeGen implements Generator {
 		ls.add("package " + namespace + ";");
 		ls.add("public class CfgMgr {");
 		ls.add("	public static class DataDir { public static String dir; public static String encoding; }");
-		exportConfigs.forEach(c -> ls.add(String.format("	public static final java.util.Map<%s, %s> %s = new java.util.HashMap<>();", 
-				getIndexType(c), c.getType(), c.getName())));
+		exportConfigs.forEach(c -> {
+			if(!c.isSingle()) {
+				ls.add(String.format("	public static final java.util.Map<%s, %s> %s = new java.util.HashMap<>();", 
+					getIndexType(c), c.getType(), c.getName()));
+			} else {
+				ls.add(String.format("	public static %s %s;", c.getType(), c.getName()));
+			}
+			}
+		);
 		ls.add("	public static void load() {");
 		exportConfigs.forEach(
 			c -> {
 			ls.add("		{");
-			ls.add(String.format("			%s.clear();", c.getName()));
-			ls.add(String.format("			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding);", c.getOutputDataFile()));
-			ls.add("			for(int n = fs.getInt() ; n-- > 0 ; ) {");
-			if(Struct.isDynamic(c.getType())) {
-				ls.add(String.format("				final %s v = (%s)create(fs.getString(), fs);", c.getType(), c.getType()));
+				ls.add(String.format("			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding);", c.getOutputDataFile()));
+				if(!c.isSingle()) {
+					ls.add(String.format("			%s.clear();", c.getName()));
+					ls.add("			for(int n = fs.getInt() ; n-- > 0 ; ) {");
+					if(Struct.isDynamic(c.getType())) {
+						ls.add(String.format("				final %s v = (%s)create(fs.getString(), fs);", c.getType(), c.getType()));
+					} else {
+						ls.add(String.format("				final %s v = (%s)create(\"%s\", fs);", c.getType(), c.getType(), c.getType()));
+					}
+					ls.add(String.format("				%s.put(v.%s, v);", c.getName(), c.getIndex()));
+					ls.add("			}");
 			} else {
-				ls.add(String.format("				final %s v = (%s)create(\"%s\", fs);", c.getType(), c.getType(), c.getType()));
+				ls.add("			if(fs.getInt() != 1) throw new RuntimeException(\"single conifg size != 1\");");
+				if(Struct.isDynamic(c.getType())) {
+					ls.add(String.format("			%s = (%s)create(fs.getString(), fs);", c.getName(), c.getType()));
+				} else {
+					ls.add(String.format("			%s = (%s)create(\"%s\", fs);", c.getName(), c.getType(), c.getType()));
+				}
 			}
-			ls.add(String.format("				%s.put(v.%s, v);", c.getName(), c.getIndex()));
-			ls.add("			}");
 			ls.add("		}");
 		});
 		ls.add("	}");

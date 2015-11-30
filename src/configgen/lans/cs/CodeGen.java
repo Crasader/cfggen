@@ -216,15 +216,21 @@ public class CodeGen implements Generator {
 		ls.add("public static string Dir { set; get;} ");
 		ls.add("public static string Encoding { set; get; }");
 		ls.add("}");
-		exportConfigs.forEach(c -> ls.add(String.format("public static readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();",
-				getIndexType(c), c.getType(), c.getName(), getIndexType(c), c.getType())));
+		exportConfigs.forEach(c -> {
+			if(!c.isSingle()) {
+				ls.add(String.format("public static readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();",
+					getIndexType(c), c.getType(), c.getName(), getIndexType(c), c.getType()));
+			} else {
+				ls.add(String.format("public static %s %s;", c.getType(), c.getName()));
+			}
+			});
 
 		ls.add("public static void Load() {");
 		exportConfigs.forEach(
 				c -> {
-				ls.add("{");
+				ls.add("{");ls.add(String.format("var fs = cfg.DataStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding);", c.getOutputDataFile()));
+				if(!c.isSingle()) {
 				ls.add(String.format("%s.Clear();", c.getName()));
-				ls.add(String.format("var fs = cfg.DataStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding);", c.getOutputDataFile()));
 				ls.add("for(var n = fs.GetInt() ; n-- > 0 ; ) {");
 				if(Struct.isDynamic(c.getType())) {
 					ls.add(String.format("var v = (%s)Create(fs.GetString(), fs);", c.getType()));
@@ -232,7 +238,16 @@ public class CodeGen implements Generator {
 					ls.add(String.format("var v = (%s)Create(\"%s\", fs);", c.getType(), c.getType()));
 				}
 				ls.add(String.format("%s.Add(v.%s, v);", c.getName(), c.getIndex()));
-				ls.add("}}");
+				ls.add("}");
+				} else {
+					ls.add("fs.GetInt();");
+					if(Struct.isDynamic(c.getType())) {
+						ls.add(String.format("%s = (%s)Create(fs.GetString(), fs);", c.getName(), c.getType()));
+					} else {
+						ls.add(String.format("%s = (%s)Create(\"%s\", fs);", c.getName(), c.getType(), c.getType()));
+					}
+				}
+				ls.add("}");
 			});
 //		Config.configs.values().forEach(c -> 
 //			ls.add(String.format("%s = new %s(DataStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding));", c.getName(), c.getType(), c.getOutputDataFile())));
