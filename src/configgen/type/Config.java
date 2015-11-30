@@ -60,7 +60,7 @@ public class Config {
 		indexs = Utils.split(data, "index");
 		if(indexs.length > 1)
 			Utils.error("config:%s indexs can only have one!", type);
-		else
+		else if(indexs.length == 0)
 			indexs = new String[] { Struct.get(type).getFields().get(0).getName() };
 		manager = !data.getAttribute("manager").equals("false");
 		single = data.getAttribute("single").equals("true");
