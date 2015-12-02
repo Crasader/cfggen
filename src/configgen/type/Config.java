@@ -59,14 +59,14 @@ public class Config {
 		hsGroups.addAll(Arrays.asList(groups));
 		if(hsGroups.isEmpty())
 			hsGroups.add("all");
-		
+
+		single = data.getAttribute("single").equals("true");
 		indexs = Utils.split(data, "index");
 		if(indexs.length > 1)
 			Utils.error("config:%s indexs can only have one!", type);
-		else if(indexs.length == 0)
+		else if(indexs.length == 0 && !single)
 			indexs = new String[] { Struct.get(type).getFields().get(0).getName() };
 		manager = !data.getAttribute("manager").equals("false");
-		single = data.getAttribute("single").equals("true");
 	}
 	
 	public String getName() {
