@@ -19,7 +19,8 @@ public final class Struct {
 	private final static HashMap<String, Struct> structs = new HashMap<String, Struct>();
 	
 	public static Struct get(String name) {
-		return structs.get(name.toLowerCase());
+		Struct s= structs.get(name.toLowerCase());
+		return s != null && s.getFullName().equals(name) ?  s : null;
 	}
 	
 	public static Struct put(String name, Struct struct) {
@@ -31,7 +32,8 @@ public final class Struct {
 	}
 	
 	public final static boolean isStruct(String name) {
-		return structs.containsKey(name.toLowerCase());
+		Struct s = structs.get(name.toLowerCase());
+		return s != null && s.getFullName().equals(name);
 	}
 	
 	public final static boolean isDynamic(String name) {
