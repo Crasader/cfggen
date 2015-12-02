@@ -121,12 +121,14 @@ public class CodeGen implements Generator {
 		ls.add("function os:gettype(typename)");
 		ls.add("return self['get_' .. typename:gsub('%.', '_')](self)");
 		ls.add("end");
+		ls.add("");
+		ls.add("local meta");
 
 		for(Struct struct : Struct.getExports()) {
 			final String fullname = struct.getFullName();
 			final String name = struct.getName();
 			
-			ls.add("local meta = {}");
+			ls.add("meta = {}");
 			ls.add("meta.__index = meta");
 			ls.add("meta.class = '" + fullname + "'");
 			for(Const c : struct.getConsts()) {

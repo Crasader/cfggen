@@ -34,6 +34,7 @@ public class Config {
 	private final HashSet<String> hsGroups = new HashSet<>();
 	private final boolean manager; // 是否出现在CfgMgr的加载列表里
 	private final boolean single;
+	private final boolean notload;
 	
 	private FList data;
 	public Config(String namespace, Element data, String csvDir) {
@@ -47,12 +48,12 @@ public class Config {
 		}
 		
 		final String inputStr = data.getAttribute("input");
-		if(inputStr.isEmpty()) {
-			Utils.error("config:%s input is missing!", name);
-		}
+		notload = inputStr.isEmpty();
+//		if(notload) {
+//			Utils.error("config:%s input is missing!", name);
+//		}
 		inputFile = Utils.combine(dir, inputStr);
-		final String outputStr = data.getAttribute("output");
-		outputFile = Utils.combine(dir, outputStr.isEmpty() ? name + ".data" : outputStr);
+		outputFile = Utils.combine(dir, name + ".data");
 		
 		groups = Utils.split(data, "group");
 		hsGroups.addAll(Arrays.asList(groups));
@@ -120,6 +121,7 @@ public class Config {
 	
 	public void loadData() throws Exception {
 		System.out.println("==load config:" + name);
+		if(notload) return;
 		final String fullPath = Utils.combine(Main.csvDir, inputFile);
 		final File f = new File(fullPath);
 		if(f.isDirectory()) {
@@ -169,7 +171,7 @@ public class Config {
 	}
 	
 	public void save(Set<String> groups) {
-		if(!checkInGroup(groups)) return;
+		if(notload || !checkInGroup(groups)) return;
 		final DataVisitor vs = new DataVisitor(groups);
 		data.accept(vs);	
 		final String outDataFile = Utils.combine(Main.dataDir, getOutputDataFile());
@@ -178,6 +180,7 @@ public class Config {
 	
 	public void verifyData() {
 		System.out.println("==verify config:" + name);
+		if(notload) return;
 		data.verifyData();
 	}
 	

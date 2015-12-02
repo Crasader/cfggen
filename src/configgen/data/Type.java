@@ -62,7 +62,7 @@ public abstract class Type {
 			if(base.isDynamic()) {
 				final String subType = base.getNamespace() + "." + is.getString();
 				Struct real = Struct.get(subType);
-				if(real == null)
+				if(real == null || !real.getFullName().equals(subType))
 					error("dynamic type:" + subType + " unknown");
 				if(!Struct.isDeriveFrom(subType, baseType))
 					error("dynamic type:" + subType + " isn't sub type of:" + baseType);
@@ -129,7 +129,7 @@ public abstract class Type {
 			if(base.isDynamic()) {
 				final String subType = base.getNamespace() + "." + node.getAttribute("type");
 				Struct real = Struct.get(subType);
-				if(real == null)
+				if(real == null || !real.getFullName().equals(subType))
 					error("dynamic type:" + subType + " unknown");
 				if(!Struct.isDeriveFrom(subType, baseType))
 					error("dynamic type:" + subType + " isn't sub type of:" + baseType);
