@@ -77,8 +77,8 @@ public class FList extends Type {
 					values.add(Type.create(host, valueDefine, new RowColumnStream(Utils.parse(file.getAbsolutePath()))));
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
-				Utils.error("file:%s load fail", file.getAbsolutePath());
+				System.out.printf("file:%s load fail\n", file.getAbsolutePath());
+				throw new RuntimeException(e);
 			}
 		}
 		

@@ -182,7 +182,7 @@ public final class Utils {
 			}
 			Files.write(new File(file).toPath(), text.getBytes(Main.outputEncoding));
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 	

@@ -72,7 +72,7 @@ public final class Struct {
 		//System.out.printf("== xml:%s struct:%s\n", Main.curXml, fullname);
 		this.base = base;
 		if(Utils.existType(name)) {
-			error(" is duplicate!");
+			error(" 类型重复");
 		}
 		put(fullname, this);
 		groups.addAll(Arrays.asList(Utils.split(data, "group")));
@@ -91,7 +91,7 @@ public final class Struct {
 			} else if(nodeName.equals("const")) {
 				consts.add(new Const(this.fullname, ele));
 			} else {
-				error("element:" + nodeName + " unknown");
+				error("element:" + nodeName + " 未知");
 			}
 		}
 	}
@@ -148,6 +148,14 @@ public final class Struct {
 		return null;
 	}
 	
+	public final String getConstType(String name) {
+		for(Const c : consts) {
+			if(c.getName().equals(name))
+				return c.getType();
+		}
+		return null;
+	}
+	
 	public static boolean isDeriveFrom(String child, String ancestor) {
 		while(true) {
 			if(child.equals(ancestor)) return true;
@@ -182,18 +190,18 @@ public final class Struct {
 	
 	public void verityDefine() {
 		if(!base.isEmpty() && Struct.get(base) == null) {
-			throw new RuntimeException("struct:" + name + " unknown base type:" + base);
+			throw new RuntimeException("struct:" + name + "未知父类:" + base);
 		}
 		
 		HashSet<String> fnames = new HashSet<String>();
 		for(Field f : fields) {
 			if(!fnames.add(f.getName()))
-				error("duplicate field:" + f.getName());
+				error("field名重复:" + f.getName());
 		}
 		fnames.clear();
 		for(Const c : consts) {
 			if(!fnames.add(c.getName()))
-				error("duplicate const:" + c.getName());
+				error("const名重复:" + c.getName());
 			c.verifyDefine();
 		}
 		

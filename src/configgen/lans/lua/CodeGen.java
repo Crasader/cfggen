@@ -175,7 +175,7 @@ public class CodeGen implements Generator {
 		ls.add("local cfgs = {}");
 		ls.add("for _, s in ipairs({");
 		exportConfigs.forEach(c -> ls.add(String.format("{name='%s', type='%s', index='%s', output='%s', single=%s},",
-			c.getName(), c.getType(), c.getIndex(), c.getOutputDataFile(), c.isSingle())));
+			c.getName(), c.getType(), c.isSingle() ? "" : c.getIndex(), c.getOutputDataFile(), c.isSingle())));
 		ls.add("}) do");
 		
 

@@ -55,7 +55,7 @@ public final class ENUM {
 		this.fullname = namespace + "." + name;
 		//System.out.printf("== xml:%s enum:%s\n", Main.curXml, fullname);
 		if(Utils.existType(fullname))
-			error("duplicate name!");
+			error("重复类型名!");
 		put(fullname, this);
 		
 		int enumValue = 0;
@@ -67,12 +67,12 @@ public final class ENUM {
 				enumValue = Integer.parseInt(c.getAttribute("value"));
 			}
 			if(cases.put(cname, enumValue) != null)
-				error(String.format("const:%s duplicate!", cname));
+				error(String.format("const:%s 重名!", cname));
 			enumValue++;
 			aliass.put(cname, cname);
 			for(String aliasName : Utils.split(c, "alias")) {
 				if(aliass.put(aliasName, cname) != null)
-					error(String.format("enum const alias<%s, %s> duplicate!", cname, aliasName));
+					error(String.format("enum const alias<%s, %s> 重复!", cname, aliasName));
 			}
 		}
 	}
@@ -80,7 +80,7 @@ public final class ENUM {
 	public int getEnumValueByName(String name) {
 		final String cname = aliass.get(name);
 		if(cname == null)
-			error("name:" + name + " not a valid case name");
+			error(name + "不是enum:" + this.name + "的合法枚举值");
 		return cases.get(cname);
 	}
 	

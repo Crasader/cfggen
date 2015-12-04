@@ -104,7 +104,7 @@ public class CodeGen implements Generator {
 						ls.add(String.format("	public static final double[] %s = {%s};", cname, value));
 						break;
 					default:
-						Utils.error("unknow const type:" + type);	
+						Utils.error("struct:%s const:%s unknown type:%s", struct.getFullName(), c.getName(), type);	
 				}
 			}
 		}

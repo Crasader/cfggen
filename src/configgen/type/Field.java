@@ -29,7 +29,7 @@ public final class Field {
 		this.fullType = fulltype;
 		this.types = Arrays.asList(types);
 		if(this.types.isEmpty())
-			error("type miss");
+			error("没有定义 type");
 		
 		for(int i = 0 ; i < types.length ; i++) {
 			String t = types[i];
@@ -38,7 +38,7 @@ public final class Field {
 		}
 
 		if(name.isEmpty())
-			error("name miss");
+			error("没有定义 name");
 		
 		for(String idx : indexs)
 			this.indexs.add(idx);
@@ -50,7 +50,7 @@ public final class Field {
 				Struct s = Struct.get(valueType);
 				for(String idx : indexs) {
 					if(s.getField(idx) == null)
-						error("idx:" + idx + " isn't struct:" + valueType + " field!");
+						error("index:" + idx + " 不是struct:" + valueType + " 的字段!");
 				}
 			}
 		}
@@ -196,12 +196,12 @@ public final class Field {
 	
 	public void checkSize(int n) {
 		if(types.size() != n)
-			error("type miss");
+			error("没有定义 type");
 	}
 	
 	public void checkType(int idx) {
 		if(types.size() <= idx)
-			error("type miss");
+			error("没有定义 type");
 	}
 	
 	public void error(String err) {
@@ -229,16 +229,16 @@ public final class Field {
 				if(!indexs.isEmpty()) {
 					final String valueType = types.get(1);
 					if(!isStruct(valueType)) {
-						error("list value type:" + valueType + "must be struct to indexed");
+						error("list的 value 类型:" + valueType + "必须是struct");
 					}
 				}
 			}
 		} else {
-			error("unknown type:" + type);
+			error("未知类型:" + type);
 		}
 		for(String name : groups) {
 			if(!Group.isGroup(name))
-				error("unknown group:" + name);
+				error("未知 group:" + name);
 		}
 	}
 

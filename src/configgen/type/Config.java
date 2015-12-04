@@ -63,7 +63,7 @@ public class Config {
 		single = data.getAttribute("single").equals("true");
 		indexs = Utils.split(data, "index");
 		if(indexs.length > 1)
-			Utils.error("config:%s indexs can only have one!", type);
+			Utils.error("config:%s 只能有一个index!", type);
 		else if(indexs.length == 0 && !single)
 			indexs = new String[] { Struct.get(type).getFields().get(0).getName() };
 		manager = !data.getAttribute("manager").equals("false");
