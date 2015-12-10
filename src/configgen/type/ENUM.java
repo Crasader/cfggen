@@ -84,6 +84,10 @@ public final class ENUM {
 		return cases.get(cname);
 	}
 	
+	public String getFirstConst() {
+		return cases.isEmpty() ? "" : cases.keySet().iterator().next();
+	}
+	
 	public void error(String err) {
 		Utils.error("enum:%s %s", name, err);
 	}

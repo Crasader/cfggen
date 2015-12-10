@@ -148,7 +148,7 @@ public class CodeGen implements Generator {
 								for(String idx : f.getIndexs()) {
 									Field idxf = s.getField(idx);
 									final String keyType = toBoxType(toJavaType(idxf.getType()));
-									ds.add(String.format("			public final java.util.Map<%s, %s> %s_%s = new java.util.HashMap<%s, %s>();",
+									ds.add(String.format("	public final java.util.Map<%s, %s> %s_%s = new java.util.HashMap<%s, %s>();",
 										keyType, valueType, fname, idx, keyType, valueType));
 									cs.add(String.format("			this.%s_%s.put(_V.%s, _V);", fname, idx, idx));
 								}
@@ -227,7 +227,7 @@ public class CodeGen implements Generator {
 		ls.add("	public static class DataDir { public static String dir; public static String encoding; }");
 		exportConfigs.forEach(c -> {
 			if(!c.isSingle()) {
-				ls.add(String.format("	public static final java.util.Map<%s, %s> %s = new java.util.HashMap<>();", 
+				ls.add(String.format("	public static final java.util.LinkedHashMap<%s, %s> %s = new java.util.LinkedHashMap<>();", 
 					getIndexType(c), c.getType(), c.getName()));
 			} else {
 				ls.add(String.format("	public static %s %s;", c.getType(), c.getName()));

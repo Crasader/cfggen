@@ -49,55 +49,6 @@ public final class Main {
         System.out.println("    -verbose  show detail. default not");
         System.out.println("    -check load and check even not set -datadir");
         System.out.println("    --help show usage");
-        System.out.println("===============example.xml==============:");
-        System.out.println(
-        "<configs namespace='cfg.skill'>\n" +
-        " <import file='item.xml:buff.xml'/>\n" +
-        " <import file='equip.xml'/>\n" +
-        " <group name='server:client:designer'/>\n" +
-        " <enum name='ProfessionType'>\n" +
-        "    <const name='Qinyun' alias='青云门:青云帮'/>枚举值为0\n" +
-        "    <const name='Guimen'/>枚举值为1\n" +
-        "    <const name='Hehuan' alias='合欢门' value='10'/>枚举值为10\n" +
-        "    <const name='Tianyin alias='天音门'/>枚举值为11\n" +
-        " </enum>\n" +
-        " <struct name='Item'>\n" +
-        "      <const name='CONST1' value='12'/>\n" +
-        "      <const name='CONST2' type='float' value='1.2'/>\n" +
-        "      <const name='const3' type='string' value='xxyy'/>\n" +
-        "      <field name='id' type='int' ref='bag'/>引用bag表,id必须为合法的bag id\n" +
-        "      <field name='itemid' type='int'/>\n" +
-        " </struct>\n" + 
-        
-        " <config name='Bag' input='bag.xml' output='bag.data' />不指定index的话以第一个字段为index, 不指定output的话以 <name.tolowercase()>.data为输出文件名\n" +
-        "    <field name='id' type='int'/>\n" +
-        "    <field name='id2' type='int'/>\n" +
-        "    <field name='type' type='int'/>\n" +
-        " </config>\n" +
-        
-        "  <config name='Skill' index='id' input='skill.xlsx' output='skill.data' group='server'>此配置只导出server版\n" + 
-        "      <field name='profession' type='ProfessionType'/>未指定分组的字段为all分组\n" +
-        "      <field name='description' type='string' group='client'/>为client分组\n" +
-        "      <field name='level' type='int' group='server'/>\n" +
-        "      <field name='designername' type='string' group='designer'/>\n" +
-        "      <field name='fbool' type='bool'/>\n" +
-        "      <field name='fint' type='int ref='bag'/>\n" +
-        "      <field name='flong' type='long'/>\n" +
-        "      <field name='fstring' type='string'/>\n" +
-        "      <field name='item' type='Item'/>\n" +
-        "      <field name='lista' type='list:int' ref='bag'/>列表中每个值都必须为合法的bag id\n" +
-        "      <field name='lists' type='set:string'/>\n" +
-        "      <field name='mapx' type='map:int:int' ref='bag'/>map中每个key都必须为合法bag id\n" +
-        "      <field name='mapx2' type='map:int:int' ref=':bag'/>map中每个value都必须为合法bag id\n" +
-        "      <field name='mapx2' type='map:int:int' ref='bag:bag'/>map中每个key和value都必须为合法bag id\n" +
-        "      <field name='mapy' type='map:long:Item'/>\n" +
-        "      <field name='listz' type='list:Item' index='id:id2'/> 按Item中的id和id2字段分别建立索引(map<int,Item>).只有list:Struct类型可以建立索引\n" + 
-        "   </config>\n" +
-        
-        "</configs>\n"
-        		
-        		
-        		);
 
         Runtime.getRuntime().exit(1);
     }
@@ -146,7 +97,7 @@ public final class Main {
 
 		if(xmlSchemeFile.isEmpty())
 			usage("-configxml miss");
-		if(groups.isEmpty())
+		if(csmarshalcodeDir.isEmpty() && groups.isEmpty())
 			usage("-group miss");
 		if(codeDir.isEmpty() && !languages.isEmpty())
 			usage("-codedir miss");
@@ -174,7 +125,6 @@ public final class Main {
         
         if(!csmarshalcodeDir.isEmpty()) {
         	(new configgen.lans.cs.CodeGen()).genMarshallCode();
-        	return;
         }
         
         if(!dataDir.isEmpty() || check) {
