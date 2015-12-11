@@ -174,6 +174,23 @@ public final class Utils {
 		}
 	}
 	
+	static public void deleteDirectory(String dir) {
+		deleteDirectory(new File(dir));
+	}
+	
+	static public void deleteDirectory(File path) {
+		if (path.exists()) {
+			for (File file : path.listFiles()) {
+				if (file.isDirectory()) {
+					deleteDirectory(file);
+				} else {
+					file.delete();
+				}
+			}
+			path.delete();
+		}
+	}
+	
 	public static void save(String file, String text) {
 		try {
 			File f = new File(file);

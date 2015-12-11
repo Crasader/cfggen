@@ -56,6 +56,8 @@
 	</enum>
 	
 	<config name="Test" input="test.xlsx" index="xid" output="test.data">
+		<const name="LIST" type="list:int" value="1,2,3,4,5"/>
+		<const name="FLIST" type="list:float" value="1,2,3,4"/>
 		<field name="xid" type="TestKey" />
 		<field name="en" type="ItemType"/>
 		<field name="b" type="bool"/>
@@ -83,6 +85,15 @@
 		<const name="x3" type="string" value="sd"/>
 		<struct name="Test1"/>
 		<struct name="Test2"/>
+	</config>
+	
+	<config name="TestSingle" single="true" >
+		<field name="xid" type="TestKey" />
+		<field name="en" type="ItemType"/>
+		<field name="b" type="bool"/>
+		<field name="id" type="Task" groups="server"/>
+		<field name="d2" type="Task" groups="server"/>
+		<field name="id3" type="Task"/>
 	</config>
 	
 	

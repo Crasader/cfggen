@@ -113,13 +113,18 @@ public final class Main {
         
         if(!codeDir.isEmpty() && !languages.isEmpty()) {
 	        for(String lan : languages) {
-	        		Class<?> cls =  Class.forName("configgen.lans." + lan + ".CodeGen");
-	            	Generator generator = (Generator)cls.newInstance();
-	            	generator.gen();
+	        	// lua版代码就两个文件,特殊处理不删目录
+	        	if(!lan.equals("lua")) {
+	            	Utils.deleteDirectory(codeDir);
+	        	}
+				Class<?> cls = Class.forName("configgen.lans." + lan + ".CodeGen");
+				Generator generator = (Generator) cls.newInstance();
+				generator.gen();
 	        }
         }
         
         if(!csmarshalcodeDir.isEmpty()) {
+        	Utils.deleteDirectory(csmarshalcodeDir);
         	(new configgen.lans.cs.CodeGen()).genMarshallCode();
         }
         
