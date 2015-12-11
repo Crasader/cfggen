@@ -84,7 +84,7 @@ public final class ENUM {
 		return cases.get(cname);
 	}
 	
-	public String getFirstConst() {
+	public String getDefaultConstName() {
 		return cases.isEmpty() ? "" : cases.keySet().iterator().next();
 	}
 	

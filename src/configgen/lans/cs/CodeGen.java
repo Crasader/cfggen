@@ -1,6 +1,7 @@
 package configgen.lans.cs;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -275,7 +276,7 @@ public class CodeGen implements Generator {
 	}
 
 	public void genMarshallCode() {
-		ENUM.getExports().forEach(e -> genEnumXmlMarshal(e));
+		genEnumXmlMarshal(ENUM.getExports());
 		Struct.getExports().forEach(s -> genStructXmlMarshallCode(s));
 	}
 	
@@ -286,20 +287,22 @@ public class CodeGen implements Generator {
 	}
 	
 	private final static String xmlPrefix = "xml.";
+	private final static String enumClass = "Enums";
 	
-	void genEnumXmlMarshal(ENUM e) {
+	void genEnumXmlMarshal(Collection<ENUM> enums) {
 		final ArrayList<String> ls = new ArrayList<String>();
-		final String namespace = xmlPrefix + e.getNamespace();
+		final String namespace = xmlPrefix + "cfg";
+		ls.add("using System.Collections.Generic;");
 		ls.add("namespace " + namespace + "{");
-		final String name = e.getName();
+		final String name = enumClass;
 		ls.add(String.format("public sealed class %s {", name));
-		for(Map.Entry<String, Integer> me : e.getCases().entrySet()) {
-			ls.add(String.format("public const int %s = %d;", me.getKey(), me.getValue()));
+		for(ENUM e : enums) {
+			ls.add(String.format("public static List<string> %s = new List<string>{%s};",
+				e.getName(), e.getCases().keySet().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(","))));
 		}
 		ls.add("}");
 		ls.add("}");
 		final String code = ls.stream().collect(Collectors.joining("\n"));
-		//Main.println(code);
 		final String outFile = String.format("%s/%s.%s.cs", Main.csmarshalcodeDir, namespace, name);
 		Utils.save(outFile, code);
 	}
@@ -313,25 +316,6 @@ public class CodeGen implements Generator {
 		return type.substring(0, 1).toUpperCase() + type.substring(1);
 	}
 	
-	String readXmlType(String os, String name, String type) {
-		final String marshalType = toMarshalType(type);
-		switch(type) {
-			case "bool":
-			case "int":
-			case "long":
-			case "float":
-			case "string":
-			 return String.format("Read%s(%s, \"%s\")", upperFirstChar(type), os, name);
-			default: {
-				//System.out.println(type);
-				Struct struct = Struct.get(type);
-				return struct.isDynamic() ?
-					String.format("ReadDynamicObject<%s>(%s, \"%s\", \"%s\")", marshalType, os, name, getNamespaceOfType(marshalType))
-				:   String.format("ReadObject<%s>(%s, \"%s\", \"%s\")", marshalType, os, name, marshalType);
-			}
-		}
-	}
-	
 	String readXmlType(String os, String type) {
 		final String marshalType = toMarshalType(type);
 		switch(type) {
@@ -342,7 +326,6 @@ public class CodeGen implements Generator {
 			case "string":
 			 return String.format("Read%s(%s)", upperFirstChar(type), os);
 			default: {
-				//System.out.println(type);
 				Struct struct = Struct.get(type);
 				return struct.isDynamic() ?
 					String.format("ReadDynamicObject<%s>(%s, \"%s\")", marshalType, os, getNamespaceOfType(marshalType))
@@ -360,36 +343,47 @@ public class CodeGen implements Generator {
 		final String base = struct.getBase();
 		final String name = struct.getName();
 		final boolean isDynamic = struct.isDynamic();
-		ls.add(String.format("public %s class %s %s {", isDynamic ? "abstract" : "sealed", name, (base.isEmpty() ? ": xml.cfg.XmlMarshaller" : ": " + toMarshalType(base))));
+		ls.add(String.format("public %s class %s %s {", isDynamic ? "abstract" : "partial", name, (base.isEmpty() ? ": xml.cfg.XmlMarshaller" : ": " + toMarshalType(base))));
 		
 		genStructConsts(struct, ls);
 		
 		final ArrayList<String> ds = new ArrayList<String>();
 		final ArrayList<String> ws = new ArrayList<String>();
 		final ArrayList<String> rs = new ArrayList<String>();
-		ws.add("public override void Write(System.IO.TextWriter os) {");
-		rs.add("public override void Read(System.Xml.XmlNode os) {");
+		
+		final String VAR1 = "_1";
+		final String VAR2 = "_2";
+		final String VAR3 = "_3";
+		ws.add(String.format("public override void Write(System.IO.TextWriter %s) {", VAR1));
+		rs.add(String.format("public override void Read(System.Xml.XmlNode %s) {", VAR1));
 		if(!base.isEmpty()) {
-			ws.add("base.Write(os);");
-			rs.add("base.Read(os);");
+			ws.add(String.format("base.Write(%s);", VAR1));
+			rs.add(String.format("base.Read(%s);", VAR1));
 		}
+		
+		rs.add(String.format("foreach (System.Xml.XmlNode %s in GetChilds(%s))", VAR2, VAR1));
+		rs.add("{");
+		rs.add(String.format("switch(%s.Name)", VAR2));
+		rs.add("{");
 		
 		for(Field f : struct.getFields()) {
 			String ftype = f.getType();
 			String jtype = toJavaType(ftype);
 			final String fname = f.getName();
 			final List<String> ftypes = f.getTypes();
-			ws.add(String.format("Write(os, \"%s\", this.%s);", fname, fname));
-			
+			ws.add(String.format("Write(%s, \"%s\", this.%s);", VAR1, fname, fname));
 			if (f.isRaw()) {
 				ds.add(String.format("public %s %s;", jtype, fname));
-				rs.add(String.format("this.%s = %s;", fname, readXmlType("os", fname, jtype)));
+				rs.add(String.format("case \"%s\": this.%s = %s; break;", fname, fname, readXmlType(VAR2, jtype)));
 			} else if (f.isStruct()) {
 				ds.add(String.format("public %s %s;", toMarshalType(jtype), fname));
-				rs.add(String.format("this.%s = %s;", fname, readXmlType("os", fname, jtype)));
+				rs.add(String.format("case \"%s\": this.%s = %s; break;", fname, fname, readXmlType(VAR2, jtype)));
 			} else if(f.isEnum()) {
-				ds.add(String.format("public string %s;", fname));
-				rs.add(String.format("this.%s = %s;", fname, readXmlType("os", fname, "string")));
+				final ENUM e = ENUM.get(ftype);
+				ds.add(String.format("public string %s = \"%s\";", fname, e.getDefaultConstName()));
+				rs.add(String.format("case \"%s\": this.%s = %s; break;", fname, fname, readXmlType(VAR2, "string")));
+				ws.add(String.format("if(!%scfg.%s.%s.Contains(this.%s)) throw new Exception(\"%s.%s=\" + this.%s + \" isn't valid enum value\");", 
+					xmlPrefix, enumClass, e.getName(), fname, e.getName(), fname, fname));
 			} else if (f.isContainer()) {
 				switch (ftype) {
 				case "list": {
@@ -397,7 +391,8 @@ public class CodeGen implements Generator {
 					ds.add(String.format(
 							"public readonly System.Collections.Generic.List<%s> %s = new System.Collections.Generic.List<%s>();",
 							toMarshalType(valueType), fname, toMarshalType(valueType)));
-					rs.add(String.format("GetChilds(GetOnlyChild(os, \"%s\")).ForEach(_ => this.%s.Add(%s));", fname, fname, readXmlType("_", valueType)));
+					rs.add(String.format("case \"%s\": GetChilds(%s).ForEach(%s => this.%s.Add(%s)); break;",
+						fname, VAR2, VAR3, fname, readXmlType(VAR3, valueType)));
 					break;
 				}
 				case "set": {
@@ -405,7 +400,8 @@ public class CodeGen implements Generator {
 					ds.add(String.format(
 							"public readonly System.Collections.Generic.HashSet<%s> %s = new System.Collections.Generic.HashSet<%s>();",
 							toMarshalType(valueType), fname, toMarshalType(valueType)));
-					rs.add(String.format("GetChilds(GetOnlyChild(os, \"%s\")).ForEach(_ => this.%s.Add(%s));", fname, fname, readXmlType("_", valueType)));
+					rs.add(String.format("case \"%s\": GetChilds(%s).ForEach(%s => this.%s.Add(%s)); break;",
+							fname, VAR2, VAR3, fname, readXmlType(VAR3, valueType)));
 					break;
 				}
 				case "map": {
@@ -415,8 +411,10 @@ public class CodeGen implements Generator {
 							"public readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();",
 							toMarshalType(keyType), toMarshalType(valueType), fname, toMarshalType(keyType),
 							toMarshalType(valueType)));
-					rs.add(String.format("GetChilds(GetOnlyChild(os, \"%s\")).ForEach(_ => this.%s.Add(%s, %s));", fname, fname,
-						readXmlType("_", "key", valueType), readXmlType("_", "value", valueType)));
+					rs.add(String.format("case \"%s\": GetChilds(%s).ForEach(%s => this.%s.Add(%s, %s)); break;",
+							fname, VAR2, VAR3, fname,
+							readXmlType(String.format("GetOnlyChild(%s, \"key\")", VAR3), keyType), 
+							readXmlType(String.format("GetOnlyChild(%s, \"value\")", VAR3), valueType)));
 					break;
 				}
 				}
@@ -426,6 +424,8 @@ public class CodeGen implements Generator {
 		}
 		
 		ws.add("}");
+		rs.add("}");
+		rs.add("}");
 		rs.add("}");
 		ls.addAll(ds);
 		ls.addAll(ws);
