@@ -13,6 +13,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import configgen.FlatStream;
+import configgen.Main;
 import configgen.RowColumnStream;
 import configgen.Utils;
 import configgen.type.Config;
@@ -26,7 +27,11 @@ public class FList extends Type {
 		super(host, define);
 		Field valueDefine = define.stripAdoreType();
 		while(!is.isSectionEnd()) {
-			values.add(Type.create(host, valueDefine, is));
+			final Type value = Type.create(host, valueDefine, is);
+			values.add(value);
+			if(host == null) {
+				Main.addLastLoadData(value);
+			}
 		}
 		
 		for(String idx : define.getIndexs()) {
@@ -47,8 +52,13 @@ public class FList extends Type {
 		final NodeList nodes = ele.getChildNodes();
 		for(int i = 0, n = nodes.getLength() ; i < n ; i++) {
 			final Node node = nodes.item(i);
-			if(node.getNodeType() == Node.ELEMENT_NODE)
-				values.add(Type.create(host, valueDefine, (Element)node));
+			if(node.getNodeType() == Node.ELEMENT_NODE) {
+				final Type value = Type.create(host, valueDefine, (Element)node);
+				values.add(value);
+				if(host == null) {
+					Main.addLastLoadData(value);
+				}
+			}
 		}
 		
 		for(String idx : define.getIndexs()) {
@@ -70,11 +80,14 @@ public class FList extends Type {
 		for(File file : f.listFiles()) {
 			//Main.println("====== load:" + file.getAbsolutePath());
 			try {
-				if (file.getName().endsWith(".xml")) {
-					values.add(Type.create(host, valueDefine, DocumentBuilderFactory.newInstance().newDocumentBuilder()
-						.parse(file).getDocumentElement()));
-				} else {
-					values.add(Type.create(host, valueDefine, new RowColumnStream(Utils.parse(file.getAbsolutePath()))));
+				final Type value = file.getName().endsWith(".xml") ?
+					 Type.create(host, valueDefine, DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement())
+					:Type.create(host, valueDefine, new RowColumnStream(Utils.parse(file.getAbsolutePath())));
+				
+				values.add(value);
+				// 说明是配置行数据,加入最近读取的数据列表
+				if(host == null) {
+					Main.addLastLoadData(value);
 				}
 			} catch (Exception e) {
 				System.out.printf("file:%s load fail\n", file.getAbsolutePath());

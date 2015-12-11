@@ -63,8 +63,6 @@ namespace xml.cfg
         public static bool ReadBool(XmlNode node)
         {
             var str = ReadContent(node).ToLower();
-            if (!string.IsNullOrEmpty(str))
-                return false;
             if (str == "true")
                 return true;
             if (str == "false")
@@ -74,30 +72,17 @@ namespace xml.cfg
 
         public static int ReadInt(XmlNode node)
         {
-            if (!string.IsNullOrEmpty(node.InnerText))
-            {
-                return int.Parse(node.InnerText);
-            }
-
-            return 0;
+            return int.Parse(node.InnerText);
         }
 
         public static long ReadLong(XmlNode node)
         {
-            if (!string.IsNullOrEmpty(node.InnerText))
-            {
-                return long.Parse(node.InnerText);
-            }
-            return 0;
+            return long.Parse(node.InnerText);
         }
 
         public static float ReadFloat(XmlNode node)
         {
-            if (!string.IsNullOrEmpty(node.InnerText))
-            {
-                return float.Parse(node.InnerText);
-            }
-            return 0f;
+            return float.Parse(node.InnerText);
         }
 
         public static string ReadString(XmlNode node)
@@ -129,54 +114,6 @@ namespace xml.cfg
             {
                 throw new Exception(string.Format("type:{0} create fail!", type), e);
             }
-        }
-
-        public static bool ReadBool(XmlNode node, string name)
-        {
-            var n = GetOnlyChild(node, name);
-            return n != null && ReadBool(n);
-        }
-
-        public static int ReadInt(XmlNode node, string name)
-        {
-            var n = GetOnlyChild(node, name);
-            return n != null ? ReadInt(n) : 0;
-        }
-
-        public static long ReadLong(XmlNode node, string name)
-        {
-            var n = GetOnlyChild(node, name);
-            return n != null ? ReadLong(n) : 0;
-        }
-
-        public static float ReadFloat(XmlNode node, string name)
-        {
-            var n = GetOnlyChild(node, name);
-            return n != null ? ReadFloat(n) : 0;
-        }
-
-        public static string ReadString(XmlNode node, string name)
-        {
-            var n = GetOnlyChild(node, name);
-            return n != null ? ReadString(n) : string.Empty;
-        }
-
-        public static T ReadObject<T>(XmlNode node, string name, string fullTypeName) where T : XmlMarshaller
-        {
-            var n = GetOnlyChild(node, name);
-            var obj = (T)Create(n, fullTypeName);
-            if (n != null)
-            {
-                obj.Read(node);
-            }
-            return obj;
-        }
-
-        public static T ReadDynamicObject<T>(XmlNode node, string name, string ns) where T : XmlMarshaller
-        {
-            var n = GetOnlyChild(node, name);
-            var fullTypeName = ns + "." + ReadAttribute(n, "type");
-            return ReadDynamicObject<T>(n, fullTypeName);
         }
 
         public static void Write(TextWriter os, string name, bool x)
@@ -213,14 +150,14 @@ namespace xml.cfg
 
         public static void Write<V>(TextWriter os, string name, List<V> x)
         {
-            os.WriteLine("<{0} type=\"{1}\">", name, x.GetType().Name);
+            os.WriteLine("<{0}>", name);
             x.ForEach(v => Write(os, "item", v));
             os.WriteLine("</{0}>", name);
         }
 
         public static void Write<V>(TextWriter os, string name, HashSet<V> x)
         {
-            os.WriteLine("<{0} type=\"{1}\">", name, x.GetType().Name);
+            os.WriteLine("<{0}>", name);
             foreach (var v in x)
             {
                 Write(os, "item", v);
@@ -230,7 +167,7 @@ namespace xml.cfg
 
         public static void Write<K, V>(TextWriter os, string name, Dictionary<K, V> x)
         {
-            os.WriteLine("<{0} type=\"{1}\">", name, x.GetType().Name);
+            os.WriteLine("<{0}>", name);
             foreach (var e in x)
             {
                 Write(os, "key", e.Key);
@@ -271,18 +208,32 @@ namespace xml.cfg
             }
         }
 
-        public void LoadSingleConfig(string file)
+        public void LoadAConfig(string file)
         {
             var doc = new XmlDocument();
             doc.Load(file);
             Read(doc.DocumentElement);
         }
 
-        public void SaveSingleConfig(string file)
+        public void SaveAConfig(string file)
         {
             var os = new StringWriter();
             Write(os, "root", this);
             File.WriteAllText(file, os.ToString());
+        }
+
+        public static V LoadSingleConfig<V>(string file) where V : XmlMarshaller
+        {
+            var datas = new List<V>();
+            LoadConfig(datas, file);
+            if(datas.Count != 1)
+                throw new Exception(string.Format("SingleConfig type:{0} file:{1} size != 1", typeof(V).FullName, file));
+            return datas[0];
+        }
+
+        public static void SaveSingleConfig<V>(V x, string file) where V : XmlMarshaller
+        {
+            SaveConfig(new List<V>{x}, file);
         }
 
         public static void LoadConfig<V>(List<V> x, string file) where V : XmlMarshaller
@@ -302,7 +253,7 @@ namespace xml.cfg
         public static void SaveConfig<K, V>(Dictionary<K, V> x, string file) where V : XmlMarshaller
         {
             var os = new StringWriter();
-            Write(os, "root", x);
+            Write(os, "root", x.Values.ToList());
             File.WriteAllText(file, os.ToString());
         }
     }

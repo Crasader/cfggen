@@ -1,7 +1,5 @@
 package configgen;
 
-
-
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Element;
 import configgen.data.DataGen;
@@ -12,10 +10,8 @@ import configgen.type.Struct;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public final class Main {
@@ -32,7 +28,7 @@ public final class Main {
 	public static final Set<String> languages = new HashSet<String>();
 	public static final Set<String> groups = new HashSet<String>();
 	
-	private static List<Object> lastLoadDatas = new ArrayList<>();
+	private static Object lastLoadData = null;
 	
     private static void usage(String reason) {
         System.out.println(reason);
@@ -133,7 +129,7 @@ public final class Main {
 	        	verifyData();
 	        } catch(Exception e) {
 	        	System.out.println("=================last datas=====================");
-	        	lastLoadDatas.forEach(d ->System.out.println(d));
+	        	System.out.println(lastLoadData);
 	        	System.out.println("=================last datas=====================");
 	        	e.printStackTrace();
 	        	System.exit(1);
@@ -212,9 +208,6 @@ public final class Main {
 	}
 	
 	public static void addLastLoadData(Object data) {
-		if(lastLoadDatas.size() > 10) {
-			lastLoadDatas = lastLoadDatas.subList(5, lastLoadDatas.size());
-		}
-		lastLoadDatas.add(data);
+		lastLoadData = data;
 	}
 }
