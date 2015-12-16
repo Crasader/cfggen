@@ -41,6 +41,8 @@ public class Config {
 		this.namespace = namespace;
 		dir = csvDir;
 		final String nameStr = data.getAttribute("name");
+		if(nameStr.isEmpty())
+			Utils.error("config名字为空");
 		type = namespace + "." + nameStr;
 		name = nameStr.toLowerCase();
 		if(configs.put(name, this) != null) {

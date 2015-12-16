@@ -208,6 +208,12 @@ public final class Field {
 		throw new RuntimeException(String.format("%s.%s %s", parent, name, err));
 	}
 	
+	public boolean isRawOrEnumOrStruct(String typeName) {
+		return (isRaw(typeName)
+			|| isEnum(typeName)
+			|| isStruct(typeName));
+	}
+	
 	public void verifyDefine() {
 		checkType(0);
 		final String type = getType();
@@ -220,16 +226,26 @@ public final class Field {
 		} else if(isContainer()) {
 			if("map".equals(type)) {
 				checkType(1);
+				final String keyType = types.get(1);
+				if(!isRawOrEnumOrStruct(keyType))
+					error("非法的map key类型:" + keyType);
 				checkType(2);
+				final String valueType = types.get(2);
+				if(!isRawOrEnumOrStruct(valueType))
+					error("非法的map value类型:" + valueType);
 			} else if("set".equals(type)) {
 				checkType(1);
+				final String valueType = types.get(1);
+				if(!isRawOrEnumOrStruct(valueType))
+					error("非法的set value类型:" + valueType);
 			} else if("list".equals(type)) {
 				checkType(1);
-
+				final String valueType = types.get(1);
+				if(!isRawOrEnumOrStruct(valueType))
+					error("非法的set value类型:" + valueType);
 				if(!indexs.isEmpty()) {
-					final String valueType = types.get(1);
 					if(!isStruct(valueType)) {
-						error("list的 value 类型:" + valueType + "必须是struct");
+						error("list的 value 类型:" + valueType + "必须是struct才能index");
 					}
 				}
 			}

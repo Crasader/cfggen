@@ -52,6 +52,8 @@ public final class ENUM {
 	public ENUM(String namespace, Element ele) {
 		this.namespace = namespace;
 		name = ele.getAttribute("name");
+		if(name.isEmpty())
+			error("enum名字为空");
 		this.fullname = namespace + "." + name;
 		//System.out.printf("== xml:%s enum:%s\n", Main.curXml, fullname);
 		if(Utils.existType(fullname))

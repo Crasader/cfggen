@@ -69,6 +69,13 @@ public class CodeGen implements Generator {
 		Utils.save(outFile, code);
 	}
 	
+	void genCurAndParentFields(Struct struct, ArrayList<Field> fields) {
+		if(!struct.getBase().isEmpty()) {
+			genCurAndParentFields(Struct.get(struct.getBase()), fields);
+		}
+		fields.addAll(struct.getFields());
+	}
+	
 	void genStruct(Struct struct) {
 		final ArrayList<String> ls = new ArrayList<String>();
 		final String namespace = struct.getNamespace();
@@ -110,11 +117,51 @@ public class CodeGen implements Generator {
 		}
 		
 		final ArrayList<String> ds = new ArrayList<String>();
+		final ArrayList<String> csda = new ArrayList<String>();
+		final ArrayList<String> csdb = new ArrayList<String>();
 		final ArrayList<String> cs = new ArrayList<String>();
-		cs.add(String.format("	public %s(cfg.DataStream fs) {", name));
 		
+
+		final ArrayList<Field> parentFields = new ArrayList<>();
+		cs.add(String.format("	public %s(cfg.DataStream fs) {", name));
 		if(!base.isEmpty()) {
 			cs.add("		super(fs);");
+			
+			genCurAndParentFields(Struct.get(base), parentFields);
+			for(Field f : parentFields) {
+				String ftype = f.getType();
+				String jtype = toJavaType(ftype);
+				final String fname = f.getName();
+				final List<String> ftypes = f.getTypes();
+				if(f.checkInGroup(Main.groups)) {
+					if(f.isRaw()|| f.isStruct()) {
+						csda.add(String.format("%s %s", jtype, fname));
+					} else if(f.isEnum()) {
+						csda.add(String.format("%s %s", "int", fname));
+					} else if(f.isContainer()) {
+						switch(ftype) {
+							case "list": {
+								final String valueType = toBoxType(toJavaType(ftypes.get(1)));
+								csda.add(String.format("java.util.List<%s> %s", valueType, fname));
+								break;
+							}
+							case "set": {
+								final String valueType = toBoxType(toJavaType(ftypes.get(1)));
+								csda.add(String.format("java.util.Set<%s> %s", valueType, fname));
+								break;
+							}
+							case "map": {
+								final String keyType = toBoxType(toJavaType(ftypes.get(1)));;
+								final String valueType = toBoxType(toJavaType(ftypes.get(2)));
+								csda.add(String.format("java.util.Map<%s, %s> %s", keyType, valueType, fname));
+								break;
+							}
+						}
+					} else {
+						Utils.error("unknown type:" + ftype);
+					}
+				}
+			}
 		}
 		
 		for(Field f : struct.getFields()) {
@@ -125,19 +172,26 @@ public class CodeGen implements Generator {
 			if(f.checkInGroup(Main.groups)) {
 				if(f.isRaw()) {
 					ds.add(String.format("	public final %s %s;", jtype, fname));
+					csda.add(String.format("%s %s", jtype, fname));
+					csdb.add(String.format("		this.%s = %s;", fname, fname));
 					cs.add(String.format("		this.%s = %s;", fname, readType(jtype)));
 				} else if(f.isStruct()) {
 					ds.add(String.format("	public final %s %s;", jtype, fname));
+					csda.add(String.format("%s %s", jtype, fname));
+					csdb.add(String.format("		this.%s = %s;", fname, fname));
 					cs.add(String.format("		this.%s = %s;", fname, readType(jtype)));
 				} else if(f.isEnum()) {
 					ds.add(String.format("	public final int %s;", fname));
+					csda.add(String.format("%s %s", "int", fname));
+					csdb.add(String.format("		this.%s = %s;", fname, fname));
 					cs.add(String.format("		this.%s = %s;", fname, readType("int")));
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {
 							final String valueType = toBoxType(toJavaType(ftypes.get(1)));
 							ds.add(String.format("	public final java.util.List<%s> %s = new java.util.ArrayList<%s>();", valueType, fname, valueType));
-							
+							csda.add(String.format("java.util.List<%s> %s", valueType, fname));
+							csdb.add(String.format("		this.%s.addAll(%s);", fname, fname));
 							cs.add("		for(int n = fs.getInt(); n-- > 0 ; ) {");
 							cs.add(String.format("			this.%s.add(%s);", fname, readType(valueType)));
 							cs.add("		}");
@@ -160,6 +214,8 @@ public class CodeGen implements Generator {
 						case "set": {
 							final String valueType = toBoxType(toJavaType(ftypes.get(1)));
 							ds.add(String.format("	public final java.util.Set<%s> %s = new java.util.HashSet<%s>();", valueType, fname, valueType));
+							csda.add(String.format("java.util.Set<%s> %s", valueType, fname));
+							csdb.add(String.format("		this.%s.addAll(%s);", fname, fname));
 							cs.add("		for(int n = fs.getInt(); n-- > 0 ; ) {");
 							cs.add(String.format("			this.%s.add(%s);", fname, readType(valueType)));
 							cs.add("		}");
@@ -169,6 +225,8 @@ public class CodeGen implements Generator {
 							final String keyType = toBoxType(toJavaType(ftypes.get(1)));;
 							final String valueType = toBoxType(toJavaType(ftypes.get(2)));
 							ds.add(String.format("	public final java.util.Map<%s, %s> %s = new java.util.HashMap<%s, %s>();", keyType, valueType, fname, keyType, valueType));
+							csda.add(String.format("java.util.Map<%s, %s> %s", keyType, valueType, fname));
+							csdb.add(String.format("		this.%s.putAll(%s);", fname, fname));
 							cs.add("		for(int n = fs.getInt(); n-- > 0 ; ) {");
 							cs.add(String.format("			this.%s.put(%s, %s);", fname, readType(keyType), readType(valueType)));
 							cs.add("		}");
@@ -183,6 +241,16 @@ public class CodeGen implements Generator {
 		
 		cs.add("	}");
 		ls.addAll(ds);
+
+
+		ls.add(String.format("	public %s(%s){", name, csda.stream().collect(Collectors.joining(", "))));
+		if (!base.isEmpty()) {
+			ls.add(String.format("		super(%s);", parentFields.stream().map(f -> f.getName()).collect(Collectors.joining(", "))));
+		}
+		ls.add(csdb.stream().collect(Collectors.joining("\n")));
+		ls.add("	}");
+
+		
 		ls.addAll(cs);
 		
 		ls.add("}");

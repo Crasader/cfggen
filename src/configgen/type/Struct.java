@@ -64,6 +64,8 @@ public final class Struct {
 	public Struct(String namespace, Element data, String base) {
 		this.namespace = namespace;
 		name = data.getAttribute("name");
+		if(name.isEmpty())
+			error("struct名字为空");
 		this.fullname = namespace + "." + name;
 		int newTypeid = this.fullname.hashCode();
 		while(!typeids.add(newTypeid))
