@@ -20,7 +20,6 @@ public class CodeGen implements Generator {
 		Struct.getExports().forEach(s -> genStruct(s));
 		ENUM.getExports().forEach(e -> genEnum(e));
 		genConfig();
-
 	}
 	
 	String readType(String type) {
@@ -38,9 +37,9 @@ public class CodeGen implements Generator {
 			default: {
 				Struct struct = Struct.get(type);
 				if(struct.isDynamic())
-					return String.format("(%s)cfg.CfgMgr.create(fs.getString(), fs)", type);
+					return String.format("(%s)cfg.DataStream.create(fs.getString(), fs)", type);
 				else
-					return "(" + type + ")cfg.CfgMgr.create(\"" + type + "\", fs)";
+					return "(" + type + ")cfg.DataStream.create(\"" + type + "\", fs)";
 			}
 		}
 	}
@@ -282,7 +281,7 @@ public class CodeGen implements Generator {
 	
 	String getIndexType(Config c) {
 		final String type = toBoxType(Struct.get(c.getType()).getField(c.getIndex()).getType());
-		return ENUM.isEnum(type) ? "Integer" : type;
+		return ENUM.isEnum(type) ? "Integer" : toBoxType(toJavaType(type));
 	}
 	
 	void genConfig() {
@@ -291,7 +290,7 @@ public class CodeGen implements Generator {
 		final String namespace = "cfg";
 		
 		ls.add("package " + namespace + ";");
-		ls.add("public class CfgMgr {");
+		ls.add(String.format("public class %s {", Main.cfgmgrName));
 		ls.add("	public static class DataDir { public static String dir; public static String encoding; }");
 		exportConfigs.forEach(c -> {
 			if(!c.isSingle()) {
@@ -311,34 +310,26 @@ public class CodeGen implements Generator {
 					ls.add(String.format("			%s.clear();", c.getName()));
 					ls.add("			for(int n = fs.getInt() ; n-- > 0 ; ) {");
 					if(Struct.isDynamic(c.getType())) {
-						ls.add(String.format("				final %s v = (%s)create(fs.getString(), fs);", c.getType(), c.getType()));
+						ls.add(String.format("				final %s v = (%s)cfg.DataStream.create(fs.getString(), fs);", c.getType(), c.getType()));
 					} else {
-						ls.add(String.format("				final %s v = (%s)create(\"%s\", fs);", c.getType(), c.getType(), c.getType()));
+						ls.add(String.format("				final %s v = (%s)cfg.DataStream.create(\"%s\", fs);", c.getType(), c.getType(), c.getType()));
 					}
 					ls.add(String.format("				%s.put(v.%s, v);", c.getName(), c.getIndex()));
 					ls.add("			}");
 			} else {
 				ls.add("			if(fs.getInt() != 1) throw new RuntimeException(\"single conifg size != 1\");");
 				if(Struct.isDynamic(c.getType())) {
-					ls.add(String.format("			%s = (%s)create(fs.getString(), fs);", c.getName(), c.getType()));
+					ls.add(String.format("			%s = (%s)cfg.DataStream.create(fs.getString(), fs);", c.getName(), c.getType()));
 				} else {
-					ls.add(String.format("			%s = (%s)create(\"%s\", fs);", c.getName(), c.getType(), c.getType()));
+					ls.add(String.format("			%s = (%s)cfg.DataStream.create(\"%s\", fs);", c.getName(), c.getType(), c.getType()));
 				}
 			}
 			ls.add("		}");
 		});
 		ls.add("	}");
 		
-		ls.add("	public static Object create(String name, cfg.DataStream fs) {");
-		ls.add("		try {");
-		ls.add("			return Class.forName(name).getConstructor(cfg.DataStream.class).newInstance(fs);");
-		ls.add("		} catch (Exception e) {");
-		ls.add("			e.printStackTrace();");
-		ls.add("			return null;");
-		ls.add("		}");
-		ls.add("	}");
 		ls.add("}");
-		final String outFile = String.format("%s/%s/CfgMgr.java", Main.codeDir, namespace.replace('.', '/'));
+		final String outFile = String.format("%s/%s/%s.java", Main.codeDir, namespace.replace('.', '/'), Main.cfgmgrName);
 		final String code = ls.stream().collect(Collectors.joining("\n"));
 		Utils.save(outFile, code);
 	}

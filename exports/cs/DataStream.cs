@@ -46,12 +46,16 @@ namespace cfg
             return float.Parse(GetNextAndCheckNotEmpty());
         }
 
-
         public int GetInt()
         {
             return int.Parse(GetNextAndCheckNotEmpty());
         }
 
+        public long GetLong()
+        {
+            return long.Parse(GetNextAndCheckNotEmpty());
+        }
+		
         public bool GetBool()
         {
             var s = GetNextAndCheckNotEmpty().ToLower();
@@ -67,5 +71,17 @@ namespace cfg
         {
             return new DataStream(file, encoding);
         }
+		
+		public static Object Create(string name, cfg.DataStream fs) {
+			try
+			{
+				return Type.GetType(name).GetConstructor(new []{typeof (cfg.DataStream)}).Invoke(new object[]{fs});
+			}
+			catch (Exception e)
+			{
+				System.Console.WriteLine(e);
+				return null;
+			}
+		}
     }
 }

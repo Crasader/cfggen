@@ -39,9 +39,9 @@ public class CodeGen implements Generator {
 			default: {
 				Struct struct = Struct.get(type);
 				if(struct.isDynamic())
-					return String.format("(%s)cfg.CfgMgr.Create(fs.GetString(), fs)", type);
+					return String.format("(%s)cfg.DataStream.Create(fs.GetString(), fs)", type);
 				else
-					return "(" + type + ")cfg.CfgMgr.Create(\"" + type + "\", fs)";
+					return "(" + type + ")cfg.DataStream.Create(\"" + type + "\", fs)";
 			}
 		}
 	}
@@ -208,7 +208,7 @@ public class CodeGen implements Generator {
 	
 	String getIndexType(Config c) {
 		final String type = Struct.get(c.getType()).getField(c.getIndex()).getType();
-		return ENUM.isEnum(type) ? "int" : type;
+		return toJavaType(type);
 	}
 	
 	void genConfig() {
@@ -217,7 +217,7 @@ public class CodeGen implements Generator {
 		final String namespace = "cfg";
 		ls.add("using System;");
 		ls.add("namespace " + namespace + "{");
-		ls.add("public class CfgMgr {");
+		ls.add(String.format("public class %s {", Main.cfgmgrName));
 		ls.add("public class DataDir {");
 		ls.add("public static string Dir { set; get;} ");
 		ls.add("public static string Encoding { set; get; }");
@@ -239,18 +239,18 @@ public class CodeGen implements Generator {
 				ls.add(String.format("%s.Clear();", c.getName()));
 				ls.add("for(var n = fs.GetInt() ; n-- > 0 ; ) {");
 				if(Struct.isDynamic(c.getType())) {
-					ls.add(String.format("var v = (%s)Create(fs.GetString(), fs);", c.getType()));
+					ls.add(String.format("var v = (%s)cfg.DataStream.Create(fs.GetString(), fs);", c.getType()));
 				} else {
-					ls.add(String.format("var v = (%s)Create(\"%s\", fs);", c.getType(), c.getType()));
+					ls.add(String.format("var v = (%s)cfg.DataStream.Create(\"%s\", fs);", c.getType(), c.getType()));
 				}
 				ls.add(String.format("%s.Add(v.%s, v);", c.getName(), c.getIndex()));
 				ls.add("}");
 				} else {
 					ls.add("fs.GetInt();");
 					if(Struct.isDynamic(c.getType())) {
-						ls.add(String.format("%s = (%s)Create(fs.GetString(), fs);", c.getName(), c.getType()));
+						ls.add(String.format("%s = (%s)cfg.DataStream.Create(fs.GetString(), fs);", c.getName(), c.getType()));
 					} else {
-						ls.add(String.format("%s = (%s)Create(\"%s\", fs);", c.getName(), c.getType(), c.getType()));
+						ls.add(String.format("%s = (%s)cfg.DataStream.Create(\"%s\", fs);", c.getName(), c.getType(), c.getType()));
 					}
 				}
 				ls.add("}");
@@ -259,18 +259,10 @@ public class CodeGen implements Generator {
 //			ls.add(String.format("%s = new %s(DataStream.Create(DataDir.Dir + \"/%s\", DataDir.Encoding));", c.getName(), c.getType(), c.getOutputDataFile())));
 		ls.add("}");
 		
-		ls.add("public static Object Create(string name, cfg.DataStream fs) {");
-		ls.add("try {");
-		ls.add("return Type.GetType(name).GetConstructor(new []{typeof (cfg.DataStream)}).Invoke(new object[]{fs});");
-		ls.add("} catch (Exception e) {");
-		ls.add("System.Console.WriteLine(e);");
-		ls.add("return null;");
-		ls.add("}");
-		ls.add("}");
 		ls.add("}");
 		ls.add("}");
 	
-		final String outFile = String.format("%s/%s/CfgMgr.cs", Main.codeDir, namespace.replace('.', '/'));
+		final String outFile = String.format("%s/%s/%s.cs", Main.codeDir, namespace.replace('.', '/'), Main.cfgmgrName);
 		final String code = ls.stream().collect(Collectors.joining("\n"));
 		Utils.save(outFile, code);
 	}

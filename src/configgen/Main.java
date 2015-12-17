@@ -24,6 +24,7 @@ public final class Main {
 	public static String inputEncoding = "GBK";
 	public static boolean verbose = false;
 	public static boolean check = false;
+	public static String cfgmgrName = "CfgMgr";
 	
 	public static final Set<String> languages = new HashSet<String>();
 	public static final Set<String> groups = new HashSet<String>();
@@ -44,6 +45,7 @@ public final class Main {
         System.out.println("    -inputencoding   input encoding. default GBK");
         System.out.println("    -verbose  show detail. default not");
         System.out.println("    -check load and check even not set -datadir");
+        System.out.println("    -cfgmgrname set cfgmgr class name");
         System.out.println("    --help show usage");
 
         Runtime.getRuntime().exit(1);
@@ -82,6 +84,9 @@ public final class Main {
 			case "-check":
 				check = true;
 				break;
+			case "-cfgmgrname":
+				cfgmgrName = args[++i];
+				break;
 			case "--help":
 				usage("");
 				break;
@@ -112,11 +117,11 @@ public final class Main {
         verifyDefine();
         
         if(!codeDir.isEmpty() && !languages.isEmpty()) {
+        	// lua版代码就两个文件,特殊处理不删目录
+        	if(!languages.contains("lua")) {
+            	Utils.deleteDirectory(codeDir);
+        	}
 	        for(String lan : languages) {
-	        	// lua版代码就两个文件,特殊处理不删目录
-	        	if(!lan.equals("lua")) {
-	            	Utils.deleteDirectory(codeDir);
-	        	}
 				Class<?> cls = Class.forName("configgen.lans." + lan + ".CodeGen");
 				Generator generator = (Generator) cls.newInstance();
 				generator.gen();

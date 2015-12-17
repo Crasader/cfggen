@@ -67,5 +67,12 @@ public final class DataStream {
 			throw new RuntimeException("data file:" + dataFile + " loads fail!");
 		}
 	}
-
+	public static Object create(String name, cfg.DataStream fs) {
+		try {
+			return Class.forName(name).getConstructor(cfg.DataStream.class).newInstance(fs);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }
