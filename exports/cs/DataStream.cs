@@ -8,7 +8,7 @@ namespace cfg
 {
     public class DataStream
     {
-
+		public const string MagicStringForNewLine = ".g9~/";
 
         private readonly string[] line;
         private int index;
@@ -38,7 +38,7 @@ namespace cfg
 
         public string GetString()
         {
-            return GetNextAndCheckNotEmpty();
+            return GetNextAndCheckNotEmpty().Replace(MagicStringForNewLine, "\n");
         }
 
         public float GetFloat()

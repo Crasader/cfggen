@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.List;
 
 public final class DataStream {
+	public static final String magicStringForNewLine = ".g9~/";
 	private final List<String> lines;
 	private int index;
 	
@@ -56,7 +57,7 @@ public final class DataStream {
 	}
 
 	public String getString() {
-		return getNextAndCheckNotEmpty();
+		return getNextAndCheckNotEmpty().replace(magicStringForNewLine, "\n");
 	}
 
 	public static DataStream create(String dataFile, String inputEncoding) {

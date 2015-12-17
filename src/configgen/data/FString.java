@@ -3,7 +3,7 @@ package configgen.data;
 import org.w3c.dom.Element;
 
 import configgen.FlatStream;
-import configgen.Utils;
+import configgen.Main;
 import configgen.type.Field;
 
 public class FString extends Type {
@@ -14,16 +14,12 @@ public class FString extends Type {
 	
 	public FString(FStruct host, Field define, FlatStream is) {
 		super(host, define);
-		value = is.getString();
-		if(value.indexOf('\n') >= 0)
-			Utils.error("can't contain \\n in string! please choose alternative char.");
+		value = is.getString().replace("\n", Main.magicStringForNewLine);
 	}
 	
 	public FString(FStruct host, Field define, Element node) {
 		super(host, define);
-		value = node.getFirstChild() != null ? node.getFirstChild().getTextContent() : "";
-		if(value.indexOf('\n') >= 0)
-			Utils.error("can't contain \\n in string! please choose alternative char.");
+		value = node.getFirstChild() != null ? node.getFirstChild().getTextContent().replace("\n", Main.magicStringForNewLine) : "";
 	}
 
 	public String value;

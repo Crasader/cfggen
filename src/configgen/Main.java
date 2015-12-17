@@ -26,6 +26,8 @@ public final class Main {
 	public static boolean check = false;
 	public static String cfgmgrName = "CfgMgr";
 	
+	public static final String magicStringForNewLine = ".g9~/";
+	
 	public static final Set<String> languages = new HashSet<String>();
 	public static final Set<String> groups = new HashSet<String>();
 	

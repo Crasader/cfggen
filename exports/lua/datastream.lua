@@ -9,18 +9,15 @@
  local tostring = tostring
  local insert = table.insert
  
+ local magicstringfornewline = gsub(".g9~/", "%.", "%%%.")
+ 
  local os = {}
  os.__index = os
  
- function os.new(csvfile)
+ function os.new(datafile)
     local o = {}
     setmetatable(o, os)
-    
-    local f, err = open(csvfile, "r")
-    if not f then
-        error(err)
-    end
-    o.data_iter = f:lines()
+	o.data_iter = io.lines(datafile)
     return o
  end
  
@@ -28,7 +25,7 @@
     while true do
         local w = self:get_next()
         if not w then break end
-        print(w)
+        --print(w)
     end
  end
  
@@ -62,8 +59,11 @@ function os:get_float()
     return tonumber(next)
  end
  
-os.get_string = os.get_next
- 
+function os:get_string() 
+	local next = self:get_next()
+	local s = gsub(next, magicstringfornewline, "\n")
+	return s
+end 
 function os:get_list(key)
     local r = {}
     local oper = self["get_" .. key]
