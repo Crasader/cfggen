@@ -8,17 +8,15 @@ import configgen.type.Field;
 public class FFloat extends Type {
 	public FFloat(FStruct host, Field define, String is) {
 		super(host, define);
-		value = Float.parseFloat(is);
+		value = is.equalsIgnoreCase(NULL_STR) ? NULL_VALUE : Float.parseFloat(is);
 	}
 	
 	public FFloat(FStruct host, Field define, FlatStream is) {
-		super(host, define);
-		value = is.getFloat();
+		this(host, define, is.getString());
 	}
 	
 	public FFloat(FStruct host, Field define, Element node) {
-		super(host, define);
-		value = Float.parseFloat(node.getFirstChild().getTextContent());
+		this(host, define, node.getFirstChild().getTextContent());
 	}
 
 	public final float value;

@@ -8,17 +8,15 @@ import configgen.type.Field;
 public final class FInt extends Type {
 	public FInt(FStruct host, Field define, String is) {
 		super(host, define);
-		value = Integer.parseInt(is);
+		value = is.equalsIgnoreCase(NULL_STR) ? NULL_VALUE : Integer.parseInt(is);
 	}
 	
 	public FInt(FStruct host, Field define, FlatStream is) {
-		super(host, define);
-		value = is.getInt();
+		this(host, define, is.getString());
 	}
 	
 	public FInt(FStruct host, Field define, Element node) {
-		super(host, define);
-		value = Integer.parseInt(node.getFirstChild().getTextContent());
+		this(host, define, node.getFirstChild().getTextContent());
 	}
 
 	public final int value;

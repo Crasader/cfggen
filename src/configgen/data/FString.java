@@ -3,7 +3,6 @@ package configgen.data;
 import org.w3c.dom.Element;
 
 import configgen.FlatStream;
-import configgen.Main;
 import configgen.type.Field;
 
 public class FString extends Type {
@@ -12,14 +11,18 @@ public class FString extends Type {
 		value = is;
 	}
 	
+
+	private final static String EMPTY = "null";
 	public FString(FStruct host, Field define, FlatStream is) {
 		super(host, define);
-		value = is.getString().replace("\n", Main.magicStringForNewLine);
+		final String s = is.getString();
+		// 因为null用来表示空字符串,%n 存在的意义是为了能够在 string 里配出 null.
+		value = s.equals(EMPTY) ? "" :
+			(s.indexOf('%') >= 0 ? s.replace("%#", "#").replace("%]", "]").replace("%n", "n") : s);
 	}
 	
 	public FString(FStruct host, Field define, Element node) {
-		super(host, define);
-		value = node.getFirstChild() != null ? node.getFirstChild().getTextContent().replace("\n", Main.magicStringForNewLine) : "";
+		this(host, define, node.getFirstChild() != null ? node.getFirstChild().getTextContent() : "");
 	}
 
 	public String value;

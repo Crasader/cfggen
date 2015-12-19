@@ -8,17 +8,15 @@ import configgen.type.Field;
 public final class FLong extends Type {
 	public FLong(FStruct host, Field define, String is) {
 		super(host, define);
-		value = Long.parseLong(is);
+		value = is.equalsIgnoreCase(NULL_STR) ? NULL_VALUE : Long.parseLong(is);
 	}
 	
 	public FLong(FStruct host, Field define, FlatStream is) {
-		super(host, define);
-		value = is.getLong();
+		this(host, define, is.getString());
 	}
 	
 	public FLong(FStruct host, Field define, Element node) {
-		super(host, define);
-		value = Long.parseLong(node.getFirstChild().getTextContent());
+		this(host, define, node.getFirstChild().getTextContent());
 	}
 
 	public final long value;

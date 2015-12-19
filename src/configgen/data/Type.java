@@ -9,6 +9,11 @@ import configgen.type.Field;
 import configgen.type.Struct;
 
 public abstract class Type {
+//	public final static String UNLIMIT_STR = "unlimit";
+//	public final static int UNLIMIT_VALUE= -1;
+	public final static String NULL_STR = "null";
+	public final static int NULL_VALUE = -1;
+	
 	protected final Field define;
 	protected final FStruct host;
 	

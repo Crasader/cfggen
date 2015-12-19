@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import configgen.Main;
+
 
 public final class DataMarshal {
 	private final List<String> line = new ArrayList<>();
@@ -30,7 +32,7 @@ public final class DataMarshal {
 	}
 	
 	public DataMarshal putString(String x) {
-		return put(x);
+		return put(x.replace("\n", Main.magicStringForNewLine));
 	}
 	
 	public String toData() {

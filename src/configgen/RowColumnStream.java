@@ -9,7 +9,6 @@ public final class RowColumnStream extends FlatStream {
 	
 	private final String EOL = "##"; // %#
 	private final String END = "]]"; // %]
-	private final String EMPTY = "null";
 	
 	public static RowColumnStream Cur;
 	
@@ -150,10 +149,7 @@ public final class RowColumnStream extends FlatStream {
 
 	@Override
 	public String getString() {
-		final String s = getNextAndCheckNotEmpty();
-		if(s.equals(EMPTY)) return "";
-		// 因为null用来表示空字符串,%n 存在的意义是为了能够在 string 里配出 null.
-		return s.indexOf('%') >= 0 ? s.replace("%#", "#").replace("%]", "]").replace("%n", "n") : s;
+		return getNextAndCheckNotEmpty();
 	}
 	
 	public String toCSVData() {
