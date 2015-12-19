@@ -14,15 +14,11 @@ public final class FEnum extends Type {
 	}
 	
 	public FEnum(FStruct host, Field define, FlatStream is) {
-		super(host, define);
-		enumName = is.getString();
-		value = ENUM.get(define.getType()).getEnumValueByName(enumName);
+		this(host, define, is.getString());
 	}
 	
 	public FEnum(FStruct host, Field define, Element node) {
-		super(host, define);
-		enumName = node.getFirstChild().getTextContent();
-		value = ENUM.get(define.getType()).getEnumValueByName(enumName);
+		this(host, define, node.getFirstChild().getTextContent());
 	}
 
 	public final String enumName;

@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import org.w3c.dom.Element;
 
 import configgen.Utils;
+import configgen.data.Type;
 
 public final class ENUM {
 	public final static HashMap<String, ENUM> enums = new HashMap<>();
@@ -60,6 +61,10 @@ public final class ENUM {
 			error("重复类型名!");
 		put(fullname, this);
 		
+		final String NULL = Type.NULL_STR.toUpperCase() ;
+		cases.put(NULL, Type.NULL_VALUE);
+		aliass.put(Type.NULL_STR, NULL);
+		aliass.put(NULL, NULL);
 		int enumValue = 0;
 		for(Element c : Utils.getChildsByTagName(ele, "const")) {
 			final String cname = c.getAttribute("name");
