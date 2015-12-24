@@ -27,8 +27,8 @@ public final class DataMarshal {
 		return put(Long.toString(x));
 	}
 	
-	public DataMarshal putFloat(float x) {
-		return put(Float.toString(x));
+	public DataMarshal putFloat(double x) {
+		return put(Double.toString(x));
 	}
 	
 	public DataMarshal putString(String x) {

@@ -98,4 +98,9 @@ public class FStruct extends Type {
 		values.forEach(v -> v.verifyData());
 	}
 
+	@Override
+	public boolean isNull() {
+		return false;
+	}
+
 }

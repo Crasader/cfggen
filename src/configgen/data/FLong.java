@@ -41,4 +41,9 @@ public final class FLong extends Type {
 	public int hashCode() {
 		return Long.hashCode(value);
 	}
+	
+	@Override
+	public boolean isNull() {
+		return value == NULL_VALUE;
+	}
 }

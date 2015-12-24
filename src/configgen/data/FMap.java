@@ -66,7 +66,7 @@ public class FMap extends Type {
 		if(!keyRef.isEmpty()) {
 			HashSet<Type> validValues = Config.getData(keyRef);
 			for(Type d : values.keySet()) {
-				if(!validValues.contains(d))
+				if(!d.isNull() && !validValues.contains(d))
 					System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + d + " can't find in config:" + keyRef);
 			}
 		}
@@ -75,10 +75,15 @@ public class FMap extends Type {
 		if(!valueRef.isEmpty()) {
 			HashSet<Type> validValues = Config.getData(valueRef);
 			for(Type d : values.values()) {
-				if(!validValues.contains(d))
+				if(!d.isNull() && !validValues.contains(d))
 					System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + d + " can't find in config:" + valueRef);
 			}
 		}
+	}
+
+	@Override
+	public boolean isNull() {
+		return false;
 	}
 	
 }

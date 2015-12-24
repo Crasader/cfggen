@@ -8,7 +8,7 @@ import configgen.type.Field;
 public class FFloat extends Type {
 	public FFloat(FStruct host, Field define, String is) {
 		super(host, define);
-		value = is.equalsIgnoreCase(NULL_STR) ? NULL_VALUE : Float.parseFloat(is);
+		value = is.equalsIgnoreCase(NULL_STR) ? NULL_VALUE : Double.parseDouble(is);
 	}
 	
 	public FFloat(FStruct host, Field define, FlatStream is) {
@@ -19,7 +19,7 @@ public class FFloat extends Type {
 		this(host, define, node.getFirstChild().getTextContent());
 	}
 
-	public final float value;
+	public final double value;
 	
 	public String toString() {
 		return String.format("float:%.2f", value);
@@ -39,7 +39,12 @@ public class FFloat extends Type {
 	
 	@Override
 	public int hashCode() {
-		return Float.hashCode(value);
+		return Double.hashCode(value);
+	}
+
+	@Override
+	public boolean isNull() {
+		return value == NULL_VALUE;
 	}
 	
 }

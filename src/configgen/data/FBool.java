@@ -52,5 +52,10 @@ public class FBool extends Type {
 	public int hashCode() {
 		return Boolean.hashCode(value);
 	}
+
+	@Override
+	public boolean isNull() {
+		return false;
+	}
 	
 }

@@ -45,4 +45,9 @@ public final class FEnum extends Type {
 		return value;
 	}
 
+	@Override
+	public boolean isNull() {
+		return value == NULL_VALUE;
+	}
+
 }

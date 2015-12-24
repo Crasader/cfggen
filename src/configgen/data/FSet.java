@@ -59,8 +59,13 @@ public class FSet extends Type {
 		if(ref.isEmpty()) return;
 		HashSet<Type> validValues = Config.getData(ref);
 		for(Type d : values) {
-			if(!validValues.contains(d))
+			if(!d.isNull() && !validValues.contains(d))
 				errorRef(d);
 		}
+	}
+
+	@Override
+	public boolean isNull() {
+		return false;
 	}
 }

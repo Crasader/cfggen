@@ -67,6 +67,7 @@ public final class Struct {
 		if(name.isEmpty())
 			error("struct名字为空");
 		this.fullname = namespace + "." + name;
+		Main.println("== define :" + this.fullname);
 		int newTypeid = this.fullname.hashCode();
 		while(!typeids.add(newTypeid))
 			newTypeid++;
@@ -96,6 +97,7 @@ public final class Struct {
 				error("element:" + nodeName + " 未知");
 			}
 		}
+		Main.println(this);
 	}
 	
 	public String getFullName() {

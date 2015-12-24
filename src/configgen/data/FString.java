@@ -49,4 +49,8 @@ public class FString extends Type {
 		return value.hashCode();
 	}
 	
+	@Override
+	public boolean isNull() {
+		return value.isEmpty();
+	}
 }

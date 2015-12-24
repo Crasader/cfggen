@@ -42,4 +42,8 @@ public final class FInt extends Type {
 		return value;
 	}
 	
+	@Override
+	public boolean isNull() {
+		return value == NULL_VALUE;
+	}
 }

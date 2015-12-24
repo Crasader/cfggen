@@ -29,8 +29,6 @@ public abstract class Type {
 	public final FStruct getHost() {
 		return host;
 	}
-
-	public  Type pop(FlatStream is) { return this;}
 	
 	static void error(String err) {
 		throw new RuntimeException(err);
@@ -148,6 +146,7 @@ public abstract class Type {
 		return null;
 	}
 	
+	public abstract boolean isNull();
 	public abstract void accept(Visitor visitor);
 	
 	public void errorRef(Type value) {
@@ -155,6 +154,7 @@ public abstract class Type {
 	}
 
 	public void verifyData() {
+		if(isNull()) return;
 		final String ref = define.getRef();
 		if(ref.isEmpty()) return;
 		HashSet<Type> validValues = Config.getData(ref);

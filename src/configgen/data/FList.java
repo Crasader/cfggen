@@ -126,7 +126,7 @@ public class FList extends Type {
 		if(!ref.isEmpty()) {
 			HashSet<Type> validValues = Config.getData(ref);
 			for(Type d : values) {
-				if(!validValues.contains(d))
+				if(!d.isNull() && !validValues.contains(d))
 					errorRef(d);
 			}
 		}
@@ -134,6 +134,11 @@ public class FList extends Type {
 			for(Type d : values) {
 				d.verifyData();
 			}
+	}
+
+	@Override
+	public boolean isNull() {
+		return false;
 	}
 	
 }
