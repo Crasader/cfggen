@@ -1,24 +1,17 @@
 package configgen.type;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Element;
-
-import configgen.RowColumnStream;
-import configgen.FlatStream;
 import configgen.Main;
+import configgen.RowColumnStream;
 import configgen.Utils;
 import configgen.data.DataVisitor;
 import configgen.data.FList;
 import configgen.data.Type;
+import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Config {
 	public final static HashMap<String, Config> configs = new HashMap<String, Config>();
@@ -27,7 +20,7 @@ public class Config {
 	private final String name;
 	private String type;
 	private final String dir;
-	private final String inputFile;
+	private final String[] inputFiles;
 	private final String outputFile;
 	private String[] indexs;
 	private final String[] groups;
@@ -48,14 +41,15 @@ public class Config {
 		if(configs.put(name, this) != null) {
 			Utils.error("config:" + name + " is duplicate!");
 		}
-		
-		final String inputStr = data.getAttribute("input");
-		notload = inputStr.isEmpty();
+
+		notload = data.getAttribute("input").isEmpty();
 //		if(notload) {
 //			Utils.error("config:%s input is missing!", name);
 //		}
-		inputFile = Utils.combine(dir, inputStr);
-		outputFile = Utils.combine(dir, name + ".data");
+		inputFiles = Utils.split(data, "input");
+		for(int i = 0 ; i < inputFiles.length ; i++)
+			inputFiles[i] = Utils.combine(Main.csvDir, Utils.combine(dir, inputFiles[i]));
+		outputFile = Utils.combine(Main.dataDir, Utils.combine(dir, name + ".data"));
 		
 		groups = Utils.split(data, "group");
 		hsGroups.addAll(Arrays.asList(groups));
@@ -69,6 +63,11 @@ public class Config {
 		else if(indexs.length == 0 && !single)
 			indexs = new String[] { Struct.get(type).getFields().get(0).getName() };
 		manager = !data.getAttribute("manager").equals("false");
+		this.data = new FList(null, new Field(null, name, "list:" + type,
+			new String[]{"list", type},
+			indexs,
+			new String[]{},
+			groups));
 	}
 	
 	public String getName() {
@@ -77,10 +76,6 @@ public class Config {
 	
 	public final String getType() {
 		return type;
-	}
-
-	public String getFiles() {
-		return inputFile;
 	}
 	
 	public String getIndex() {
@@ -107,7 +102,7 @@ public class Config {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("config{name=").append(name).append(",type=").append(type);
-		sb.append(",file=").append(inputFile);
+		sb.append(",file=").append(inputFiles);
 		sb.append("}}");
 		return sb.toString();
 	}
@@ -120,39 +115,34 @@ public class Config {
 			throw new RuntimeException("config:" + name + " type:" + type + "isn't struct!");
 		}
 	}
+
+	private void loadFrom(String fileName) throws Exception {
+		final File file = new File(fileName);
+		if(file.isDirectory()) {
+			for(File f : file.listFiles()) {
+				if(f.isDirectory()) {
+					loadFrom(f.getPath());
+				} else {
+					data.load(f);
+				}
+			}
+		} else if(fileName.endsWith(".xml")) {
+			data.load(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement());
+		} else {
+			data.load(new RowColumnStream(Utils.parse(fileName)));
+		}
+	}
 	
 	public void loadData() throws Exception {
 		System.out.println("==load config:" + name);
 		if(notload) return;
-		final String fullPath = Utils.combine(Main.csvDir, inputFile);
-		final File f = new File(fullPath);
-		if(f.isDirectory()) {
-			data = new FList(null, new Field(null, name, "list:" + type, 
-					new String[]{"list", type},
-					indexs,
-					new String[]{},
-					groups),
-					f);
-		} else if(!inputFile.endsWith(".xml")) { 
-			final FlatStream fs = new RowColumnStream(Utils.parse(fullPath));
-			data = new FList(null, new Field(null, name, "list:" + type, 
-					new String[]{"list", type},
-					indexs,
-					new String[]{},
-					groups),
-					fs);
-		} else {
-			data = new FList(null, new Field(null, name, "list:" + type, 
-					new String[]{"list", type},
-					indexs,
-					new String[]{},
-					groups),
-					DocumentBuilderFactory.newInstance().newDocumentBuilder().
-        			parse(fullPath).getDocumentElement());
+		for(String file : inputFiles) {
+			loadFrom(file);
 		}
 		if(isSingle() && data.values.size() != 1)
 			Utils.error("config:%s is single. but size=%d", name, data.values.size());
-		Main.println(data);
+		System.out.println("==load config:" + name + ",size:" + data.values.size());
+		Main.println(data.values.size());
 	}
 	
 	public static HashSet<Type> getData(String name) {
@@ -175,9 +165,8 @@ public class Config {
 	public void save(Set<String> groups) {
 		if(notload || !checkInGroup(groups)) return;
 		final DataVisitor vs = new DataVisitor(groups);
-		data.accept(vs);	
-		final String outDataFile = Utils.combine(Main.dataDir, getOutputDataFile());
-		Utils.save(outDataFile, vs.toData());
+		data.accept(vs);
+		Utils.save(outputFile, vs.toData());
 	}
 	
 	public void verifyData() {

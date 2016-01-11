@@ -1,12 +1,12 @@
 package configgen.data;
 
-import java.util.HashSet;
-
-import org.w3c.dom.Element;
 import configgen.FlatStream;
 import configgen.type.Config;
 import configgen.type.Field;
 import configgen.type.Struct;
+import org.w3c.dom.Element;
+
+import java.util.HashSet;
 
 public abstract class Type {
 //	public final static String UNLIMIT_STR = "unlimit";
@@ -50,7 +50,9 @@ public abstract class Type {
 			}
 		} else if(define.isContainer()) {
 			if(type.equals("list")) {
-				return new FList(host, define, is);
+				FList d = new FList(host, define);
+				d.load(is);
+				return d;
 			} else if(type.equals("set")) {
 				return new FSet(host, define, is);
 			} else if(type.equals("map")) {
@@ -118,7 +120,9 @@ public abstract class Type {
 			}
 		} else if(define.isContainer()) {
 			if(type.equals("list")) {
-				return new FList(host, define, node);
+				FList d = new FList(host, define);
+				d.load(node);
+				return d;
 			} else if(type.equals("set")) {
 				return new FSet(host, define, node);
 			} else if(type.equals("map")) {

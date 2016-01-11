@@ -1,10 +1,10 @@
 package configgen.data;
 
+import configgen.Main;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import configgen.Main;
 
 
 public final class DataMarshal {
@@ -28,7 +28,13 @@ public final class DataMarshal {
 	}
 	
 	public DataMarshal putFloat(double x) {
-		return put(Double.toString(x));
+		final long lx = (long)x;
+		final String s;
+		if(lx == x)
+			s = Long.toString(lx);
+		else
+			s = String.format("%g", ((float)x));
+		return put(s);
 	}
 	
 	public DataMarshal putString(String x) {

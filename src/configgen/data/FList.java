@@ -1,109 +1,74 @@
 package configgen.data;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import configgen.FlatStream;
 import configgen.Main;
 import configgen.RowColumnStream;
 import configgen.Utils;
 import configgen.type.Config;
 import configgen.type.Field;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 public class FList extends Type {
 	public final List<Type> values = new ArrayList<Type>();
 	public final HashMap<String, HashSet<Type>> indexs = new HashMap<String, HashSet<Type>>();
-
-	public FList(FStruct host, Field define, FlatStream is) {
+	public FList(FStruct host, Field define) {
 		super(host, define);
-		Field valueDefine = define.stripAdoreType();
-		while(!is.isSectionEnd()) {
-			final Type value = Type.create(host, valueDefine, is);
-			values.add(value);
-			if(host == null) {
-				Main.addLastLoadData(value);
-			}
-		}
-		
 		for(String idx : define.getIndexs()) {
-			final HashSet<Type> m = new HashSet<Type>();
-			for(Type v : values) {
-				FStruct s = (FStruct)v;
-				Type key = s.getField(idx);
-				if(!m.add(key)) 
-					throw new RuntimeException(String.format("field:%s idx:%s key:%s duplicate!", define, idx, key));
-			}
-			indexs.put(idx, m);
+			indexs.put(idx, new HashSet<Type>());
 		}
 	}
-	
-	public FList(FStruct host, Field define, Element ele) {
-		super(host, define);
+
+	public void addValue(Type value) {
+		if(host == null) {
+			Main.addLastLoadData(value);
+		}
+		values.add(value);
+		for(String idx : define.getIndexs()) {
+			final HashSet<Type> m = indexs.get(idx);
+			FStruct s = (FStruct)value;
+			Type key = s.getField(idx);
+			if(!m.add(key))
+				throw new RuntimeException(String.format("field:%s idx:%s key:%s duplicate!", define, idx, key));
+		}
+	}
+
+	public void load(FlatStream is) {
+		final Field valueDefine = define.stripAdoreType();
+		while(!is.isSectionEnd()) {
+			addValue(Type.create(host, valueDefine, is));
+		}
+	}
+
+
+	public void load(Element ele) {
 		Field valueDefine = define.stripAdoreType();
 		final NodeList nodes = ele.getChildNodes();
 		for(int i = 0, n = nodes.getLength() ; i < n ; i++) {
 			final Node node = nodes.item(i);
 			if(node.getNodeType() == Node.ELEMENT_NODE) {
-				final Type value = Type.create(host, valueDefine, (Element)node);
-				values.add(value);
-				if(host == null) {
-					Main.addLastLoadData(value);
-				}
+				addValue(Type.create(host, valueDefine, (Element)node));
 			}
-		}
-		
-		for(String idx : define.getIndexs()) {
-			final HashSet<Type> m = new HashSet<Type>();
-			for(Type v : values) {
-				FStruct s = (FStruct)v;
-				Type key = s.getField(idx);
-				if(!m.add(key)) 
-					throw new RuntimeException(String.format("field:%s idx:%s key:%s duplicate!", define, idx, key));
-			}
-			indexs.put(idx, m);
 		}
 	}
 
-	public FList(FStruct host, Field define, File f) {
-		super(host, define);
+	public void load(File file) {
 		Field valueDefine = define.stripAdoreType();
-		
-		for(File file : f.listFiles()) {
-			//Main.println("====== load:" + file.getAbsolutePath());
-			try {
-				final Type value = file.getName().endsWith(".xml") ?
-					 Type.create(host, valueDefine, DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement())
-					:Type.create(host, valueDefine, new RowColumnStream(Utils.parse(file.getAbsolutePath())));
-				
-				values.add(value);
-				// 说明是配置行数据,加入最近读取的数据列表
-				if(host == null) {
-					Main.addLastLoadData(value);
-				}
-			} catch (Exception e) {
-				System.out.printf("file:%s load fail\n", file.getAbsolutePath());
-				throw new RuntimeException(e);
-			}
-		}
-		
-		for(String idx : define.getIndexs()) {
-			final HashSet<Type> m = new HashSet<Type>();
-			for(Type v : values) {
-				FStruct s = (FStruct)v;
-				Type key = s.getField(idx);
-				if(!m.add(key)) 
-					throw new RuntimeException(String.format("field:%s idx:%s key:%s duplicate!", define, idx, key));
-			}
-			indexs.put(idx, m);
+		try {
+			addValue(file.getName().endsWith(".xml") ?
+				 Type.create(host, valueDefine, DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement())
+				:Type.create(host, valueDefine, new RowColumnStream(Utils.parse(file.getAbsolutePath()))));
+		} catch (Exception e) {
+			System.out.printf("file:%s load fail\n", file.getAbsolutePath());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -130,10 +95,11 @@ public class FList extends Type {
 					errorRef(d);
 			}
 		}
-		if(Field.isStruct(define.getTypes().get(1)))
-			for(Type d : values) {
+		if(Field.isStruct(define.getTypes().get(1))) {
+			for (Type d : values) {
 				d.verifyData();
 			}
+		}
 	}
 
 	@Override
