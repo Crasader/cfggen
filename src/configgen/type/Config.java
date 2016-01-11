@@ -49,7 +49,7 @@ public class Config {
 		inputFiles = Utils.split(data, "input");
 		for(int i = 0 ; i < inputFiles.length ; i++)
 			inputFiles[i] = Utils.combine(Main.csvDir, Utils.combine(dir, inputFiles[i]));
-		outputFile = Utils.combine(Main.dataDir, Utils.combine(dir, name + ".data"));
+		outputFile = Utils.combine(dir, name + ".data");
 		
 		groups = Utils.split(data, "group");
 		hsGroups.addAll(Arrays.asList(groups));
@@ -166,7 +166,7 @@ public class Config {
 		if(notload || !checkInGroup(groups)) return;
 		final DataVisitor vs = new DataVisitor(groups);
 		data.accept(vs);
-		Utils.save(outputFile, vs.toData());
+		Utils.save(Utils.combine(Main.dataDir, outputFile), vs.toData());
 	}
 	
 	public void verifyData() {
