@@ -27,7 +27,6 @@ public class Config {
 	private final HashSet<String> hsGroups = new HashSet<>();
 	private final boolean manager; // 是否出现在CfgMgr的加载列表里
 	private final boolean single;
-	private final boolean notload;
 	
 	private FList data;
 	public Config(String namespace, Element data, String csvDir) {
@@ -42,11 +41,10 @@ public class Config {
 			Utils.error("config:" + name + " is duplicate!");
 		}
 
-		notload = data.getAttribute("input").isEmpty();
-//		if(notload) {
-//			Utils.error("config:%s input is missing!", name);
-//		}
 		inputFiles = Utils.split(data, "input");
+		if(inputFiles.length == 0) {
+			Utils.error("config:%s input is missing!", name);
+		}
 		for(int i = 0 ; i < inputFiles.length ; i++)
 			inputFiles[i] = Utils.combine(Main.csvDir, Utils.combine(dir, inputFiles[i]));
 		outputFile = Utils.combine(dir, name + ".data");
@@ -135,7 +133,6 @@ public class Config {
 	
 	public void loadData() throws Exception {
 		System.out.println("==load config:" + name);
-		if(notload) return;
 		for(String file : inputFiles) {
 			loadFrom(file);
 		}
@@ -163,7 +160,7 @@ public class Config {
 	}
 	
 	public void save(Set<String> groups) {
-		if(notload || !checkInGroup(groups)) return;
+		if(!checkInGroup(groups)) return;
 		final DataVisitor vs = new DataVisitor(groups);
 		data.accept(vs);
 		Utils.save(Utils.combine(Main.dataDir, outputFile), vs.toData());
@@ -171,7 +168,6 @@ public class Config {
 	
 	public void verifyData() {
 		System.out.println("==verify config:" + name);
-		if(notload) return;
 		data.verifyData();
 	}
 	
