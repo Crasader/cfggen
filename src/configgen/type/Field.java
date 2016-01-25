@@ -1,14 +1,9 @@
 package configgen.type;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import configgen.Utils;
 import org.w3c.dom.Element;
 
-import configgen.Utils;
+import java.util.*;
 
 public final class Field {
 	private final Struct parent;
@@ -207,8 +202,13 @@ public final class Field {
 	public void error(String err) {
 		throw new RuntimeException(String.format("%s.%s %s", parent, name, err));
 	}
-	
-	public boolean isRawOrEnumOrStruct(String typeName) {
+
+	public boolean isRawOrEnumOrStruct() {
+		return (isRaw()
+				|| isEnum()
+				|| isStruct());
+	}
+	public static boolean isRawOrEnumOrStruct(String typeName) {
 		return (isRaw(typeName)
 			|| isEnum(typeName)
 			|| isStruct(typeName));

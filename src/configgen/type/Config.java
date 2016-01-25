@@ -57,7 +57,7 @@ public class Config {
 		single = data.getAttribute("single").equals("true");
 		indexs = Utils.split(data, "index");
 		if(indexs.length > 1)
-			Utils.error("config:%s 只能有一个index!", type);
+			Utils.error("config:%s 只能有一个index!", name);
 		else if(indexs.length == 0 && !single)
 			indexs = new String[] { Struct.get(type).getFields().get(0).getName() };
 		manager = !data.getAttribute("manager").equals("false");
@@ -112,6 +112,16 @@ public class Config {
 		if(type == null || !Field.isStruct(type)) {
 			throw new RuntimeException("config:" + name + " type:" + type + "isn't struct!");
 		}
+
+		if(indexs.length == 1) {
+			Field indexField = Struct.get(type).getField(indexs[0]);
+			if(indexField == null) {
+				Utils.error("config:%s 索引字段:%s 不存在", name, indexs[0]);
+			}
+			if(!indexField.isRawOrEnumOrStruct()) {
+				Utils.error("config:%s id不能是map,set,list这些容器类型", name);
+			}
+		}
 	}
 
 	private void loadFrom(String fileName) throws Exception {
@@ -138,7 +148,7 @@ public class Config {
 		}
 		if(isSingle() && data.values.size() != 1)
 			Utils.error("config:%s is single. but size=%d", name, data.values.size());
-		System.out.println("==load config:" + name + ",size:" + data.values.size());
+		//System.out.println("==load config:" + name + ",size:" + data.values.size());
 		Main.println(data.values.size());
 	}
 	
