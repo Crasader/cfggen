@@ -1,19 +1,15 @@
 package configgen.lans.cs;
 
+import configgen.Generator;
+import configgen.Main;
+import configgen.Utils;
+import configgen.type.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import configgen.Generator;
-import configgen.Main;
-import configgen.Utils;
-import configgen.type.Config;
-import configgen.type.Const;
-import configgen.type.ENUM;
-import configgen.type.Field;
-import configgen.type.Struct;
 
 public class CodeGen implements Generator {
 	@Override
@@ -280,7 +276,10 @@ public class CodeGen implements Generator {
 	
 	private final static String xmlPrefix = "xml.";
 	private final static String enumClass = "Enums";
-	
+
+	public String toXmlJavaType(String rawType) {
+		return ENUM.isEnum(rawType) ? "string" : rawType;
+	}
 	void genEnumXmlMarshal(Collection<ENUM> enums) {
 		final ArrayList<String> ls = new ArrayList<String>();
 		final String namespace = xmlPrefix + "cfg";
@@ -326,6 +325,8 @@ public class CodeGen implements Generator {
 		}
 	}
 
+
+
 	private void genStructXmlMarshallCode(Struct struct) {
 		final ArrayList<String> ls = new ArrayList<String>();
 		final String namespace =  xmlPrefix + struct.getNamespace();
@@ -360,7 +361,7 @@ public class CodeGen implements Generator {
 		
 		for(Field f : struct.getFields()) {
 			String ftype = f.getType();
-			String jtype = toJavaType(ftype);
+			String jtype = toXmlJavaType(ftype);
 			final String fname = f.getName();
 			final List<String> ftypes = f.getTypes();
 			ws.add(String.format("Write(%s, \"%s\", this.%s);", VAR1, fname, fname));
@@ -379,7 +380,7 @@ public class CodeGen implements Generator {
 			} else if (f.isContainer()) {
 				switch (ftype) {
 				case "list": {
-					final String valueType = toJavaType(ftypes.get(1));
+					final String valueType = toXmlJavaType(ftypes.get(1));
 					ds.add(String.format(
 							"public readonly System.Collections.Generic.List<%s> %s = new System.Collections.Generic.List<%s>();",
 							toMarshalType(valueType), fname, toMarshalType(valueType)));
@@ -388,7 +389,7 @@ public class CodeGen implements Generator {
 					break;
 				}
 				case "set": {
-					final String valueType = toJavaType(ftypes.get(1));
+					final String valueType = toXmlJavaType(ftypes.get(1));
 					ds.add(String.format(
 							"public readonly System.Collections.Generic.HashSet<%s> %s = new System.Collections.Generic.HashSet<%s>();",
 							toMarshalType(valueType), fname, toMarshalType(valueType)));
@@ -397,8 +398,8 @@ public class CodeGen implements Generator {
 					break;
 				}
 				case "map": {
-					final String keyType = toJavaType(ftypes.get(1));
-					final String valueType = toJavaType(ftypes.get(2));
+					final String keyType = toXmlJavaType(ftypes.get(1));
+					final String valueType = toXmlJavaType(ftypes.get(2));
 					ds.add(String.format(
 							"public readonly System.Collections.Generic.Dictionary<%s, %s> %s = new System.Collections.Generic.Dictionary<%s, %s>();",
 							toMarshalType(keyType), toMarshalType(valueType), fname, toMarshalType(keyType),

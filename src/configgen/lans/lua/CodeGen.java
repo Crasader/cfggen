@@ -1,24 +1,24 @@
 package configgen.lans.lua;
 
+import configgen.Generator;
+import configgen.Main;
+import configgen.Utils;
+import configgen.type.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import configgen.Generator;
-import configgen.Main;
-import configgen.Utils;
-import configgen.type.Config;
-import configgen.type.Const;
-import configgen.type.ENUM;
-import configgen.type.Field;
-import configgen.type.Struct;
 
 public class CodeGen implements Generator {
 	@Override
 	public void gen() {	
 		genStructAndEnums();		
 		genConfig();
+	}
+
+	private String toLuaType(String type) {
+		return ENUM.isEnum(type) ? "int" : type;
 	}
 	
 	void genStructBody(Struct struct, ArrayList<String> ls) {
@@ -41,7 +41,7 @@ public class CodeGen implements Generator {
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {
-							final String valueType = ftypes.get(1);
+							final String valueType = toLuaType(ftypes.get(1));
 							ls.add(String.format("local _list = self:get_list('%s')", valueType.replace('.', '_')));
 							ls.add(String.format("o.%s = _list", fname));
 							
@@ -59,13 +59,13 @@ public class CodeGen implements Generator {
 							break;
 						}
 						case "set": {
-							final String valueType = ftypes.get(1);
+							final String valueType = toLuaType(ftypes.get(1));
 							ls.add(String.format("o.%s = self:get_set('%s')", fname, valueType.replace('.', '_')));
 							break;
 						}
 						case "map": {
-							final String keyType = ftypes.get(1);
-							final String valueType = ftypes.get(2);
+							final String keyType = toLuaType(ftypes.get(1));
+							final String valueType = toLuaType(ftypes.get(2));
 							ls.add(String.format("o.%s = self:get_map('%s', '%s')", fname, keyType.replace('.', '_'), valueType.replace('.', '_')));
 							break;
 						}
