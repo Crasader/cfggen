@@ -165,7 +165,7 @@ public class CodeGen implements Generator {
 							break;
 						}
 						case "map": {
-							final String keyType = toBoxType(toJavaType(ftypes.get(1)));;
+							final String keyType = toBoxType(toJavaType(ftypes.get(1)));
 							final String valueType = toBoxType(toJavaType(ftypes.get(2)));
 							ds.add(String.format("	public final java.util.Map<%s, %s> %s = new java.util.HashMap<%s, %s>();", keyType, valueType, fname, keyType, valueType));
 							cs.add("		for(int n = fs.getInt(); n-- > 0 ; ) {");
@@ -208,8 +208,6 @@ public class CodeGen implements Generator {
 		case "float": return "Float";
 		default : return type;
 		}
-
-
 	}
 	
 	String getIndexType(Config c) {

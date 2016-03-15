@@ -38,18 +38,6 @@ public final class Field {
 		for(String idx : indexs)
 			this.indexs.add(idx);
 		
-		if(types[0].equals("list")) {
-			final String valueType = types[1];
-			if(Field.isStruct(valueType)) {
-				this.indexs.addAll(Arrays.asList(indexs));
-				Struct s = Struct.get(valueType);
-				for(String idx : indexs) {
-					if(s.getField(idx) == null)
-						error("index:" + idx + " 不是struct:" + valueType + " 的字段!");
-				}
-			}
-		}
-		
 		this.refs.addAll(Arrays.asList(refs));
 		
 //		else if(!name.isEmpty() && isEnum())
@@ -255,6 +243,17 @@ public final class Field {
 		for(String name : groups) {
 			if(!Group.isGroup(name))
 				error("未知 group:" + name);
+		}
+
+		if(types.get(0).equals("list")) {
+			final String valueType = types.get(1);
+			if(Field.isStruct(valueType)) {
+				Struct s = Struct.get(valueType);
+				for(String idx : indexs) {
+					if(s.getField(idx) == null)
+						error("index:" + idx + " 不是struct:" + valueType + " 的字段!");
+				}
+			}
 		}
 	}
 

@@ -1,13 +1,13 @@
 package configgen.data;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.w3c.dom.Element;
 import configgen.FlatStream;
 import configgen.Utils;
 import configgen.type.Field;
 import configgen.type.Struct;
+import org.w3c.dom.Element;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FStruct extends Type {
 	private final String type;
@@ -79,7 +79,7 @@ public class FStruct extends Type {
 			} else if(ns.size() > 1) {
 				Utils.error("type:%s field:%s duplicate", self.getName(), fname);
 			} else {
-				values.add(Type.create(this, f, (Element)ns.get(0)));
+				values.add(Type.create(this, f, ns.get(0)));
 			}
 		}
 	}

@@ -1,19 +1,13 @@
 package configgen.type;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import configgen.Main;
+import configgen.Utils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import configgen.Main;
-import configgen.Utils;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public final class Struct {
 	private final static HashMap<String, Struct> structs = new HashMap<String, Struct>();
@@ -133,7 +127,7 @@ public final class Struct {
 			if(f.getName().equals(name))
 				return f;
 		}
-		return null;
+		return !base.isEmpty() ? Struct.get(base).getField(name) : null;
 	}
 	
 	public final String getNamespace() {
