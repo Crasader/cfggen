@@ -69,6 +69,8 @@ public abstract class Type {
 				Struct real = Struct.get(subType);
 				if(real == null || !real.getFullName().equals(subType))
 					error("dynamic type:" + subType + " unknown");
+				if(real.isDynamic())
+					error("data type:" + subType + " is dynamic type!");
 				if(!Struct.isDeriveFrom(subType, baseType))
 					error("dynamic type:" + subType + " isn't sub type of:" + baseType);
 				return new FStruct(host, define, subType, is);
@@ -138,6 +140,8 @@ public abstract class Type {
 				Struct real = Struct.get(subType);
 				if(real == null || !real.getFullName().equals(subType))
 					error("dynamic type:" + subType + " unknown");
+				if(real.isDynamic())
+					error("data type:" + subType + " is dynamic type!");
 				if(!Struct.isDeriveFrom(subType, baseType))
 					error("dynamic type:" + subType + " isn't sub type of:" + baseType);
 				return new FStruct(host, define, subType, node);
