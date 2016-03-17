@@ -2,6 +2,7 @@ package configgen.type;
 
 import configgen.Main;
 import configgen.Utils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -50,6 +51,35 @@ public final class Struct {
 	private final HashSet<String> groups = new HashSet<>();
 	
 	private final static HashSet<Integer> typeids = new HashSet<>();
+
+	public static void importDefineFromInput(Document doc, Element ele, String csvDir, String inputFileStr) throws Exception {
+		final String configName = ele.getAttribute("name");
+		final String[] inputs = Utils.split(ele, "input");
+		if(inputs.length == 0)
+			Utils.error("extern config:%s input miss", configName);
+		final String path = Utils.combine(Main.csvDir, Utils.combine(csvDir, inputs[0]));
+		final List<List<String>> lines = Utils.parse(path);
+		if(lines.isEmpty() || lines.get(0).isEmpty() || !lines.get(0).get(0).startsWith("##"))
+			Utils.error("extern config:%s can't find field defines!", configName);
+		for(String fieldDefne : lines.get(0)) {
+			final String define = fieldDefne.replace("##", ""); //去掉注释
+			final String fieldName;
+			final String fieldType;
+			final int index = define.indexOf(':');
+			if(index > 0) {
+				fieldName = define.substring(0, index);
+				fieldType = define.substring(index + 1, define.length());
+			} else {
+				fieldName = define;
+				fieldType = "int";
+			}
+			final Element field = doc.createElement("field");
+			field.setAttribute("name", fieldName);
+			field.setAttribute("type", fieldType);
+			System.out.printf("==import define. config:%s filed name:%s type:%s\n", configName, fieldName, fieldType);
+			ele.appendChild(field);
+		}
+	}
 	
 	public Struct(String namespace, Element data) {
 		this(namespace, data, "");

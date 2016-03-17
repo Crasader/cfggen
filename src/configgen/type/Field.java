@@ -4,6 +4,8 @@ import configgen.Utils;
 import org.w3c.dom.Element;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class Field {
 	private final Struct parent;
@@ -17,7 +19,8 @@ public final class Field {
 	
 	public final static HashSet<String> RawTypes = new HashSet<String>(Arrays.asList("bool", "int", "float", "long", "string"));
 	public final static HashSet<String> ConTypes = new HashSet<String>(Arrays.asList("list", "set", "map"));
-	
+
+	private final static Pattern namePattern = Pattern.compile("[a-zA-Z]\\w*");
 	public Field(Struct parent, String name, String fulltype, String[] types, String[] indexs, String[] refs, String[] groups) {
 		this.parent = parent;
 		this.name = name;
@@ -34,6 +37,9 @@ public final class Field {
 
 		if(name.isEmpty())
 			error("没有定义 name");
+		final Matcher matcher = namePattern.matcher(name);
+		if(!matcher.matches())
+			error("非法变量名:" + name);
 		
 		for(String idx : indexs)
 			this.indexs.add(idx);

@@ -142,14 +142,17 @@ public class Config {
 	}
 	
 	public void loadData() throws Exception {
-		System.out.println("==load config:" + name);
-		for(String file : inputFiles) {
-			loadFrom(file);
+		try {
+			for (String file : inputFiles) {
+				loadFrom(file);
+			}
+			if (isSingle() && data.values.size() != 1)
+				Utils.error("config:%s is single. but size=%d", name, data.values.size());
+			//System.out.println("==load config:" + name + ",size:" + data.values.size());
+		} catch (Exception e) {
+			System.out.println("[ERROR] load config:" + name);
+			throw e;
 		}
-		if(isSingle() && data.values.size() != 1)
-			Utils.error("config:%s is single. but size=%d", name, data.values.size());
-		//System.out.println("==load config:" + name + ",size:" + data.values.size());
-		Main.println(data.values.size());
 	}
 	
 	public static HashSet<Type> getData(String name) {
@@ -177,7 +180,7 @@ public class Config {
 	}
 	
 	public void verifyData() {
-		System.out.println("==verify config:" + name);
+		//System.out.println("==verify config:" + name);
 		data.verifyData();
 	}
 	

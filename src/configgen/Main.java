@@ -1,13 +1,14 @@
 package configgen;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Element;
 import configgen.data.DataGen;
 import configgen.type.Config;
 import configgen.type.ENUM;
 import configgen.type.Group;
 import configgen.type.Struct;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -111,10 +112,11 @@ public final class Main {
         final File cfgxml = new File(xmlSchemeFile);
         final Path parent = cfgxml.toPath().getParent();
         csvDir = parent != null ? parent.toString() : ".";
-        Element root = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(cfgxml).getDocumentElement();
+		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(cfgxml);
+        Element root = doc.getDocumentElement();
         
         curXml = xmlSchemeFile;
-        loadDefine(root, "");
+        loadDefine(doc, root, "");
         dumpDefine();
         verifyDefine();
         
@@ -154,7 +156,7 @@ public final class Main {
 	}
 
 	public static String curXml = "";
-	public static void loadDefine(Element root, String relateDir) throws Exception {
+	public static void loadDefine(Document doc, Element root, String relateDir) throws Exception {
 		final String namespace = root.getAttribute("namespace");
 		if(namespace.isEmpty())
 			Utils.error("xml:%s configs's attribute<namespace> missing", curXml);
@@ -171,6 +173,12 @@ public final class Main {
         }
   
         for(Element ele : Utils.getChildsByTagName(root, "config")) {
+			if("true".equals(ele.getAttribute("extern"))) {
+				if(!Utils.getChildsByTagName(ele, "field").isEmpty()) {
+					throw new RuntimeException("extern config:" + ele.getAttribute("name") + " can't define fields");
+				}
+				Struct.importDefineFromInput(doc, ele, relateDir, ele.getAttribute("input"));
+			}
         	new Struct(namespace, ele);
         	new Config(namespace, ele, relateDir);
         }
@@ -180,9 +188,8 @@ public final class Main {
         		final String oldXml = curXml;
         		curXml = file;
         		final String newRelateDir = file.contains("/") ? Utils.combine(relateDir, file.substring(0, file.lastIndexOf('/'))) : relateDir;
-        		loadDefine(DocumentBuilderFactory.newInstance().newDocumentBuilder().
-        			parse(Utils.combine(csvDir, relateDir) + "/" + file).getDocumentElement()
-        			, newRelateDir);
+				final Document subDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(Utils.combine(csvDir, relateDir) + "/" + file);
+        		loadDefine(subDoc, subDoc.getDocumentElement(), newRelateDir);
         		curXml = oldXml;
         	}
         }
