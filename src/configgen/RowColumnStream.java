@@ -68,28 +68,6 @@ public final class RowColumnStream extends FlatStream {
 			}
 		}
 	}
-
-	@Override
-	public void checkLineEnd() {
-		while(true) {
-			if(row >= lines.size()) return;
-			List<String> line = lines.get(row);
-			if(col >= line.size()) {
-				return;
-			}
-			final String data = line.get(col);
-			if(data.startsWith(EOL)) {
-				row++;
-				col = 0;
-				return;
-			}
-			if(data.isEmpty()) {
-				col++;
-			} else {
-				error("expect line end.");
-			}
-		}
-	}
 	
 	private void error(String err) {
 		throw new RuntimeException(String.format("%d:%d %s", row + 1, col + 1, err));

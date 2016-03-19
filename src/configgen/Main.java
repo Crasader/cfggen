@@ -142,6 +142,7 @@ public final class Main {
 	        	loadData();
 	        	verifyData();
 	        } catch(Exception e) {
+				System.out.println();
 	        	System.out.println("=================last datas=====================");
 	        	System.out.println(lastLoadData);
 	        	System.out.println("=================last datas=====================");
@@ -157,6 +158,7 @@ public final class Main {
 
 	public static String curXml = "";
 	public static void loadDefine(Document doc, Element root, String relateDir) throws Exception {
+		System.out.print(".");
 		final String namespace = root.getAttribute("namespace");
 		if(namespace.isEmpty())
 			Utils.error("xml:%s configs's attribute<namespace> missing", curXml);
@@ -215,12 +217,15 @@ public final class Main {
 	}
 	
 	static void loadData() throws Exception {
+		System.out.println();
 		for(Config c : Config.configs.values()) {
+			System.out.print(".");
 			c.loadData();
 		}
 	}
 	
 	private static void verifyData() {
+		System.out.println();
 		for(Config c : Config.configs.values()) {
 			c.verifyData();
 		}

@@ -7,5 +7,4 @@ public abstract class FlatStream {
 	public abstract long getLong();
 	public abstract float getFloat();
 	public abstract String getString();
-	public abstract void checkLineEnd();
 }
