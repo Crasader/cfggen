@@ -325,7 +325,16 @@ public class CodeGen implements Generator {
 		}
 	}
 
-
+	String getRawTypeDefaultValue(String type) {
+		switch (type) {
+			case "bool": return "false";
+			case "int":
+			case "long": return "0";
+			case "float": return "0f";
+			case "string": return "\"\"";
+		}
+		throw new RuntimeException("unknow rawtype:" + type);
+	}
 
 	private void genStructXmlMarshallCode(Struct struct) {
 		final ArrayList<String> ls = new ArrayList<String>();
@@ -366,7 +375,7 @@ public class CodeGen implements Generator {
 			final List<String> ftypes = f.getTypes();
 			ws.add(String.format("Write(%s, \"%s\", this.%s);", VAR1, fname, fname));
 			if (f.isRaw()) {
-				ds.add(String.format("public %s %s;", jtype, fname));
+				ds.add(String.format("public %s %s = %s;", jtype, fname, getRawTypeDefaultValue(ftype)));
 				rs.add(String.format("case \"%s\": this.%s = %s; break;", fname, fname, readXmlType(VAR2, jtype)));
 			} else if (f.isStruct()) {
 				ds.add(String.format("public %s %s;", toMarshalType(jtype), fname));

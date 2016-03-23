@@ -4,6 +4,7 @@ public class CfgMgr {
 	public static final java.util.LinkedHashMap<Integer, cfg.role.Profession> profession = new java.util.LinkedHashMap<>();
 	public static cfg.role.Name name;
 	public static final java.util.LinkedHashMap<Integer, cfg.item.ItemBasic> itembasic = new java.util.LinkedHashMap<>();
+	public static final java.util.LinkedHashMap<Integer, cfg.role.Profession2> profession2 = new java.util.LinkedHashMap<>();
 	public static cfg.item.ItemConfig itemconfig;
 	public static final java.util.LinkedHashMap<Integer, cfg.currency.Currency> currency = new java.util.LinkedHashMap<>();
 	public static cfg.role.RoleConfig roleconfig;
@@ -28,6 +29,14 @@ public class CfgMgr {
 			for(int n = fs.getInt() ; n-- > 0 ; ) {
 				final cfg.item.ItemBasic v = (cfg.item.ItemBasic)cfg.DataStream.create(fs.getString(), fs);
 				itembasic.put(v.id, v);
+			}
+		}
+		{
+			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/role/profession2.data", DataDir.encoding);
+			profession2.clear();
+			for(int n = fs.getInt() ; n-- > 0 ; ) {
+				final cfg.role.Profession2 v = (cfg.role.Profession2)cfg.DataStream.create("cfg.role.Profession2", fs);
+				profession2.put(v.id, v);
 			}
 		}
 		{

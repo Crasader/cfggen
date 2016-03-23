@@ -51,6 +51,8 @@
 		<field name="createweaponid" type="int"/>创建角色时表现的武器id
 		<field name="createarmourid" type="int"/>创建角色时表现的防具id
 	</config>
+	
+	<config name="Profession2" extern="true" input="profession2.xlsx"/>
 
 	<enum name="BagType">背包类型
 		<const name="ITEM"/>

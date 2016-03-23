@@ -61,8 +61,13 @@ public final class Struct {
 		final List<List<String>> lines = Utils.parse(path);
 		if(lines.isEmpty() || lines.get(0).isEmpty() || !lines.get(0).get(0).startsWith("##"))
 			Utils.error("extern config:%s can't find field defines!", configName);
+
+		int fieldNum = 0;
 		for(String fieldDefne : lines.get(0)) {
 			final String define = fieldDefne.replace("##", ""); //去掉注释
+			if(define.isEmpty())
+				continue;;
+			++fieldNum;
 			final String fieldName;
 			final String fieldType;
 			final int index = define.indexOf(':');
@@ -76,9 +81,11 @@ public final class Struct {
 			final Element field = doc.createElement("field");
 			field.setAttribute("name", fieldName);
 			field.setAttribute("type", fieldType);
-			System.out.printf("==import define. config:%s filed name:%s type:%s\n", configName, fieldName, fieldType);
+			Main.println(String.format("==import define. config:%s filed name:%s type:%s", configName, fieldName, fieldType));
 			ele.appendChild(field);
 		}
+		if(fieldNum == 0)
+			Utils.error("extern config:%s can't find field defines!", configName);
 	}
 	
 	public Struct(String namespace, Element data) {
