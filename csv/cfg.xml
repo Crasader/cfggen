@@ -1,101 +1,13 @@
-<?xml version="1.0" encoding="UTF8"?>
+<?xml version="1.0" encoding="utf8"?>
+
 <configs namespace="cfg">
-	<group name="server:client"/>
+	<group name="server:client:designer:editor"/>
 	
 	<import input="item/item.xml"/>
-	<import input="skill.xml"/>
-	
-	<enum name="ItemType">
-		<const name="AAA" alias="类型1:类型A" value="11111"/>
-		<const name="BBB" alias="类型2:类型B" value="22222"/>
+	<import input="cmd/cmd.xml"/>
+	<import input="role/role.xml"/>
+	<import input="ectype/storylayout.xml"/>
+	<import input="currency/currency.xml"/>
+	<enum name="Const">
 	</enum>
-
-	<config name="Name" input="names.csv" output="names.data">
-		<field name="id" type="int"/>
-		<field name="name" type="string"/>
-	</config>
-	
-	<config name="Index"  input="indexs.csv">
-		<field name="id" type="int"/>
-		<field name="d1" type="int" ref="item"/>
-		<field name="d2" type="int" ref="item"/>
-		<field name="d3" type="int" ref="name"/>
-		<field name="d4" type="int" ref="name"/>
-		<field name="e1" type="list:int" ref="item"/>
-		<field name="e2" type="set:int" ref="name"/>
-		<field name="e3" type="map:int:string"  ref="name"/>
-		<field name="e4" type="map:string:int" ref=":name"/>
-		<field name="e5" type="map:int:int" ref="item:name"/>
-	</config>
-	
-	<struct name="Task">
-		<field name="id" type="int" />
-			<struct name="Task1" typeid="1">
-				<field name="x" type="float" />
-			</struct>
-			
-			<struct name="Task2" typeid="2">
-				<field name="y" type="int"/>
-				<field name="name" type="string" groups="client"/>
-
-			</struct>
-							
-				<struct name="Task3">
-					<field name="z" type="bool"/>
-					<struct name="Task4">
-						<field name="xxx" type="bool"/>
-					</struct>
-				</struct>	
-	</struct>
-	
-	<enum name="TestKey">
-		<const name="Key1" />
-		<const name="Key2"/>
-		<const name="Key4" value="4"/>
-		<const name="Key5"/>
-	</enum>
-	
-	<config name="Test" input="test.xlsx" index="xid" output="test.data">
-		<const name="LIST" type="list:int" value="1,2,3,4,5"/>
-		<const name="FLIST" type="list:float" value="1,2,3,4"/>
-		<field name="xid" type="TestKey" />
-		<field name="en" type="ItemType"/>
-		<field name="b" type="bool"/>
-		<field name="id" type="Task" groups="server"/>
-		<field name="d2" type="Task" groups="server"/>
-		<field name="id3" type="Task"/>
-		<field name="d24" type="Task"/>
-		<field name="d25" type="Task"/>
-		<field name="e1" type="float" groups="server"/>
-		<field name="e2" type="Task" groups="server"/>
-		
-		<field name="a1" type="list:int"/>
-		<field name="a2" type="list:string" groups="server"/>
-		
-		<field name="s1" type="set:int"/>
-		
-		<field name="d225" type="list:Task" indexs="id"/>
-		
-		<field name="m1" type="map:int:int"/>
-		<field name="m2" type="map:int:string"/>
-		<field name="m3" type="map:int:Task"/>
-		
-		<const name="x1" value="7"/>
-		<const name="x2" type="float" value="8.5"/>
-		<const name="x3" type="string" value="sd"/>
-		<struct name="Test1"/>
-		<struct name="Test2"/>
-	</config>
-	
-	<config name="TestSingle" single="true" >
-		<field name="xid" type="TestKey" />
-		<field name="en" type="ItemType"/>
-		<field name="b" type="bool"/>
-		<field name="id" type="Task" groups="server"/>
-		<field name="d2" type="Task" groups="server"/>
-		<field name="id3" type="Task"/>
-	</config>
-	
-	
-	
 </configs>

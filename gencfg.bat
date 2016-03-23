@@ -1,2 +1,2 @@
-java -jar config.jar -lan cs:lua:java -configdir csv -configxml cfg.xml -codedir code2 -datadir data2 -group all
+java -jar config.jar -lan java -configxml csv/cfg.xml -codedir code -datadir data -group all
 pause

@@ -67,8 +67,7 @@ public class FList extends Type {
 				 Type.create(host, valueDefine, DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement())
 				:Type.create(host, valueDefine, new RowColumnStream(Utils.parse(file.getAbsolutePath()))));
 		} catch (Exception e) {
-			System.out.printf("file:%s load fail\n", file.getAbsolutePath());
-			throw new RuntimeException(e);
+			System.out.printf("【加载文件失败】 %s\n", file.getAbsolutePath());
 		}
 	}
 

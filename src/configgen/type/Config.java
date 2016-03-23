@@ -142,17 +142,17 @@ public class Config {
 	}
 	
 	public void loadData() throws Exception {
-		try {
-			for (String file : inputFiles) {
+
+		for (String file : inputFiles) {
+			try {
 				loadFrom(file);
+			} catch (Exception e) {
+				System.out.println("\n【加载配置失败】:" + file);
+				throw e;
 			}
-			if (isSingle() && data.values.size() != 1)
-				Utils.error("config:%s is single. but size=%d", name, data.values.size());
-			//System.out.println("==load config:" + name + ",size:" + data.values.size());
-		} catch (Exception e) {
-			System.out.println("[ERROR] load config:" + name);
-			throw e;
 		}
+		if (isSingle() && data.values.size() != 1)
+			Utils.error("配置:%s 是单键表. 但数据个数=%d", name, data.values.size());
 	}
 	
 	public static HashSet<Type> getData(String name) {
