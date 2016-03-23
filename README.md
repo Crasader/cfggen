@@ -39,8 +39,37 @@
 		只有一种简洁的数据格式。对svn友好。尽管源数据(excel)对svn并不友好，但导出数据
 		很容易版本对比。
 
-* 为编辑器提供序列化支持。
+* 为编辑器提供序列化支持
 
 		一些极复杂的配置不适合直接在excel编辑，一般使用编辑器来制作。cfggen能够为编辑器
 		生成版本兼容的序列化代码，序列化后的xml数据能够被cfggen与excel数据同等处理。
 
+##  cfggen使用
+
+		csv目录是一个实际项目中抽取出的展示cfggen所有功能的示例配置,配置由定义文件(xml)与数据文件(excel或者xml)组成。
+		code目录是由csv生成的java配置加载
+		data目录是由csv生成的最终导出数据(使用了all分组,如果使用其他分组,导出的数据有所差别)
+		
+* cfggen.jar与gencfg.bat
+ 
+		cfggen.jar是最新build的jar包
+		gencfg.bat是导出配置与生成配置代码的示例脚本
+* cfg/cfg.xml
+ 
+		定义根文件
+* cfg/role
+
+		profession表 经典的规范表的例子,在游戏配置中最常见
+		roleconfig表是 单键表的例子
+		name表 是多标签页的单键表
+* cfg/item
+
+		item表是 多态表的经典例子(每行有公共字段,但根据物品类型有各自独有字段)
+		itemconfig表 是单键表例子
+* cfg/cmd 和 cfg/currency
+
+		全局性的一些定义.不具体到某个表
+* cfg/ectype
+
+		storylayout表是规范表,但它的某些子孙字段是非常复杂的多态类型。策划手动配置这种数据比较困难，需要借助编辑器。
+		cfggen为编辑器提供了序列化支持,导出的xml数据能被cfggen识别处理。
