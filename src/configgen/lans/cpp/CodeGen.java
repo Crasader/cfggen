@@ -7,35 +7,26 @@ import configgen.type.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CodeGen implements Generator {
 	@Override
 	public void gen() {
-		Struct.getExports().forEach(s -> {
-			genStructHeadFile(s);
-		});
-		List<Struct> structs = Struct.getExports();
-		for(int i = 0, n = (structs.size() + CLASS_PER_CONFIG - 1) / CLASS_PER_CONFIG ; i < n ; i++) {
-			genStructCppFile(structs.subList(i * CLASS_PER_CONFIG, Math.min(structs.size(), (i+1) * CLASS_PER_CONFIG)), i);
-		}
-		genConfigHead();
-		//genConfigCpp();
+		genStructs();
+		genConfigs();
 		genAllDefines();
 		genStub();
 	}
 
-	void save(List<String> lines, String file) {
+	private void save(List<String> lines, String file) {
 		final String code = lines.stream().collect(Collectors.joining("\n"));
-		//Main.println(code);
 		final String outFile = String.format("%s/%s", Main.codeDir, file.toLowerCase());
 		Utils.save(outFile, code);
 	}
 
 	private final static String ENUM_TYPE = "int32_t";
 	
-	String readType(String type) {
+	private String readType(String type) {
 		switch(type) {
 			case "bool": return "fs.getBool()";
 			case "int": return "fs.getInt()";
@@ -43,21 +34,18 @@ public class CodeGen implements Generator {
 			case "float":  return "fs.getFloat()";
 			case "string": return "fs.getString()";
 			default: {
-				String cppType = toCppType(type);
 				if(ENUM.isEnum(type)) {
-					return String.format("fs.getInt()", cppType);
+					return "fs.getInt()";
 				}
-				Struct struct = Struct.get(type);
-				if(struct.isDynamic())
-					return String.format("(%s*)fs.getObject(fs.getString())", cppType);
-				else
-					return String.format("new %s(fs)", cppType);
+				final String cppType = toCppType(type);
+				return Struct.isDynamic(type) ?
+					String.format("(%s*)fs.getObject(fs.getString())", cppType) :
+					String.format("new %s(fs)", cppType);
 			}
 		}
 	}
 
-
-	public String toCppType(String type) {
+	private String toCppType(String type) {
 		if(Struct.isStruct(type)) {
 			return type.replace(".", "::");
 		}
@@ -77,80 +65,68 @@ public class CodeGen implements Generator {
 		throw new RuntimeException("unknown type:" + type);
 	}
 
-	public String toCppDefineType(String type) {
-		if(Struct.isStruct(type)) {
-			return type.replace(".", "::") + "*";
-		}
-		if(ENUM.isEnum(type)) {
-			return ENUM_TYPE;
-		}
-		switch(type) {
-			case "bool" :
-			case "float": return type;
-			case "string" : return "std::string";
-			case "int" : return "int32_t";
-			case "long" : return "int64_t";
-			case "list" : return "std::vector";
-			case "set" : return "std::set";
-			case "map" : return "std::map";
-		}
-		throw new RuntimeException("unknown type:" + type);
-	}
-
-	String getIndexType(Config c) {
-		return Struct.get(c.getType()).getField(c.getIndex()).getType();
+	private String toCppDefineType(String type) {
+		return (Struct.isStruct(type)) ? type.replace(".", "::") + "*" : toCppType(type);
 	}
 	
-	String toCppValue(String type, String value) {
+	private String toCppValue(String type, String value) {
 		switch(type) {
 		case "string": return "\"" + value + "\"";
 		default: return value;
 		}
 	}
 
-	String getDefMacroBegin(String fullName) {
+	private String getDefMacroBegin(String fullName) {
 		final String macro = "__" + fullName.replace('.', '_').toUpperCase() + "__H__";
 		return "#ifndef " + macro + "\n"
 				+"#define " + macro + "\n";
 	}
 
-	String getDefMacroEnd() {
+	private String getDefMacroEnd() {
 		return "#endif";
 	}
 
-	String getDefNamespaceBegin(String namespace) {
+	private String getDefNamespaceBegin(String namespace) {
 		final StringBuilder sb = new StringBuilder();
 		for(String n : namespace.split("\\.")) {
-			sb.append("namespace " + n  + "{");
+			sb.append("namespace ").append(n).append("{");
 		}
 		return sb.toString();
 	}
 
-	String getDefNamespaceEnd(String namespace) {
+	private String getDefNamespaceEnd(String namespace) {
 		final StringBuilder sb = new StringBuilder();
-		for(String n : namespace.split("\\.")) {
+		for(String ignored : namespace.split("\\.")) {
 			sb.append("}");
 		}
 		return sb.toString();
 	}
 
-	String getAllDefins() {
-		return  "#include \"alldefines.h\"";
+	private void includeAlldefines(List<String> ls) {
+		include(ls, "alldefines");
+	}
+
+	private void genStructs() {
+		final List<Struct> structs = Struct.getExports();
+		structs.forEach(this::genStructHeadFile);
+		for(int i = 0, n = (structs.size() + CLASS_PER_CONFIG - 1) / CLASS_PER_CONFIG ; i < n ; i++) {
+			genStructCppFile(structs.subList(i * CLASS_PER_CONFIG, Math.min(structs.size(), (i + 1) * CLASS_PER_CONFIG)), i);
+		}
 	}
 	
-	void genStructHeadFile(Struct struct) {
-		final ArrayList<String> ls = new ArrayList<String>();
+	private void genStructHeadFile(Struct struct) {
+		final ArrayList<String> ls = new ArrayList<>();
 		final String namespace = struct.getNamespace();
 		final String fullName = struct.getFullName();
 		ls.add(getDefMacroBegin(fullName));
-		ls.add(getAllDefins());
+		includeAlldefines(ls);
 		
 		final String base = struct.getBase();
 		final String name = struct.getName();
 		final boolean isDynamic = struct.isDynamic() ;
 
 		if(!base.isEmpty()) {
-			ls.add(String.format("#include \"%s.h\"", base.toLowerCase()));
+			include(ls, base);
 		}
 
 		ls.add(getDefNamespaceBegin(namespace));
@@ -164,64 +140,52 @@ public class CodeGen implements Generator {
 		}
 		
 		for(Const c : struct.getConsts()) {
-			final String type = c.getType();
-			final String value = c.getValue();
+			final String ctype = c.getType();
 			final String cname = c.getName();
-			if(Field.isRaw(type)) {
-				final String cppType = toCppType(type);
+			if(Field.isRaw(ctype)) {
+				final String cppType = toCppType(ctype);
 				ls.add(String.format("static %s %s;", cppType, cname));
 			} else {
-				switch(type) {
+				switch(ctype) {
 					case "list:int" :
 						ls.add(String.format("static int32_t %s[];", cname));
 						break;
 					case "list:float" :
-						ls.add(String.format("static double %s[];", cname, value));
+						ls.add(String.format("static double %s[];", cname));
 						break;
 					default:
-						Utils.error("struct:%s const:%s unknown type:%s", struct.getFullName(), c.getName(), type);	
+						Utils.error("struct:%s const:%s unknown type:%s", fullName, cname, ctype);
 				}
 			}
 		}
 		
-		final ArrayList<String> ds = new ArrayList<String>();
-		
 		for(Field f : struct.getFields()) {
-			String ftype = f.getType();
+			final String ftype = f.getType();
 			final String fname = f.getName();
 			final List<String> ftypes = f.getTypes();
 			if(f.checkInGroup(Main.groups)) {
 				if(f.isRawOrEnumOrStruct()) {
-					String dtype = toCppDefineType(ftype);
-					ds.add(String.format("%s %s;", dtype, fname));
+					final String dtype = toCppDefineType(ftype);
+					ls.add(String.format("%s %s;", dtype, fname));
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {
 							final String vtype = ftypes.get(1);
 							final String dvtype = toCppDefineType(vtype);
-							ds.add(String.format("std::vector<%s> %s;", dvtype, fname));
+							ls.add(String.format("std::vector<%s> %s;", dvtype, fname));
 							if(!f.getIndexs().isEmpty()) {
-								Struct s = Struct.get(vtype);
-								for(String idx : f.getIndexs()) {
-									Field idxf = s.getField(idx);
-									final String dktype = toCppDefineType(idxf.getType());
-									ds.add(String.format("std::map<%s, %s> %s_%s;", dktype, dvtype, fname, idx));
-								}
+								final Struct s = Struct.get(vtype);
+								ls.addAll(f.getIndexs().stream().map(idxName -> String.format("std::map<%s, %s> %s_%s;",
+										toCppDefineType(s.getField(idxName).getType()), dvtype, fname, idxName)).collect(Collectors.toList()));
 							}
 							break;
 						}
 						case "set": {
-							final String vtype = ftypes.get(1);
-							final String dvtype = toCppDefineType(vtype);
-							ds.add(String.format("std::set<%s> %s;", dvtype, fname));
+							ls.add(String.format("std::set<%s> %s;", toCppDefineType(ftypes.get(1)), fname));
 							break;
 						}
 						case "map": {
-							final String ktype = ftypes.get(1);
-							final String dktype = toCppDefineType(ktype);
-							final String vtype = ftypes.get(2);
-							final String dvtype = toCppDefineType(vtype);
-							ds.add(String.format("std::map<%s, %s> %s;", dktype, dvtype, fname));
+							ls.add(String.format("std::map<%s, %s> %s;", toCppDefineType(ftypes.get(1)), toCppDefineType(ftypes.get(2)), fname));
 							break;
 						}
 					}
@@ -231,8 +195,6 @@ public class CodeGen implements Generator {
 			}
 		}
 
-		ls.addAll(ds);
-
 		ls.add(String.format("%s(cfg::DataStream& fs);", name));
 		ls.add("};");
 
@@ -241,8 +203,8 @@ public class CodeGen implements Generator {
 		save(ls, fullName + ".h");
 	}
 
-	void genStructCppFile(List<Struct> structs, int id) {
-		final ArrayList<String> ls = new ArrayList<String>();
+	private void genStructCppFile(List<Struct> structs, int id) {
+		final ArrayList<String> ls = new ArrayList<>();
 		for(Struct struct : structs) {
 			final String namespace = struct.getNamespace();
 			final String fullName = struct.getFullName();
@@ -250,10 +212,8 @@ public class CodeGen implements Generator {
 			final String name = struct.getName();
 			final String base = struct.getBase();
 
-			ls.add(include(fullName + ".h"));
-			for (String refStructFullName : struct.getRefStructs()) {
-				ls.add(include(refStructFullName + ".h"));
-			}
+			include(ls, fullName);
+			struct.getRefStructs().forEach(s -> include(ls, s));
 
 			ls.add(getDefNamespaceBegin(namespace));
 			if (!struct.isDynamic()) {
@@ -261,14 +221,14 @@ public class CodeGen implements Generator {
 			}
 
 			for (Const c : struct.getConsts()) {
-				final String type = c.getType();
+				final String cType = c.getType();
 				final String value = c.getValue();
 				final String cname = c.getName();
-				if (Field.isRaw(type)) {
-					final String cppType = toCppType(type);
-					ls.add(String.format("%s %s::%s = %s;", cppType, name, cname, toCppValue(type, value)));
+				if (Field.isRaw(cType)) {
+					final String cppType = toCppType(cType);
+					ls.add(String.format("%s %s::%s = %s;", cppType, name, cname, toCppValue(cType, value)));
 				} else {
-					switch (type) {
+					switch (cType) {
 						case "list:int":
 							ls.add(String.format("int32_t %s::%s[] = {%s};", name, cname, value));
 							break;
@@ -276,7 +236,7 @@ public class CodeGen implements Generator {
 							ls.add(String.format("double %s::%s[] = {%s};", name, cname, value));
 							break;
 						default:
-							Utils.error("struct:%s const:%s unknown type:%s", fullName, c.getName(), type);
+							Utils.error("struct:%s const:%s unknown type:%s", fullName, cname, cType);
 					}
 				}
 			}
@@ -300,9 +260,8 @@ public class CodeGen implements Generator {
 								if (!f.getIndexs().isEmpty()) {
 									ls.add(String.format("%s _x = %s;", dvtype, readType(vtype)));
 									ls.add(String.format("%s.push_back(_x);", fname));
-									for (String idx : f.getIndexs()) {
-										ls.add(String.format("%s_%s[_x->%s] = _x;", fname, idx, idx));
-									}
+									ls.addAll(f.getIndexs().stream().map(idx -> String.format("%s_%s[_x->%s] = _x;", fname, idx, idx))
+											.collect(Collectors.toList()));
 								} else {
 									ls.add(String.format("%s.push_back(%s);", fname, readType(vtype)));
 								}
@@ -310,9 +269,8 @@ public class CodeGen implements Generator {
 								break;
 							}
 							case "set": {
-								final String vtype = ftypes.get(1);
 								ls.add("for(int n = fs.getSize(); n-- > 0 ; ) {");
-								ls.add(String.format("%s.insert(%s);", fname, readType(vtype)));
+								ls.add(String.format("%s.insert(%s);", fname, readType(ftypes.get(1))));
 								ls.add("}");
 								break;
 							}
@@ -340,19 +298,19 @@ public class CodeGen implements Generator {
 		save(ls, "structs" + id + ".cpp");
 	}
 
-	String include(String header) {
-		return "#include \"" + header.toLowerCase() + "\"";
+	private void include(List<String> ls, String header) {
+		ls.add("#include \"" + header.toLowerCase() + ".h\"");
 	}
 
-	final static int CLASS_PER_CONFIG = 100;
-	void genConfigHead() {
-		final ArrayList<String> ls = new ArrayList<String>();
+	private final static int CLASS_PER_CONFIG = 100;
+	private void genConfigs() {
+		final ArrayList<String> ls = new ArrayList<>();
 		List<Config> configs = Config.getExportConfigs();
 		final String namespace = "cfg";
 		final String name = Main.cfgmgrName;
 		final String fullName = namespace + "." + name;
 		ls.add(getDefMacroBegin(fullName));
-		ls.add(getAllDefins());
+		includeAlldefines(ls);
 		ls.add(getDefNamespaceBegin(namespace));
 
 		ls.add(String.format("class %s {", name));
@@ -362,7 +320,7 @@ public class CodeGen implements Generator {
 			final String dvtype = toCppDefineType(c.getType());
 			final String cname = c.getName();
 			if(!c.isSingle()) {
-				ls.add(String.format("std::map<%s, %s> %s;", toCppDefineType(getIndexType(c)), dvtype, cname));
+				ls.add(String.format("std::map<%s, %s> %s;", toCppDefineType(c.getIndexType()), dvtype, cname));
 			} else {
 				ls.add(String.format("%s %s;", dvtype, cname));
 			}
@@ -383,14 +341,12 @@ public class CodeGen implements Generator {
 		save(ls, name + ".h");
 	}
 
-	void genSubConfig(List<Config> configs, int id) {
-		final ArrayList<String> ls = new ArrayList<String>();
+	private void genSubConfig(List<Config> configs, int id) {
+		final ArrayList<String> ls = new ArrayList<>();
 		final String namespace = "cfg";
 		final String name = Main.cfgmgrName;
-		ls.add(include(name + ".h"));
-		configs.forEach(s -> {
-			ls.add(include(s.getType() + ".h"));
-		});
+		include(ls, name);
+		configs.forEach(c -> include(ls, c.getType()));
 		ls.add(getDefNamespaceBegin(namespace));
 
 		ls.add(String.format("void CfgMgr::load%s(const std::string& dataDir) {", id));
@@ -419,12 +375,12 @@ public class CodeGen implements Generator {
 		save(ls, name + id + ".cpp");
 	}
 
-	void genAllDefines() {
-		final ArrayList<String> ls = new ArrayList<String>();
+	private void genAllDefines() {
+		final ArrayList<String> ls = new ArrayList<>();
 		final String name = "alldefines";
 		ls.add(getDefMacroBegin(name));
-		ls.add(include("datastream.hpp"));
-		ls.add(include("object.h"));
+		include(ls, "datastream");
+		include(ls, "object");
 
 		Struct.getExports().forEach(s -> {
 			ls.add(getDefNamespaceBegin(s.getNamespace()));
@@ -435,9 +391,8 @@ public class CodeGen implements Generator {
 			final String namespace = e.getNamespace();
 			ls.add(getDefNamespaceBegin(namespace));
 			ls.add(String.format("class %s {enum {", e.getName()));
-			for(Map.Entry<String, Integer> me : e.getCases().entrySet()) {
-				ls.add(String.format("%s = %s,", me.getKey().replace("NULL", "null"), me.getValue()));
-			}
+			ls.addAll(e.getCases().entrySet().stream().map(me -> String.format("%s = %s,", me.getKey().replace("NULL", "null"), me.getValue()))
+					.collect(Collectors.toList()));
 			ls.add("};};");
 			ls.add(getDefNamespaceEnd(namespace));
 		});
@@ -447,30 +402,24 @@ public class CodeGen implements Generator {
 		save(ls, name + ".h");
 	}
 
-	void genStub() {
-		final ArrayList<String> ls = new ArrayList<String>();
-		List<Struct> exportStructs = Struct.getExports();
+	private void genStub() {
+		final ArrayList<String> ls = new ArrayList<>();
+		List<Struct> exports = Struct.getExports();
 
 		final String namespace = "cfg";
 		final String name = "Stub";
 		final String fullName = namespace + "." + name;
 		ls.add(getDefMacroBegin(fullName));
-		ls.add(getAllDefins());
+		includeAlldefines(ls);
 
-		exportStructs.forEach(s -> {
-			if(!s.isDynamic())
-				ls.add(include(s.getFullName() + ".h"));
-		});
+		exports.stream().filter(s -> !s.isDynamic()).forEach(s -> include(ls, s.getFullName()));
 
 		ls.add(getDefNamespaceBegin(namespace));
 
 		ls.add(String.format("class %s {", name));
 		ls.add(String.format("public: %s() {", name));
-		exportStructs.forEach(s -> {
-			if(!s.isDynamic()) {
-				ls.add(String.format("DataStream::registerType<%s>(\"%s\");", toCppType(s.getFullName()), s.getFullName()));
-			}
-		});
+		exports.stream().filter(s -> !s.isDynamic()).forEach(s ->
+				ls.add(String.format("DataStream::registerType<%s>(\"%s\");", toCppType(s.getFullName()), s.getFullName())));
 		ls.add("}} stub;");
 
 		ls.add(getDefNamespaceEnd(namespace));

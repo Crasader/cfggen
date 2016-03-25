@@ -79,13 +79,13 @@ public class Config {
 	public String getIndex() {
 		return indexs[0];
 	}
+
+	public String getIndexType() {
+		return Struct.get(getType()).getField(getIndex()).getType();
+	}
 	
 	public String getOutputDataFile() {
 		return outputFile;
-	}
-	
-	public boolean inManager() {
-		return manager;
 	}
 
 	public final boolean isSingle() {

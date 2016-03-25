@@ -39,19 +39,6 @@ namespace cfg {
 			return new DataStream(inputDatas);
 		}
 
-	private :
-		DataStream(std::vector<std::string> inputDatas) : datas(inputDatas), index(0) {
-
-		}
-
-		const std::string& getNext() {
-			if(index < datas.size()) {
-				return datas[index++];
-			} else {
-				throw Error("read not enough", "");
-			}
-		}
-	public:
 		bool getBool() {
 			const std::string& str = getNext();
 			if(str == "true")
@@ -106,7 +93,7 @@ namespace cfg {
 		Object* getObject(const std::string& name) {
 			Factory* factory = getFactorys()[name];
 			if(factory)
-				factory->create(*this);
+				return factory->create(*this);
 			throw Error(name, "unknown object type");
 		}
 
@@ -115,26 +102,38 @@ namespace cfg {
 			getFactorys()[name] = new FactoryImp<T>();
 		}
 
-		private:
-			const std::vector<std::string> datas;
-			size_t index;
-			class Factory {
-			public:
-				virtual Object* create(DataStream& ds) = 0;
-			};
+	private:
+		DataStream(std::vector<std::string> inputDatas) : datas(inputDatas), index(0) {
 
-			template<typename T>
-			class FactoryImp : public Factory {
-			public:
-				Object* create(DataStream& ds) {
-					return new T(ds);
-				}
-			};
+		}
 
-			static std::map<std::string, Factory*>& getFactorys() {
-				static std::map<std::string, Factory*> factorys;
-				return factorys;
+		const std::string& getNext() {
+			if(index < datas.size()) {
+				return datas[index++];
+			} else {
+				throw Error("read not enough", "");
 			}
+		}
+
+		const std::vector<std::string> datas;
+		size_t index;
+		class Factory {
+		public:
+			virtual Object* create(DataStream& ds) = 0;
+		};
+
+		template<typename T>
+		class FactoryImp : public Factory {
+		public:
+			Object* create(DataStream& ds) {
+				return new T(ds);
+			}
+		};
+
+		static std::map<std::string, Factory*>& getFactorys() {
+			static std::map<std::string, Factory*> factorys;
+			return factorys;
+		}
 	};
 }
 
