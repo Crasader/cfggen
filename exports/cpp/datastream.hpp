@@ -26,7 +26,7 @@ namespace cfg {
 		static DataStream* create(const std::string& dataFile) {
 			std::ifstream fin(dataFile.c_str());
 			if(!fin)
-				throw Error(dataFile, "open file fail");
+				throw Error(dataFile, "open fail");
 			std::vector<std::string> lines;
 			std::string line;
 			while(std::getline(fin, line)) {
@@ -105,7 +105,9 @@ namespace cfg {
 
 		Object* getObject(const std::string& name) {
 			Factory* factory = getFactorys()[name];
-			return factory ? factory->create(*this) : NULL;
+			if(factory)
+				factory->create(*this);
+			throw Error(name, "unknown object type");
 		}
 
 		template<typename T>

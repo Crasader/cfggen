@@ -418,24 +418,6 @@ public class CodeGen implements Generator {
 		ls.add(getDefNamespaceEnd(namespace));
 		save(ls, name + id + ".cpp");
 	}
-	/*
-	void genConfigCpp() {
-		final ArrayList<String> ls = new ArrayList<String>();
-		final String namespace = "cfg";
-		final String name = Main.cfgmgrName;
-		ls.add(include(name + ".h"));
-		Config.getExportConfigs().forEach(s -> {
-			ls.add(include(s.getType() + ".h"));
-		});
-		ls.add(getDefNamespaceBegin(namespace));
-
-		ls.add("void CfgMgr::load(const std::string& dataDir) {");
-
-
-		ls.add(getDefNamespaceEnd(namespace));
-		save(ls, name + ".cpp");
-	}
-	*/
 
 	void genAllDefines() {
 		final ArrayList<String> ls = new ArrayList<String>();
