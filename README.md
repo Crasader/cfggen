@@ -3,7 +3,7 @@
 ## cfggen是一个游戏专用配置生成工具.
 
 	cfggen读取excel或者xml文件,导出配置数据,并且生成读取配置数据所需的代码.
-	cfggen目前支持java,csharp,lua三种语言.
+	cfggen目前支持java,csharp,lua,c++.
 	cfggen经受过项目实践，非常稳定强大可靠。
 
 ## cfggen有如下优点
@@ -32,7 +32,7 @@
 
 * 支持最常用的语言
 
-		java,c#和lua。添加新语言支持也很容易
+		java,c#,lua,c++,添加新语言支持也很容易
 
 * 统一的导出数据格式
 
