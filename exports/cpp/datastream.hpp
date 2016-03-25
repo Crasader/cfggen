@@ -23,7 +23,6 @@ namespace cfg {
 
 	class DataStream {
 	public:
-		static int x[];
 		static DataStream* create(const std::string& dataFile) {
 			std::ifstream fin(dataFile.c_str());
 			if(!fin)
