@@ -1,13 +1,12 @@
 package configgen.type;
 
+import configgen.Utils;
+import configgen.data.Type;
+import org.w3c.dom.Element;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-
-import org.w3c.dom.Element;
-
-import configgen.Utils;
-import configgen.data.Type;
 
 public final class ENUM {
 	public final static HashMap<String, ENUM> enums = new HashMap<>();
@@ -29,6 +28,10 @@ public final class ENUM {
 	
 	public String getName() {
 		return name;
+	}
+
+	public String getFullname() {
+		return fullname;
 	}
 	
 	public HashMap<String, Integer> getCases() {

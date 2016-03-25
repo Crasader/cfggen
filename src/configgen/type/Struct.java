@@ -203,6 +203,32 @@ public final class Struct {
 		return Utils.checkInGroup(groups, gs);
 	}
 
+	public Set<String> getRefStructs() {
+		final Set<String> refs = new HashSet<>();
+		for(Field f : fields) {
+			if(f.isStruct()) {
+				refs.add(f.getType());
+			} else if(f.isContainer()) {
+				switch (f.getType()) {
+					case "list":
+					case "set": {
+						final String valueType = f.getTypes().get(1);
+						if (isStruct(valueType))
+							refs.add(valueType);
+						break;
+					}
+					case "map": {
+						final String valueType = f.getTypes().get(2);
+						if (isStruct(valueType))
+							refs.add(valueType);
+						break;
+					}
+				}
+			}
+		}
+		return refs;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
