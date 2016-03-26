@@ -5,6 +5,6 @@ public final class ItemGiftPack extends cfg.item.ItemBasic {
 	public final cfg.cmd.action.MultiBonus itempacklist;
 	public ItemGiftPack(cfg.DataStream fs) {
 		super(fs);
-		this.itempacklist = (cfg.cmd.action.MultiBonus)cfg.DataStream.create("cfg.cmd.action.MultiBonus", fs);
+		this.itempacklist = new cfg.cmd.action.MultiBonus(fs);
 	}
 }

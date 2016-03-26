@@ -1,5 +1,5 @@
 package cfg.ectype;
-public final class MissionCollectMineral  {
+public final class MissionCollectMineral extends cfg.CfgObject {
 	public final static int TYPEID = -508049504;
 	final public int getTypeId() { return TYPEID; }
 	public final int mineralid;

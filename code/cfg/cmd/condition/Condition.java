@@ -1,6 +1,5 @@
 package cfg.cmd.condition;
-public abstract class Condition  {
-	public abstract int getTypeId();
+public abstract class Condition extends cfg.CfgObject {
 	public Condition(cfg.DataStream fs) {
 	}
 }

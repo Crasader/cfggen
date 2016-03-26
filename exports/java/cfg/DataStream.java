@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.util.List;
 
 public final class DataStream {
-	public static final String magicStringForNewLine = ".g9~/";
+	private static final String magicStringForNewLine = ".g9~/";
 	private final List<String> lines;
 	private int index;
 	
@@ -32,12 +32,15 @@ public final class DataStream {
 	
 	public boolean getBool() {
 		final String s = getNextAndCheckNotEmpty().toLowerCase();
-		if(s.equals("true"))
-			return true;
-		else if(s.equals("false"))
-			return false;
-		else 
-			error(s + " isn't bool");
+		switch (s) {
+			case "true":
+				return true;
+			case "false":
+				return false;
+			default:
+				error(s + " isn't bool");
+				break;
+		}
 		return false;
 	}
 	
@@ -60,20 +63,20 @@ public final class DataStream {
 		return getNextAndCheckNotEmpty().replace(magicStringForNewLine, "\n");
 	}
 
+	public cfg.CfgObject getObject(String name) {
+		try {
+			return (cfg.CfgObject)Class.forName(name).getConstructor(cfg.DataStream.class).newInstance(this);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static DataStream create(String dataFile, String inputEncoding) {
 		try {
 			return new DataStream(Files.readAllLines(new File(dataFile).toPath(), Charset.forName(inputEncoding)));
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("data file:" + dataFile + " loads fail!");
-		}
-	}
-	public static Object create(String name, cfg.DataStream fs) {
-		try {
-			return Class.forName(name).getConstructor(cfg.DataStream.class).newInstance(fs);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
 		}
 	}
 }

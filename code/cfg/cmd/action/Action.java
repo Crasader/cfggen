@@ -1,6 +1,5 @@
 package cfg.cmd.action;
-public abstract class Action  {
-	public abstract int getTypeId();
+public abstract class Action extends cfg.CfgObject {
 	public Action(cfg.DataStream fs) {
 	}
 }

@@ -5,6 +5,6 @@ public final class ItemExperience extends cfg.item.ItemBasic {
 	public final cfg.cmd.action.AddExperience effect;
 	public ItemExperience(cfg.DataStream fs) {
 		super(fs);
-		this.effect = (cfg.cmd.action.AddExperience)cfg.DataStream.create(fs.getString(), fs);
+		this.effect = (cfg.cmd.action.AddExperience)fs.getObject(fs.getString());
 	}
 }

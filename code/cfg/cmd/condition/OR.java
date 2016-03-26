@@ -6,7 +6,7 @@ public final class OR extends cfg.cmd.condition.Condition {
 	public final cfg.cmd.condition.Condition second;
 	public OR(cfg.DataStream fs) {
 		super(fs);
-		this.first = (cfg.cmd.condition.Condition)cfg.DataStream.create(fs.getString(), fs);
-		this.second = (cfg.cmd.condition.Condition)cfg.DataStream.create(fs.getString(), fs);
+		this.first = (cfg.cmd.condition.Condition)fs.getObject(fs.getString());
+		this.second = (cfg.cmd.condition.Condition)fs.getObject(fs.getString());
 	}
 }

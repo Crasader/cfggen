@@ -7,6 +7,6 @@ public final class CareerBonus extends cfg.cmd.action.Bonus {
 	public CareerBonus(cfg.DataStream fs) {
 		super(fs);
 		this.career = fs.getInt();
-		this.bonus = (cfg.cmd.action.Bonus)cfg.DataStream.create(fs.getString(), fs);
+		this.bonus = (cfg.cmd.action.Bonus)fs.getObject(fs.getString());
 	}
 }

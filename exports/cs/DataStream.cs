@@ -67,21 +67,15 @@ namespace cfg
             return false;
         }
 
+        public cfg.CfgObject GetObject(string name)
+        {
+            return (cfg.CfgObject)Type.GetType(name).GetConstructor(new[] { typeof(cfg.DataStream) }).Invoke(new object[] { this });
+        }
+
         public static DataStream Create(string file, string encoding)
         {
             return new DataStream(file, encoding);
         }
 		
-		public static Object Create(string name, cfg.DataStream fs) {
-			try
-			{
-				return Type.GetType(name).GetConstructor(new []{typeof (cfg.DataStream)}).Invoke(new object[]{fs});
-			}
-			catch (Exception e)
-			{
-				System.Console.WriteLine(e);
-				return null;
-			}
-		}
     }
 }

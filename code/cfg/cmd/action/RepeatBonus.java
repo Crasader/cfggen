@@ -6,7 +6,7 @@ public final class RepeatBonus extends cfg.cmd.action.Bonus {
 	public final int num;
 	public RepeatBonus(cfg.DataStream fs) {
 		super(fs);
-		this.bonus = (cfg.cmd.action.Bonus)cfg.DataStream.create(fs.getString(), fs);
+		this.bonus = (cfg.cmd.action.Bonus)fs.getObject(fs.getString());
 		this.num = fs.getInt();
 	}
 }

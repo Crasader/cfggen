@@ -1,5 +1,5 @@
 package cfg.ectype;
-public final class MissionKillMonster  {
+public final class MissionKillMonster extends cfg.CfgObject {
 	public final static int TYPEID = 507461980;
 	final public int getTypeId() { return TYPEID; }
 	public final int monsterid;

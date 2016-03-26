@@ -11,57 +11,52 @@ public class CfgMgr {
 	public static final java.util.LinkedHashMap<Integer, cfg.ectype.StoryLayout> storylayout = new java.util.LinkedHashMap<>();
 	public static void load() {
 		{
-			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/role/profession.data", DataDir.encoding);
-			profession.clear();
+			final cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/role/profession.data", DataDir.encoding);
 			for(int n = fs.getInt() ; n-- > 0 ; ) {
-				final cfg.role.Profession v = (cfg.role.Profession)cfg.DataStream.create("cfg.role.Profession", fs);
+				final cfg.role.Profession v = new cfg.role.Profession(fs);
 				profession.put(v.id, v);
 			}
 		}
 		{
-			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/role/name.data", DataDir.encoding);
+			final cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/role/name.data", DataDir.encoding);
 			if(fs.getInt() != 1) throw new RuntimeException("single conifg size != 1");
-			name = (cfg.role.Name)cfg.DataStream.create("cfg.role.Name", fs);
+			name = new cfg.role.Name(fs);
 		}
 		{
-			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/item/itembasic.data", DataDir.encoding);
-			itembasic.clear();
+			final cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/item/itembasic.data", DataDir.encoding);
 			for(int n = fs.getInt() ; n-- > 0 ; ) {
-				final cfg.item.ItemBasic v = (cfg.item.ItemBasic)cfg.DataStream.create(fs.getString(), fs);
+				final cfg.item.ItemBasic v = (cfg.item.ItemBasic)fs.getObject(fs.getString());
 				itembasic.put(v.id, v);
 			}
 		}
 		{
-			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/role/profession2.data", DataDir.encoding);
-			profession2.clear();
+			final cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/role/profession2.data", DataDir.encoding);
 			for(int n = fs.getInt() ; n-- > 0 ; ) {
-				final cfg.role.Profession2 v = (cfg.role.Profession2)cfg.DataStream.create("cfg.role.Profession2", fs);
+				final cfg.role.Profession2 v = new cfg.role.Profession2(fs);
 				profession2.put(v.id, v);
 			}
 		}
 		{
-			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/item/itemconfig.data", DataDir.encoding);
+			final cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/item/itemconfig.data", DataDir.encoding);
 			if(fs.getInt() != 1) throw new RuntimeException("single conifg size != 1");
-			itemconfig = (cfg.item.ItemConfig)cfg.DataStream.create("cfg.item.ItemConfig", fs);
+			itemconfig = new cfg.item.ItemConfig(fs);
 		}
 		{
-			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/currency/currency.data", DataDir.encoding);
-			currency.clear();
+			final cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/currency/currency.data", DataDir.encoding);
 			for(int n = fs.getInt() ; n-- > 0 ; ) {
-				final cfg.currency.Currency v = (cfg.currency.Currency)cfg.DataStream.create("cfg.currency.Currency", fs);
+				final cfg.currency.Currency v = new cfg.currency.Currency(fs);
 				currency.put(v.type, v);
 			}
 		}
 		{
-			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/role/roleconfig.data", DataDir.encoding);
+			final cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/role/roleconfig.data", DataDir.encoding);
 			if(fs.getInt() != 1) throw new RuntimeException("single conifg size != 1");
-			roleconfig = (cfg.role.RoleConfig)cfg.DataStream.create("cfg.role.RoleConfig", fs);
+			roleconfig = new cfg.role.RoleConfig(fs);
 		}
 		{
-			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/ectype/storylayout.data", DataDir.encoding);
-			storylayout.clear();
+			final cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + "/ectype/storylayout.data", DataDir.encoding);
 			for(int n = fs.getInt() ; n-- > 0 ; ) {
-				final cfg.ectype.StoryLayout v = (cfg.ectype.StoryLayout)cfg.DataStream.create("cfg.ectype.StoryLayout", fs);
+				final cfg.ectype.StoryLayout v = new cfg.ectype.StoryLayout(fs);
 				storylayout.put(v.id, v);
 			}
 		}

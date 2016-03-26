@@ -1,5 +1,5 @@
 package cfg.role;
-public final class Const  {
+public final class Const extends cfg.CfgObject {
 	public final static int TYPEID = 1361263509;
 	final public int getTypeId() { return TYPEID; }
 	public static final int MAX_LEVEL = 90;

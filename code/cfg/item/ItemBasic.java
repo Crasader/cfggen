@@ -1,6 +1,5 @@
 package cfg.item;
-public abstract class ItemBasic  {
-	public abstract int getTypeId();
+public abstract class ItemBasic extends cfg.CfgObject {
 	public final int id;
 	public final String name;
 	public final String owner;
@@ -27,14 +26,14 @@ public abstract class ItemBasic  {
 		this.level = fs.getInt();
 		this.quality = fs.getInt();
 		this.prize = fs.getInt();
-		this.gender = (cfg.cmd.condition.Gender)cfg.DataStream.create("cfg.cmd.condition.Gender", fs);
-		this.professionlimit = (cfg.cmd.condition.ProfessionLimit)cfg.DataStream.create("cfg.cmd.condition.ProfessionLimit", fs);
-		this.bindtype = (cfg.cmd.action.BindType)cfg.DataStream.create("cfg.cmd.action.BindType", fs);
+		this.gender = new cfg.cmd.condition.Gender(fs);
+		this.professionlimit = new cfg.cmd.condition.ProfessionLimit(fs);
+		this.bindtype = new cfg.cmd.action.BindType(fs);
 		this.introduction = fs.getString();
-		this.levellimit = (cfg.cmd.condition.MinMaxLevel)cfg.DataStream.create("cfg.cmd.condition.MinMaxLevel", fs);
+		this.levellimit = new cfg.cmd.condition.MinMaxLevel(fs);
 		this.maxpile = fs.getInt();
 		this.batch = fs.getBool();
 		this.cansell = fs.getBool();
-		this.daylimit = (cfg.cmd.condition.DayLimit)cfg.DataStream.create("cfg.cmd.condition.DayLimit", fs);
+		this.daylimit = new cfg.cmd.condition.DayLimit(fs);
 	}
 }

@@ -7,81 +7,93 @@ import configgen.type.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CodeGen implements Generator {
 	@Override
 	public void gen() {
-		Struct.getExports().forEach(s -> genStruct(s));
-		ENUM.getExports().forEach(e -> genEnum(e));
+		Struct.getExports().forEach(this::genStruct);
+		ENUM.getExports().forEach(this::genEnum);
 		genConfig();
 	}
-	
-	String readType(String type) {
+
+	private void save(String fullTypeName, ArrayList<String> lines) {
+		final String code = lines.stream().collect(Collectors.joining("\n"));
+		final String outFile = String.format("%s/%s.java", Main.codeDir, fullTypeName.replace('.', '/'));
+		Utils.save(outFile, code);
+	}
+
+	private String readType(String type) {
 		switch(type) {
-			case "bool":
-			case "boolean":
-			case "Boolean": return "fs.getBool()";
-			case "int":
-			case "Integer": return "fs.getInt()";
-			case "long":
-			case "Long": return "fs.getLong()";
-			case "float":
-			case "Float":  return "fs.getFloat()";
-			case "String": return "fs.getString()";
+			case "bool": return "fs.getBool()";
+			case "int": return "fs.getInt()";
+			case "long": return "fs.getLong()";
+			case "float":  return "fs.getFloat()";
+			case "string": return "fs.getString()";
 			default: {
-				Struct struct = Struct.get(type);
-				if(struct.isDynamic())
-					return String.format("(%s)cfg.DataStream.create(fs.getString(), fs)", type);
+				if(ENUM.isEnum(type))
+					return "fs.getInt()";
+				if(Struct.isDynamic(type))
+					return String.format("(%s)fs.getObject(fs.getString())", type);
 				else
-					return "(" + type + ")cfg.DataStream.create(\"" + type + "\", fs)";
+					return String.format("new %s(fs)", type);
 			}
 		}
 	}
 	
-	String toJavaValue(String type, String value) {
+	private String toJavaValue(String type, String value) {
 		switch(type) {
 		case "string": return "\"" + value + "\"";
 		case "float": return value + "f";
 		default: return value;
 		}
 	}
-	
-	void genEnum(ENUM e) {
-		final ArrayList<String> ls = new ArrayList<String>();
+
+	private String toJavaType(String type) {
+		switch(type) {
+			case "bool" : return "boolean";
+			case "string" : return "String";
+			default: return ENUM.isEnum(type) ? "int" : type;
+		}
+	}
+
+	private String toBoxType(String type) {
+		switch(type) {
+			case "bool": return "Boolean";
+			case "int": return "Integer";
+			case "long": return "Long";
+			case "float": return "Float";
+			case "string": return "String";
+			default : return ENUM.isEnum(type) ? "Integer" : type;
+		}
+	}
+
+	private void genEnum(ENUM e) {
+		final ArrayList<String> ls = new ArrayList<>();
 		final String namespace = e.getNamespace();
 		ls.add("package " + namespace + ";");
 		final String name = e.getName();
 		ls.add(String.format("public final class %s {", name));
-		for(Map.Entry<String, Integer> me : e.getCases().entrySet()) {
-			ls.add(String.format("	public final static int %s = %d;", me.getKey(), me.getValue()));
-		}
+		ls.addAll(e.getCases().entrySet().stream().map(me ->
+				String.format("	public final static int %s = %d;", me.getKey(), me.getValue())).collect(Collectors.toList()));
 		ls.add(String.format("	public final static java.util.List<Integer> enums = java.util.Arrays.asList(%s);",
 				e.getCases().entrySet().stream().filter(ee -> !ee.getKey().equalsIgnoreCase("null"))
 				.map(ee-> ee.getValue().toString()).collect(Collectors.joining(" ,"))));
 		ls.add("}");
-		final String code = ls.stream().collect(Collectors.joining("\n"));
-		//Main.println(code);
-		final String outFile = String.format("%s/%s/%s.java", Main.codeDir, namespace.replace('.', '/'), name);
-		Utils.save(outFile, code);
+		save(e.getFullname(), ls);
 	}
-	
-	void genStruct(Struct struct) {
-		final ArrayList<String> ls = new ArrayList<String>();
+
+	private void genStruct(Struct struct) {
+		final ArrayList<String> ls = new ArrayList<>();
 		final String namespace = struct.getNamespace();
 		ls.add("package " + namespace + ";");
 		
 		final String base = struct.getBase();
 		final String name = struct.getName();
 		final boolean isDynamic = struct.isDynamic() ;
-		ls.add(String.format("public %s class %s %s {", (isDynamic ? "abstract" : "final"), name, (base.isEmpty() ? "" : "extends " + base)));
+		ls.add(String.format("public %s class %s extends %s {", (isDynamic ? "abstract" : "final"), name, (base.isEmpty() ? "cfg.CfgObject" : base)));
 		
-		if(isDynamic) {
-			if(base.isEmpty()) {
-				ls.add("	public abstract int getTypeId();");
-			}
-		} else {
+		if(!isDynamic) {
 			ls.add(String.format("	public final static int TYPEID = %s;", struct.getTypeId()));
 			ls.add("	final public int getTypeId() { return TYPEID; }");
 		}
@@ -107,11 +119,9 @@ public class CodeGen implements Generator {
 			}
 		}
 		
-		final ArrayList<String> ds = new ArrayList<String>();
-		final ArrayList<String> cs = new ArrayList<String>();
-		
+		final ArrayList<String> ds = new ArrayList<>();
+		final ArrayList<String> cs = new ArrayList<>();
 
-		final ArrayList<Field> parentFields = new ArrayList<>();
 		cs.add(String.format("	public %s(cfg.DataStream fs) {", name));
 		if(!base.isEmpty()) {
 			cs.add("		super(fs);");
@@ -123,53 +133,50 @@ public class CodeGen implements Generator {
 			final String fname = f.getName();
 			final List<String> ftypes = f.getTypes();
 			if(f.checkInGroup(Main.groups)) {
-				if(f.isRaw()) {
+				if(f.isRawOrEnumOrStruct()) {
 					ds.add(String.format("	public final %s %s;", jtype, fname));
-					cs.add(String.format("		this.%s = %s;", fname, readType(jtype)));
-				} else if(f.isStruct()) {
-					ds.add(String.format("	public final %s %s;", jtype, fname));
-					cs.add(String.format("		this.%s = %s;", fname, readType(jtype)));
-				} else if(f.isEnum()) {
-					ds.add(String.format("	public final int %s;", fname));
-					cs.add(String.format("		this.%s = %s;", fname, readType("int")));
+					cs.add(String.format("		this.%s = %s;", fname, readType(ftype)));
 				} else if(f.isContainer()) {
 					switch(ftype) {
 						case "list": {
-							final String valueType = toBoxType(toJavaType(ftypes.get(1)));
-							ds.add(String.format("	public final java.util.List<%s> %s = new java.util.ArrayList<%s>();", valueType, fname, valueType));
+							final String vtype = ftypes.get(1);
+							final String jvtype = toJavaType(vtype);
+							final String bvtype = toBoxType(ftypes.get(1));
+							ds.add(String.format("	public final java.util.List<%s> %s = new java.util.ArrayList<>();", bvtype, fname));
 							cs.add("		for(int n = fs.getInt(); n-- > 0 ; ) {");
-							cs.add(String.format("			this.%s.add(%s);", fname, readType(valueType)));
-							cs.add("		}");
-							
-							if(!f.getIndexs().isEmpty()) {
-								cs.add(String.format("		for(%s _V : this.%s) {", valueType, fname));
-								Struct s = Struct.get(valueType);
+							if(f.getIndexs().isEmpty()) {
+								cs.add(String.format("			this.%s.add(%s);", fname, readType(vtype)));
+							} else {
+								cs.add(String.format("			final %s _v = %s;", jvtype, readType(vtype)));
+								cs.add(String.format("			this.%s.add(_v);", fname));
+								final Struct s = Struct.get(vtype);
 								for(String idx : f.getIndexs()) {
-									Field idxf = s.getField(idx);
-									final String keyType = toBoxType(toJavaType(idxf.getType()));
-									ds.add(String.format("	public final java.util.Map<%s, %s> %s_%s = new java.util.HashMap<%s, %s>();",
-										keyType, valueType, fname, idx, keyType, valueType));
-									cs.add(String.format("			this.%s_%s.put(_V.%s, _V);", fname, idx, idx));
+									final String bktype = toBoxType(s.getField(idx).getType());
+									final String idxFieldName = fname + "_" + idx;
+									ds.add(String.format("	public final java.util.Map<%s, %s> %s= new java.util.HashMap<>();",
+											bktype, bvtype, idxFieldName));
+									cs.add(String.format("			this.%s.put(_v.%s, _v);", idxFieldName, idx));
 								}
-								cs.add("		}");
 							}
-							
+							cs.add("		}");
 							break;
 						}
 						case "set": {
-							final String valueType = toBoxType(toJavaType(ftypes.get(1)));
-							ds.add(String.format("	public final java.util.Set<%s> %s = new java.util.HashSet<%s>();", valueType, fname, valueType));
+							final String vtype = ftypes.get(1);
+							ds.add(String.format("	public final java.util.Set<%s> %s = new java.util.HashSet<>();", toBoxType(vtype), fname));
 							cs.add("		for(int n = fs.getInt(); n-- > 0 ; ) {");
-							cs.add(String.format("			this.%s.add(%s);", fname, readType(valueType)));
+							cs.add(String.format("			this.%s.add(%s);", fname, readType(vtype)));
 							cs.add("		}");
 							break;
 						}
 						case "map": {
-							final String keyType = toBoxType(toJavaType(ftypes.get(1)));
-							final String valueType = toBoxType(toJavaType(ftypes.get(2)));
-							ds.add(String.format("	public final java.util.Map<%s, %s> %s = new java.util.HashMap<%s, %s>();", keyType, valueType, fname, keyType, valueType));
+							final String ktype = ftypes.get(1);
+							final String vtype = ftypes.get(2);
+							ds.add(String.format("	public final java.util.Map<%s, %s> %s = new java.util.HashMap<>();",
+									toBoxType(ktype), toBoxType(vtype), fname));
 							cs.add("		for(int n = fs.getInt(); n-- > 0 ; ) {");
-							cs.add(String.format("			this.%s.put(%s, %s);", fname, readType(keyType), readType(valueType)));
+							cs.add(String.format("			final %s _k = %s;", toJavaType(ktype), readType(ktype)));
+							cs.add(String.format("			this.%s.put(_k, %s);", fname, readType(vtype)));
 							cs.add("		}");
 							break;
 						}
@@ -186,83 +193,50 @@ public class CodeGen implements Generator {
 		ls.addAll(cs);
 		
 		ls.add("}");
-		final String code = ls.stream().collect(Collectors.joining("\n"));
-		//Main.println(code);
-		final String outFile = String.format("%s/%s/%s.java", Main.codeDir, namespace.replace('.', '/'), name);
-		Utils.save(outFile, code);
+		save(struct.getFullName(), ls);
 	}
 	
-	public String toJavaType(String rawType) {
-		switch(rawType) {
-		case "bool" : return "boolean";
-		case "string" : return "String";
-		}
-		return ENUM.isEnum(rawType) ? "int" : rawType;
-	}
-	
-	public String toBoxType(String type) {
-		switch(type) {
-		case "boolean": return "Boolean";
-		case "int": return "Integer";
-		case "long": return "Long";
-		case "float": return "Float";
-		default : return type;
-		}
-	}
-	
-	String getIndexType(Config c) {
-		final String type = toBoxType(Struct.get(c.getType()).getField(c.getIndex()).getType());
-		return ENUM.isEnum(type) ? "Integer" : toBoxType(toJavaType(type));
-	}
-	
-	void genConfig() {
+	private void genConfig() {
 		final List<Config> exportConfigs = Config.getExportConfigs();
-		final ArrayList<String> ls = new ArrayList<String>();
+		final ArrayList<String> ls = new ArrayList<>();
 		final String namespace = "cfg";
+		final String name = Main.cfgmgrName;
 		
 		ls.add("package " + namespace + ";");
-		ls.add(String.format("public class %s {", Main.cfgmgrName));
+		ls.add(String.format("public class %s {", name));
 		ls.add("	public static class DataDir { public static String dir; public static String encoding; }");
 		exportConfigs.forEach(c -> {
+			final String vtype = c.getType();
+			final String cname = c.getName();
 			if(!c.isSingle()) {
 				ls.add(String.format("	public static final java.util.LinkedHashMap<%s, %s> %s = new java.util.LinkedHashMap<>();", 
-					getIndexType(c), c.getType(), c.getName()));
+					toBoxType(c.getIndexType()), toBoxType(vtype), cname));
 			} else {
-				ls.add(String.format("	public static %s %s;", c.getType(), c.getName()));
+				ls.add(String.format("	public static %s %s;", toJavaType(vtype), cname));
 			}
 			}
 		);
 		ls.add("	public static void load() {");
-		exportConfigs.forEach(
-			c -> {
+		exportConfigs.forEach(c -> {
+			final String vtype = c.getType();
+			final String cname = c.getName();
 			ls.add("		{");
-				ls.add(String.format("			cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding);", c.getOutputDataFile()));
+				ls.add(String.format("			final cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding);", c.getOutputDataFile()));
 				if(!c.isSingle()) {
-					ls.add(String.format("			%s.clear();", c.getName()));
 					ls.add("			for(int n = fs.getInt() ; n-- > 0 ; ) {");
-					if(Struct.isDynamic(c.getType())) {
-						ls.add(String.format("				final %s v = (%s)cfg.DataStream.create(fs.getString(), fs);", c.getType(), c.getType()));
-					} else {
-						ls.add(String.format("				final %s v = (%s)cfg.DataStream.create(\"%s\", fs);", c.getType(), c.getType(), c.getType()));
-					}
-					ls.add(String.format("				%s.put(v.%s, v);", c.getName(), c.getIndex()));
+					ls.add(String.format("				final %s v = %s;", toBoxType(vtype), readType(vtype)));
+					ls.add(String.format("				%s.put(v.%s, v);", cname, c.getIndex()));
 					ls.add("			}");
 			} else {
 				ls.add("			if(fs.getInt() != 1) throw new RuntimeException(\"single conifg size != 1\");");
-				if(Struct.isDynamic(c.getType())) {
-					ls.add(String.format("			%s = (%s)cfg.DataStream.create(fs.getString(), fs);", c.getName(), c.getType()));
-				} else {
-					ls.add(String.format("			%s = (%s)cfg.DataStream.create(\"%s\", fs);", c.getName(), c.getType(), c.getType()));
-				}
+				ls.add(String.format("			%s = %s;", cname, readType(vtype)));
 			}
 			ls.add("		}");
 		});
 		ls.add("	}");
 		
 		ls.add("}");
-		final String outFile = String.format("%s/%s/%s.java", Main.codeDir, namespace.replace('.', '/'), Main.cfgmgrName);
-		final String code = ls.stream().collect(Collectors.joining("\n"));
-		Utils.save(outFile, code);
+		save(namespace + "." + name, ls);
 	}
 
 }

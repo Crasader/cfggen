@@ -11,6 +11,6 @@ public final class ItemMedicine extends cfg.item.ItemBasic {
 		this.buffid = fs.getInt();
 		this.hp = fs.getInt();
 		this.mp = fs.getInt();
-		this.cdgroup = (cfg.cmd.condition.GroupCoolDown)cfg.DataStream.create("cfg.cmd.condition.GroupCoolDown", fs);
+		this.cdgroup = new cfg.cmd.condition.GroupCoolDown(fs);
 	}
 }

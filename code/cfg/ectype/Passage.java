@@ -1,5 +1,5 @@
 package cfg.ectype;
-public final class Passage  {
+public final class Passage extends cfg.CfgObject {
 	public final static int TYPEID = -2104230174;
 	final public int getTypeId() { return TYPEID; }
 	public final int curveid;

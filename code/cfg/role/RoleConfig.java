@@ -1,5 +1,5 @@
 package cfg.role;
-public final class RoleConfig  {
+public final class RoleConfig extends cfg.CfgObject {
 	public final static int TYPEID = -409859482;
 	final public int getTypeId() { return TYPEID; }
 	public final int bornmap;
@@ -11,7 +11,7 @@ public final class RoleConfig  {
 	public final float duegonbonus;
 	public final int addtiliinterval;
 	public final int addtilivalue;
-	public final java.util.List<Integer> createroletasks = new java.util.ArrayList<Integer>();
+	public final java.util.List<Integer> createroletasks = new java.util.ArrayList<>();
 	public RoleConfig(cfg.DataStream fs) {
 		this.bornmap = fs.getInt();
 		this.bornpointx = fs.getFloat();

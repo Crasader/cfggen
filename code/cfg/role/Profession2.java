@@ -1,5 +1,5 @@
 package cfg.role;
-public final class Profession2  {
+public final class Profession2 extends cfg.CfgObject {
 	public final static int TYPEID = -266349208;
 	final public int getTypeId() { return TYPEID; }
 	public final int id;

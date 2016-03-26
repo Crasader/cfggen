@@ -1,6 +1,5 @@
 package cfg.ectype;
-public abstract class ExeCondition  {
-	public abstract int getTypeId();
+public abstract class ExeCondition extends cfg.CfgObject {
 	public ExeCondition(cfg.DataStream fs) {
 	}
 }

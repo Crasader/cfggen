@@ -1,5 +1,5 @@
 package cfg.currency;
-public final class Currency  {
+public final class Currency extends cfg.CfgObject {
 	public final static int TYPEID = 1524312676;
 	final public int getTypeId() { return TYPEID; }
 	public final int type;
