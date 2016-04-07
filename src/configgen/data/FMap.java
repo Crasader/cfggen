@@ -1,17 +1,16 @@
 package configgen.data;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import configgen.FlatStream;
 import configgen.Utils;
 import configgen.type.Config;
 import configgen.type.Field;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class FMap extends Type {
 	public final Map<Type, Type> values = new LinkedHashMap<Type, Type>();
@@ -64,19 +63,17 @@ public class FMap extends Type {
 	public void verifyData() {
 		final String keyRef = define.getKeyRef();
 		if(!keyRef.isEmpty()) {
-			HashSet<Type> validValues = Config.getData(keyRef);
 			for(Type d : values.keySet()) {
-				if(!d.isNull() && !validValues.contains(d))
-					System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + d + " can't find in config:" + keyRef);
+				verifyData(d, keyRef);
 			}
+
 		}
 		
 		final String valueRef = define.getValueRef();
 		if(!valueRef.isEmpty()) {
 			HashSet<Type> validValues = Config.getData(valueRef);
 			for(Type d : values.values()) {
-				if(!d.isNull() && !validValues.contains(d))
-					System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + d + " can't find in config:" + valueRef);
+				verifyData(d, valueRef);
 			}
 		}
 	}

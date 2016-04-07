@@ -4,7 +4,6 @@ import configgen.FlatStream;
 import configgen.Main;
 import configgen.RowColumnStream;
 import configgen.Utils;
-import configgen.type.Config;
 import configgen.type.Field;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -88,10 +87,8 @@ public class FList extends Type {
 	public void verifyData() {
 		final String ref = define.getRef();
 		if(!ref.isEmpty()) {
-			HashSet<Type> validValues = Config.getData(ref);
 			for(Type d : values) {
-				if(!d.isNull() && !validValues.contains(d))
-					errorRef(d);
+				verifyData(d, ref);
 			}
 		}
 		if(Field.isStruct(define.getTypes().get(1))) {

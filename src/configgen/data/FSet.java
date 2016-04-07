@@ -1,16 +1,14 @@
 package configgen.data;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import configgen.FlatStream;
+import configgen.Utils;
+import configgen.type.Field;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import configgen.FlatStream;
-import configgen.Utils;
-import configgen.type.Config;
-import configgen.type.Field;
+import java.util.HashSet;
+import java.util.Set;
 
 public class FSet extends Type {
 	final public Set<Type> values = new HashSet<Type>();
@@ -56,11 +54,10 @@ public class FSet extends Type {
 	@Override
 	public void verifyData() {
 		final String ref = define.getRef();
-		if(ref.isEmpty()) return;
-		HashSet<Type> validValues = Config.getData(ref);
-		for(Type d : values) {
-			if(!d.isNull() && !validValues.contains(d))
-				errorRef(d);
+		if(!ref.isEmpty()) {
+			for(Type d : values) {
+				verifyData(d, ref);
+			}
 		}
 	}
 

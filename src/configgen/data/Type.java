@@ -6,6 +6,7 @@ import configgen.type.Field;
 import configgen.type.Struct;
 import org.w3c.dom.Element;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 public abstract class Type {
@@ -157,17 +158,29 @@ public abstract class Type {
 	public abstract boolean isNull();
 	public abstract void accept(Visitor visitor);
 	
-	public void errorRef(Type value) {
-		System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + value + " can't find in config:" + define.getRef());
+	public static void errorRef(Type value, String refName) {
+		System.out.println("struct:" + value.host.getType() + " field:" + value.define.getName() + " value:" + value + " can't find in config:" + refName);
+	}
+
+	public static void verifyData(Type value, String ref) {
+		if(value.isNull() || ref.isEmpty()) return;
+		if(ref.contains("|")) {
+			if(Arrays.asList(ref.split("\\|")).stream().allMatch(refName -> !Config.getData(refName).contains(value)))
+				errorRef(value, ref);
+		} else if(ref.contains(",")) {
+			for(String refName : ref.split(",")) {
+				if(!Config.getData(refName).contains(value))
+					errorRef(value, refName);
+			}
+		} else {
+			HashSet<Type> validValues = Config.getData(ref);
+			if(!validValues.contains(value))
+				errorRef(value, ref);
+		}
 	}
 
 	public void verifyData() {
-		if(isNull()) return;
-		final String ref = define.getRef();
-		if(ref.isEmpty()) return;
-		HashSet<Type> validValues = Config.getData(ref);
-		if(!validValues.contains(this))
-			errorRef(this);	
+		verifyData(this, define.getRef());
 	}
 
 	

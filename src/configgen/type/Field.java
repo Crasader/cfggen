@@ -13,12 +13,14 @@ public final class Field {
 	private final String fullType;
 	private final List<String> types;
 
-	private final HashSet<String> indexs = new HashSet<String>();
-	private final HashSet<String> groups = new HashSet<String>();
-	private final List<String> refs = new ArrayList<String>();
+	private final HashSet<String> indexs = new HashSet<>();
+	private final HashSet<String> groups = new HashSet<>();
+	private final List<String> refs = new ArrayList<>();
 	
-	public final static HashSet<String> RawTypes = new HashSet<String>(Arrays.asList("bool", "int", "float", "long", "string"));
-	public final static HashSet<String> ConTypes = new HashSet<String>(Arrays.asList("list", "set", "map"));
+	private final static HashSet<String> RawTypes = new HashSet<>(Arrays.asList("bool", "int", "float", "long", "string"));
+	private final static HashSet<String> ConTypes = new HashSet<>(Arrays.asList("list", "set", "map"));
+	private final static HashSet<String> ReserveNames = new HashSet<>(Arrays.asList("end", "base", "super"));//, "typeid", "friend"));
+
 
 	private final static Pattern namePattern = Pattern.compile("[a-zA-Z]\\w*");
 	public Field(Struct parent, String name, String fulltype, String[] types, String[] indexs, String[] refs, String[] groups) {
@@ -31,7 +33,7 @@ public final class Field {
 		
 		for(int i = 0 ; i < types.length ; i++) {
 			String t = types[i];
-			if(!isRaw(t) && !isContainer(t) && t.indexOf(".") < 0)
+			if(!isRaw(t) && !isContainer(t) && !t.contains("."))
 				types[i] = parent.getNamespace() + "." + types[i];
 		}
 
@@ -40,6 +42,8 @@ public final class Field {
 		final Matcher matcher = namePattern.matcher(name);
 		if(!matcher.matches())
 			error("非法变量名:" + name);
+		if(ReserveNames.contains(name))
+			error("保留关键字:" + name);
 		
 		for(String idx : indexs)
 			this.indexs.add(idx);
