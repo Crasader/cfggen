@@ -141,14 +141,14 @@ public class Config {
 		}
 	}
 	
-	public void loadData() throws Exception {
+	public void loadData() {
 
 		for (String file : inputFiles) {
 			try {
 				loadFrom(file);
 			} catch (Exception e) {
 				System.out.println("\n【加载配置失败】:" + file);
-				throw e;
+				throw new RuntimeException(e);
 			}
 		}
 		if (isSingle() && data.values.size() != 1)

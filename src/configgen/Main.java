@@ -212,23 +212,21 @@ public final class Main {
 	}
 	
 	private static void verifyDefine() {
-		Struct.getStructs().values().forEach(s -> s.verityDefine());
-		Config.configs.values().forEach(c -> c.verifyDefine());
+		Struct.getStructs().values().parallelStream().forEach(Struct::verityDefine);
+		Config.configs.values().parallelStream().forEach(Config::verifyDefine);
 	}
 	
-	static void loadData() throws Exception {
+	static void loadData() {
 		System.out.println();
-		for(Config c : Config.configs.values()) {
+		Config.configs.values().parallelStream().forEach(c -> {
 			System.out.print(".");
 			c.loadData();
-		}
+		});
 	}
 	
 	private static void verifyData() {
 		System.out.println();
-		for(Config c : Config.configs.values()) {
-			c.verifyData();
-		}
+		Config.configs.values().parallelStream().forEach(Config::verifyData);
 	}
 	
 	public static void addLastLoadData(Object data) {
