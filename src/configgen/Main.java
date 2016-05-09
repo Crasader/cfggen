@@ -109,6 +109,7 @@ public final class Main {
 		if(codeDir.isEmpty() && dataDir.isEmpty() && csmarshalcodeDir.isEmpty() && !check)
 			usage("needs -codeDir or -dataDir or csmarshalcodedir or -check");
 
+        final long startTime = System.currentTimeMillis();
         final File cfgxml = new File(xmlSchemeFile);
         final Path parent = cfgxml.toPath().getParent();
         csvDir = parent != null ? parent.toString() : ".";
@@ -154,11 +155,13 @@ public final class Main {
 	        	new DataGen().gen();
 	        }
         }
+        final long endTime = System.currentTimeMillis();
+        System.out.printf("\n\n");
+        System.out.printf("====> cost time %.2f s <====\n", (endTime - startTime) / 1000.0);
 	}
 
 	public static String curXml = "";
 	public static void loadDefine(Document doc, Element root, String relateDir) throws Exception {
-		System.out.print(".");
 		final String namespace = root.getAttribute("namespace");
 		if(namespace.isEmpty())
 			Utils.error("xml:%s configs's attribute<namespace> missing", curXml);
@@ -219,8 +222,12 @@ public final class Main {
 	static void loadData() {
 		System.out.println();
 		Config.configs.values().parallelStream().forEach(c -> {
-			System.out.print(".");
+            final long t1 = System.currentTimeMillis();
 			c.loadData();
+            final long t2 = System.currentTimeMillis();
+            if(t2 - t1 > 500) {
+                System.out.printf("load config:%s cost time:%.2f s\n", c.getName(), (t2 - t1) / 1000.0);
+            }
 		});
 	}
 	

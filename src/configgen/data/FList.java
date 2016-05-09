@@ -67,7 +67,8 @@ public class FList extends Type {
 				:Type.create(host, valueDefine, new RowColumnStream(Utils.parse(file.getAbsolutePath()))));
 		} catch (Exception e) {
 			System.out.printf("【加载文件失败】 %s\n", file.getAbsolutePath());
-		}
+            e.printStackTrace();
+        }
 	}
 
 	public String toString() {
