@@ -220,13 +220,13 @@ public final class Main {
 	}
 	
 	static void loadData() {
-		System.out.println();
 		Config.configs.values().parallelStream().forEach(c -> {
+            System.out.printf(".");
             final long t1 = System.currentTimeMillis();
 			c.loadData();
             final long t2 = System.currentTimeMillis();
-            if(t2 - t1 > 500) {
-                System.out.printf("load config:%s cost time:%.2f s\n", c.getName(), (t2 - t1) / 1000.0);
+            if(t2 - t1 > 1000) {
+                System.out.printf("\nload config:%s cost time:%.2f s\n", c.getName(), (t2 - t1) / 1000.0);
             }
 		});
 	}
