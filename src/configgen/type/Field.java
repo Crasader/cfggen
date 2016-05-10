@@ -13,6 +13,8 @@ public final class Field {
 	private final String fullType;
 	private final List<String> types;
 
+    private final String compoundDelimitor;
+
 	private final HashSet<String> indexs = new HashSet<>();
 	private final HashSet<String> groups = new HashSet<>();
 	private final List<String> refs = new ArrayList<>();
@@ -23,7 +25,7 @@ public final class Field {
 
 
 	private final static Pattern namePattern = Pattern.compile("[a-zA-Z]\\w*");
-	public Field(Struct parent, String name, String fulltype, String[] types, String[] indexs, String[] refs, String[] groups) {
+	public Field(Struct parent, String name, String compoundDelimitor, String fulltype, String[] types, String[] indexs, String[] refs, String[] groups) {
 		this.parent = parent;
 		this.name = name;
 		this.fullType = fulltype;
@@ -44,7 +46,8 @@ public final class Field {
 			error("非法变量名:" + name);
 		if(ReserveNames.contains(name))
 			error("保留关键字:" + name);
-		
+
+        this.compoundDelimitor = compoundDelimitor;
 		for(String idx : indexs)
 			this.indexs.add(idx);
 		
@@ -65,6 +68,7 @@ public final class Field {
 		this(
 			parent, 
 			data.getAttribute("name"),
+            data.getAttribute("delimitor"),
 			data.getAttribute("type"),
 			Utils.split(data, "type"),
 			Utils.split(data, "index"),
@@ -79,6 +83,7 @@ public final class Field {
 		this.fullType = fullType;
 		this.types = types;
 		this.groups.addAll(groups);
+        this.compoundDelimitor = "";
 	}
 	
 	public Field stripAdoreType() {
@@ -105,6 +110,14 @@ public final class Field {
 	public List<String> getTypes() {
 		return types;
 	}
+
+    public boolean isCompound() {
+        return !compoundDelimitor.isEmpty();
+    }
+
+    public String getDelimitor() {
+        return compoundDelimitor;
+    }
 	
 	public final HashSet<String> getGroups() {
 		return groups;

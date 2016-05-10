@@ -61,7 +61,7 @@ public class Config {
 		else if(indexs.length == 0 && !single)
 			indexs = new String[] { Struct.get(type).getFields().get(0).getName() };
 		manager = !data.getAttribute("manager").equals("false");
-		this.data = new FList(null, new Field(null, name, "list:" + type,
+		this.data = new FList(null, new Field(null, name, "", "list:" + type,
 			new String[]{"list", type},
 			indexs,
 			new String[]{},

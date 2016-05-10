@@ -1,6 +1,7 @@
 package configgen.data;
 
 import configgen.FlatStream;
+import configgen.RowColumnStream;
 import configgen.type.Config;
 import configgen.type.Field;
 import configgen.type.Struct;
@@ -36,6 +37,9 @@ public abstract class Type {
 	}
 	
 	public static Type create(FStruct host, Field define, FlatStream is) {
+        if(define.isCompound()) {
+            is = new RowColumnStream(Arrays.asList(Arrays.asList(is.getString().split(define.getDelimitor()))));
+        }
 		final String type = define.getType();
 		if(define.isRaw()) {
 			if(type.equals("bool")) {
