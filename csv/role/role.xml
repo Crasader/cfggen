@@ -60,10 +60,14 @@
 		<const name="EQUIP"/>
 	</enum>
 	
+	<struct name="Vector2">
+		<field name="x" type="float"/>
+		<field name="y" type="float"/>
+	</struct>
+	
 	<config name="RoleConfig" input="roleconfig.xlsx" single="true">
 		<field name="bornmap" type="int"/>
-		<field name="bornpointx" type="float"/>
-		<field name="bornpointy" type="float"/>
+		<field name="bornpoint" type="Vector2" delimitor=","/>
 		<field name="viewportminradius" type="float"/>
 		<field name="viewportmaxradius" type="float"/>
 	
@@ -73,7 +77,7 @@
 		<field name="addtiliinterval" type="int"/>
 		<field name="addtilivalue" type="int"/>
 		
-		<field name="createroletasks" type="list:int"/>
+		<field name="createroletasks" type="list:int" delimitor=";"/>
 	</config>
 	
 </configs>

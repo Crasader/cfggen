@@ -32,8 +32,17 @@ public final class DataMarshal {
 		final String s;
 		if(lx == x)
 			s = Long.toString(lx);
-		else
-			s = String.format("%g", ((float)x));
+		else {
+            double y = x;
+            for(int i = 1 ; i < 8; i++) {
+                y *= 10;
+                if(Math.abs(y - Math.round(y)) < 1.0e-7) {
+                    return put(String.format("%." + i + "f", x));
+                }
+            }
+            s = String.format("%f", x);
+        }
+
 		return put(s);
 	}
 	
