@@ -51,7 +51,7 @@ public final class Struct {
 	private final HashSet<String> groups = new HashSet<>();
 	
 	private final static HashSet<Integer> typeids = new HashSet<>();
-    private final String delimitor;
+    private final String delimiter;
 
 	public static void importDefineFromInput(Document doc, Element ele, String csvDir, String inputFileStr) throws Exception {
 		final String configName = ele.getAttribute("name");
@@ -130,7 +130,7 @@ public final class Struct {
 				error("element:" + nodeName + " 未知");
 			}
 		}
-        this.delimitor = data.getAttribute("delimitor");
+        this.delimiter = data.getAttribute("delimiter");
 		Main.println(this);
 	}
 	
@@ -162,12 +162,12 @@ public final class Struct {
 		return fields;
 	}
 
-    public String getDelimitor() {
-        return delimitor;
+    public String getdelimiter() {
+        return delimiter;
     }
 
     public boolean isCompound() {
-        return !delimitor.isEmpty();
+        return !delimiter.isEmpty();
     }
 	
 	public Field getField(String name) {

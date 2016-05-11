@@ -13,7 +13,7 @@ public final class Field {
 	private final String fullType;
 	private final List<String> types;
 
-    private final String compoundDelimitor;
+    private String compounddelimiter;
 
 	private final HashSet<String> indexs = new HashSet<>();
 	private final HashSet<String> groups = new HashSet<>();
@@ -25,7 +25,7 @@ public final class Field {
 
 
 	private final static Pattern namePattern = Pattern.compile("[a-zA-Z]\\w*");
-	public Field(Struct parent, String name, String compoundDelimitor, String fulltype, String[] types, String[] indexs, String[] refs, String[] groups) {
+	public Field(Struct parent, String name, String compounddelimiter, String fulltype, String[] types, String[] indexs, String[] refs, String[] groups) {
 		this.parent = parent;
 		this.name = name;
 		this.fullType = fulltype;
@@ -47,7 +47,7 @@ public final class Field {
 		if(ReserveNames.contains(name))
 			error("保留关键字:" + name);
 
-        this.compoundDelimitor = compoundDelimitor;
+        this.compounddelimiter = compounddelimiter;
 		for(String idx : indexs)
 			this.indexs.add(idx);
 		
@@ -68,7 +68,7 @@ public final class Field {
 		this(
 			parent, 
 			data.getAttribute("name"),
-            data.getAttribute("delimitor"),
+            data.getAttribute("delimiter"),
 			data.getAttribute("type"),
 			Utils.split(data, "type"),
 			Utils.split(data, "index"),
@@ -83,7 +83,7 @@ public final class Field {
 		this.fullType = fullType;
 		this.types = types;
 		this.groups.addAll(groups);
-        this.compoundDelimitor = "";
+        this.compounddelimiter = "";
 	}
 	
 	public Field stripAdoreType() {
@@ -112,11 +112,11 @@ public final class Field {
 	}
 
     public boolean isCompound() {
-        return !compoundDelimitor.isEmpty() || (isStruct() && Struct.get(types.get(0)).isCompound());
+        return !compounddelimiter.isEmpty();
     }
 
-    public String getDelimitor() {
-        return !compoundDelimitor.isEmpty() ? compoundDelimitor : Struct.get(types.get(0)).getDelimitor();
+    public String getdelimiter() {
+        return compounddelimiter;
     }
 	
 	public final HashSet<String> getGroups() {
@@ -231,7 +231,8 @@ public final class Field {
 		if(isRaw()) {
 			
 		} else if(isStruct()) {
-			
+            if(compounddelimiter.isEmpty())
+                compounddelimiter = Struct.get(types.get(0)).getdelimiter();
 		} else if(isEnum()) {
 			
 		} else if(isContainer()) {
