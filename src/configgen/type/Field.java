@@ -112,11 +112,11 @@ public final class Field {
 	}
 
     public boolean isCompound() {
-        return !compoundDelimitor.isEmpty();
+        return !compoundDelimitor.isEmpty() || (isStruct() && Struct.get(types.get(0)).isCompound());
     }
 
     public String getDelimitor() {
-        return compoundDelimitor;
+        return !compoundDelimitor.isEmpty() ? compoundDelimitor : Struct.get(types.get(0)).getDelimitor();
     }
 	
 	public final HashSet<String> getGroups() {
@@ -253,7 +253,7 @@ public final class Field {
 				checkType(1);
 				final String valueType = types.get(1);
 				if(!isRawOrEnumOrStruct(valueType))
-					error("非法的set value类型:" + valueType);
+					error("非法的list value类型:" + valueType);
 				if(!indexs.isEmpty()) {
 					if(!isStruct(valueType)) {
 						error("list的 value 类型:" + valueType + "必须是struct才能index");

@@ -17,7 +17,7 @@ namespace cfg {
 	public:
 		const std::string content;
 		const std::string type;
-		Error(const std::string& content, const std::string type) : content(content), type(type) {
+		Error(const std::string& content, const std::string& type) : content(content), type(type) {
 		}
 	};
 
@@ -103,7 +103,7 @@ namespace cfg {
 		}
 
 	private:
-		DataStream(std::vector<std::string> inputDatas) : datas(inputDatas), index(0) {
+		DataStream(std::vector<std::string>& inputDatas) : datas(inputDatas), index(0) {
 
 		}
 
