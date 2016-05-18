@@ -59,7 +59,7 @@ public class FList extends Type {
 		}
 	}
 
-	public void load(File file) {
+	public void load(File file) throws Exception {
 		Field valueDefine = define.stripAdoreType();
 		try {
 			addValue(file.getName().endsWith(".xml") ?
@@ -67,7 +67,7 @@ public class FList extends Type {
 				:Type.create(host, valueDefine, new RowColumnStream(Utils.parse(file.getAbsolutePath()))));
 		} catch (Exception e) {
 			System.out.printf("【加载文件失败】 %s\n", file.getAbsolutePath());
-            e.printStackTrace();
+            throw e;
         }
 	}
 

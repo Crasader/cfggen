@@ -107,7 +107,7 @@ public final class Struct {
 		this.typeid = newTypeid;
 		//System.out.printf("== xml:%s struct:%s\n", Main.curXml, fullname);
 		this.base = base;
-		if(Utils.existType(name)) {
+		if(Utils.existType(fullname)) {
 			error(" 类型重复");
 		}
 		put(fullname, this);

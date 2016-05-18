@@ -215,25 +215,25 @@ public final class Main {
 	}
 	
 	private static void verifyDefine() {
-		Struct.getStructs().values().parallelStream().forEach(Struct::verityDefine);
-		Config.configs.values().parallelStream().forEach(Config::verifyDefine);
+		Struct.getStructs().values().stream().forEach(Struct::verityDefine);
+		Config.configs.values().stream().forEach(Config::verifyDefine);
 	}
 	
-	static void loadData() {
-		Config.configs.values().parallelStream().forEach(c -> {
+	static void loadData() throws Exception{
+        for (Config c : Config.configs.values()) {
             System.out.printf(".");
             final long t1 = System.currentTimeMillis();
-			c.loadData();
+            c.loadData();
             final long t2 = System.currentTimeMillis();
             if(t2 - t1 > 1000) {
                 System.out.printf("\nload config:%s cost time:%.2f s\n", c.getName(), (t2 - t1) / 1000.0);
             }
-		});
+        }
 	}
 	
 	private static void verifyData() {
 		System.out.println();
-		Config.configs.values().parallelStream().forEach(Config::verifyData);
+		Config.configs.values().stream().forEach(Config::verifyData);
 	}
 	
 	public static void addLastLoadData(Object data) {
