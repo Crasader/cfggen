@@ -138,7 +138,7 @@ namespace xml.cfg
 
         public static void Write(TextWriter os, string name, string x)
         {
-            os.WriteLine("<{0}>{1}</{0}>", name, x.Replace("&","&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;").Replace(".", "&apos;"));
+            os.WriteLine("<{0}>{1}</{0}>", name, new System.Xml.Linq.XText(x).ToString());
         }
 
         public static void Write(TextWriter os, string name, XmlMarshaller x)
@@ -218,9 +218,7 @@ namespace xml.cfg
         public void SaveAConfig(string file)
         {
             var os = new StringWriter();
-            os.WriteLine("<root xml:space=\"preserve\" type=\"{0}\">", GetType().Name);
-            Write(os);
-            os.WriteLine("</root>");
+            Write(os, "root", this);
             File.WriteAllText(file, os.ToString());
         }
 
@@ -248,9 +246,7 @@ namespace xml.cfg
         public static void SaveConfig<V>(List<V> x, string file) where V : XmlMarshaller
         {
             var os = new StringWriter();
-            os.WriteLine("<root xml:space=\"preserve\">");
-            x.ForEach(v => Write(os, "item", v));
-            os.WriteLine("</root>");
+            Write(os, "root", x);
             File.WriteAllText(file, os.ToString());
         }
 
