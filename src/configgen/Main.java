@@ -221,6 +221,7 @@ public final class Main {
 	
 	static void loadData() throws Exception{
         for (Config c : Config.configs.values()) {
+            lastLoadData = null;
             System.out.printf(".");
             final long t1 = System.currentTimeMillis();
             c.loadData();

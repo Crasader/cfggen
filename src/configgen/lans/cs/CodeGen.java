@@ -32,7 +32,7 @@ public class CodeGen implements Generator {
 			case "float":  return "fs.GetFloat()";
 			case "string": return "fs.GetString()";
 			default: {
-				if(ENUM.isEnum(type)) return "fs.GetInt();";
+				if(ENUM.isEnum(type)) return "fs.GetInt()";
 				return Struct.isDynamic(type) ?
 					String.format("(%s)fs.GetObject(fs.GetString())", type) :
 					String.format("new %s(fs)", type);
