@@ -18,6 +18,7 @@ public final class Field {
 	private final HashSet<String> indexs = new HashSet<>();
 	private final HashSet<String> groups = new HashSet<>();
 	private final List<String> refs = new ArrayList<>();
+    private final List<String> refPath = new ArrayList<>();
 	
 	private final static HashSet<String> RawTypes = new HashSet<>(Arrays.asList("bool", "int", "float", "long", "string"));
 	private final static HashSet<String> ConTypes = new HashSet<>(Arrays.asList("list", "set", "map"));
@@ -25,7 +26,7 @@ public final class Field {
 
 
 	private final static Pattern namePattern = Pattern.compile("[a-zA-Z]\\w*");
-	public Field(Struct parent, String name, String compounddelimiter, String fulltype, String[] types, String[] indexs, String[] refs, String[] groups) {
+	public Field(Struct parent, String name, String compounddelimiter, String fulltype, String[] types, String[] indexs, String[] refs, String[] refPath, String[] groups) {
 		this.parent = parent;
 		this.name = name;
 		this.fullType = fulltype;
@@ -52,6 +53,7 @@ public final class Field {
 			this.indexs.add(idx);
 		
 		this.refs.addAll(Arrays.asList(refs));
+        this.refPath.addAll(Arrays.asList(refPath));
 		
 //		else if(!name.isEmpty() && isEnum())
 //			error("enum can't have name");
@@ -73,6 +75,7 @@ public final class Field {
 			Utils.split(data, "type"),
 			Utils.split(data, "index"),
 			Utils.split(data, "ref"),
+            Utils.split(data, "refpath", ";"),
 			Utils.split(data, "group")
 			);	
 	}
@@ -134,6 +137,10 @@ public final class Field {
 	public final String getValueRef() {
 		return getType().equals("map") ? (refs.size() >= 2 ? refs.get(1) : "") : (refs.size() >= 1 ? refs.get(0) : ""); 
 	}
+
+    public final List<String> getRefPath() {
+        return refPath;
+    }
 
 	public final boolean checkInGroup(Set<String> gs) {
 		if(groups.contains("all")) return true;

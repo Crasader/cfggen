@@ -65,6 +65,7 @@ public class Config {
 			new String[]{"list", type},
 			indexs,
 			new String[]{},
+            new String[]{},
 			groups));
 	}
 	

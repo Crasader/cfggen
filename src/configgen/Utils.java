@@ -37,6 +37,15 @@ public final class Utils {
 			return str.split(":");
 		}
 	}
+
+    public static String[] split(Element ele, String attr, String delimiter) {
+        final String str = ele.getAttribute(attr);
+        if(str.isEmpty()) {
+            return new String[0];
+        } else {
+            return str.split(delimiter);
+        }
+    }
 	
 	public static String concat(String[] strs, String splitor) {
 		StringBuilder sb = new StringBuilder();

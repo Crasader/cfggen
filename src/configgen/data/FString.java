@@ -5,6 +5,10 @@ import org.w3c.dom.Element;
 import configgen.FlatStream;
 import configgen.type.Field;
 
+import java.io.File;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class FString extends Type {
 	public FString(FStruct host, Field define, String is) {
 		super(host, define);
@@ -53,4 +57,17 @@ public class FString extends Type {
 	public boolean isNull() {
 		return value.isEmpty();
 	}
+
+    @Override
+    public void verifyData() {
+        super.verifyData();
+        final List<String> refPaths = define.getRefPath();
+        if(!refPaths.isEmpty() && !isNull()) {
+            if(refPaths.stream().noneMatch(path -> new File(path.replace("?", value)).exists())) {
+                System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + value
+                        + " verify refpath fail. not exist path:"
+                        + refPaths.stream().map(path -> path.replace("?", value)).collect(Collectors.joining("] or [", "[", "]")));
+            }
+        }
+    }
 }

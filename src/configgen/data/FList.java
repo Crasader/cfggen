@@ -97,6 +97,13 @@ public class FList extends Type {
 				d.verifyData();
 			}
 		}
+        if(!define.getRefPath().isEmpty()) {
+            if(define.getTypes().get(1).equals("string")) {
+
+            } else {
+
+            }
+        }
 	}
 
 	@Override
