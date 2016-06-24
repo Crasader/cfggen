@@ -1,5 +1,6 @@
 package configgen.data;
 
+import configgen.Main;
 import org.w3c.dom.Element;
 
 import configgen.FlatStream;
@@ -58,12 +59,16 @@ public class FString extends Type {
 		return value.isEmpty();
 	}
 
+    public String toFinalPath(String path) {
+        return new File(path).isAbsolute() ? path : Main.csvDir + "/" + path;
+    }
+
     @Override
     public void verifyData() {
         super.verifyData();
         final List<String> refPaths = define.getRefPath();
         if(!refPaths.isEmpty() && !isNull()) {
-            if(refPaths.stream().noneMatch(path -> new File(path.replace("?", value)).exists())) {
+            if(refPaths.stream().noneMatch(path -> new File(toFinalPath(path.replace("?", value))).exists())) {
                 System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + value
                         + " verify refpath fail. not exist path:"
                         + refPaths.stream().map(path -> path.replace("?", value)).collect(Collectors.joining("] or [", "[", "]")));
