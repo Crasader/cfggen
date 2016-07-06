@@ -1,6 +1,7 @@
 package configgen.data;
 
 import configgen.FlatStream;
+import configgen.Main;
 import configgen.RowColumnStream;
 import configgen.type.Config;
 import configgen.type.Field;
@@ -9,6 +10,7 @@ import org.w3c.dom.Element;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 
 public abstract class Type {
 //	public final static String UNLIMIT_STR = "unlimit";
@@ -161,9 +163,13 @@ public abstract class Type {
 	
 	public abstract boolean isNull();
 	public abstract void accept(Visitor visitor);
+
+    private static String getKey(FStruct d, Config c) {
+        return c.isSingle() ? "0" : d.getField(c.getIndex()).toString();
+    }
 	
 	public static void errorRef(Type value, String refName) {
-		System.out.println("struct:" + value.host.getType() + " field:" + value.define.getName() + " value:" + value + " can't find in config:" + refName);
+		System.out.println("config:" + Main.getCurVerifyConfig().getName() + " key:" + getKey((FStruct)Main.getCurVerifyData(), Main.getCurVerifyConfig()) + " struct:" + value.host.getType() + " field:" + value.define.getName() + " value:" + value + " can't find in config:" + refName);
 	}
 
 	public static void verifyData(Type value, String ref) {

@@ -71,7 +71,6 @@ public class FMap extends Type {
 		
 		final String valueRef = define.getValueRef();
 		if(!valueRef.isEmpty()) {
-			HashSet<Type> validValues = Config.getData(valueRef);
 			for(Type d : values.values()) {
 				verifyData(d, valueRef);
 			}

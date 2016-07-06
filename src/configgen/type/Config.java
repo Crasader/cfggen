@@ -181,7 +181,8 @@ public class Config {
 	}
 	
 	public void verifyData() {
-		//System.out.println("==verify config:" + name);
+		Main.println("==verify config:" + name);
+        Main.setCurVerifyConfig(this);
 		data.verifyData();
 	}
 	

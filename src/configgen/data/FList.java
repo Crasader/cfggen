@@ -94,6 +94,9 @@ public class FList extends Type {
 		}
 		if(Field.isStruct(define.getTypes().get(1))) {
 			for (Type d : values) {
+                if(host == null) {
+                    Main.setCurVerifyData(d);
+                }
 				d.verifyData();
 			}
 		}

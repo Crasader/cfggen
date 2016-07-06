@@ -236,8 +236,27 @@ public final class Main {
 		System.out.println();
 		Config.configs.values().stream().forEach(Config::verifyData);
 	}
-	
-	public static void addLastLoadData(Object data) {
+
+    private static Config curVerifyConfig = null;
+    private static Object curVerifyData = null;
+
+    public static Config getCurVerifyConfig() {
+        return curVerifyConfig;
+    }
+
+    public static void setCurVerifyConfig(Config curVerifyConfig) {
+        Main.curVerifyConfig = curVerifyConfig;
+    }
+
+    public static Object getCurVerifyData() {
+        return curVerifyData;
+    }
+
+    public static void setCurVerifyData(Object curVerifyData) {
+        Main.curVerifyData = curVerifyData;
+    }
+
+    public static void addLastLoadData(Object data) {
 		lastLoadData = data;
 	}
 }
