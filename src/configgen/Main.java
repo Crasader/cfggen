@@ -152,6 +152,7 @@ public final class Main {
 	        }
 
 	        if(!dataDir.isEmpty()) {
+                Utils.deleteDirectory(dataDir);
 	        	new DataGen().gen();
 	        }
         }
