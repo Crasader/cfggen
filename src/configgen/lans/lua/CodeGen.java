@@ -192,6 +192,7 @@ public class CodeGen implements Generator {
 		ls.add("if fs:get_int() ~= 1 then error('single config size != 1') end");
 		ls.add("cfgs[s.name] = fs[method](fs)");
 		ls.add("end");
+        ls.add("fs:close()");
 		ls.add("end");
 		
 		ls.add("return cfgs");

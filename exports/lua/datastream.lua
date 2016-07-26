@@ -29,6 +29,11 @@
     end
  end
  
+ function os:close()
+    while self.data_iter() do
+    end
+ end
+ 
  function os:get_next()
     return self.data_iter()
  end
