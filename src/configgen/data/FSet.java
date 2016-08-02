@@ -1,6 +1,7 @@
 package configgen.data;
 
 import configgen.FlatStream;
+import configgen.Main;
 import configgen.Utils;
 import configgen.type.Field;
 import org.w3c.dom.Element;
@@ -59,6 +60,11 @@ public class FSet extends Type {
 				verifyData(d, ref);
 			}
 		}
+        if(Field.isStruct(define.getTypes().get(1))) {
+            for (Type d : values) {
+                d.verifyData();
+            }
+        }
 	}
 
 	@Override

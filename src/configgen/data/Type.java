@@ -169,7 +169,7 @@ public abstract class Type {
     }
 	
 	public static void errorRef(Type value, String refName) {
-		System.out.println("config:" + Main.getCurVerifyConfig().getName() + " key:" + getKey((FStruct)Main.getCurVerifyData(), Main.getCurVerifyConfig()) + " struct:" + value.host.getType() + " field:" + value.define.getName() + " value:" + value + " can't find in config:" + refName);
+		System.out.println("config:" + Main.getCurVerifyConfig().getName() + " key:" + getKey((FStruct)Main.getCurVerifyData(), Main.getCurVerifyConfig()) + " struct:" + value.host.getType() + " field:" + value.define.getName() + " value:" + value + " err ref:" + refName);
 	}
 
 	public static void verifyData(Type value, String ref) {

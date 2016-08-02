@@ -66,7 +66,6 @@ public class FMap extends Type {
 			for(Type d : values.keySet()) {
 				verifyData(d, keyRef);
 			}
-
 		}
 		
 		final String valueRef = define.getValueRef();
@@ -75,6 +74,13 @@ public class FMap extends Type {
 				verifyData(d, valueRef);
 			}
 		}
+
+        Field valueDefine = define.stripAdoreType().stripAdoreType();
+        if(valueDefine.isStruct()) {
+            for(Type d : values.values()) {
+                d.verifyData();
+            }
+        }
 	}
 
 	@Override

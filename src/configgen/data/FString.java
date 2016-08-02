@@ -60,7 +60,7 @@ public class FString extends Type {
 	}
 
     public String toFinalPath(String path) {
-        return new File(path).isAbsolute() ? path : Main.csvDir + "/" + path;
+        return (new File(path).isAbsolute() ? path : Main.csvDir + "/" + path).replace("?", value).replace("*", value.toLowerCase());
     }
 
     @Override
@@ -68,10 +68,12 @@ public class FString extends Type {
         super.verifyData();
         final List<String> refPaths = define.getRefPath();
         if(!refPaths.isEmpty() && !isNull()) {
-            if(refPaths.stream().noneMatch(path -> new File(toFinalPath(path.replace("?", value))).exists())) {
-                System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + value
-                        + " verify refpath fail. not exist path:"
-                        + refPaths.stream().map(path -> path.replace("?", value)).collect(Collectors.joining("] or [", "[", "]")));
+            final List<String> finalRefPaths = refPaths.stream().map(path -> toFinalPath(path)).collect(Collectors.toList());
+            if(finalRefPaths.stream().noneMatch(path -> new File(path).exists())) {
+                errorRef(this, finalRefPaths.stream().collect(Collectors.joining("] or [", "[", "]")));
+//                System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + value
+//                        + " verify refpath fail. not exist path:"
+//                        + finalRefPaths.stream().collect(Collectors.joining("] or [", "[", "]")));
             }
         }
     }
