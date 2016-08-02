@@ -67,7 +67,7 @@ public final class Struct {
 		for(String fieldDefne : lines.get(0)) {
 			final String define = fieldDefne.replace("##", ""); //去掉注释
 			if(define.isEmpty())
-				continue;;
+				continue;
 			++fieldNum;
 			final String fieldName;
 			final String fieldType;

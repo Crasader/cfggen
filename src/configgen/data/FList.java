@@ -41,7 +41,7 @@ public class FList extends Type {
 	}
 
 	public void load(FlatStream is) {
-		final Field valueDefine = define.stripAdoreType();
+		final Field valueDefine = define.getValueFieldDefine();
 		while(!is.isSectionEnd()) {
 			addValue(Type.create(host, valueDefine, is));
 		}
@@ -49,7 +49,7 @@ public class FList extends Type {
 
 
 	public void load(Element ele) {
-		Field valueDefine = define.stripAdoreType();
+		Field valueDefine = define.getValueFieldDefine();
 		final NodeList nodes = ele.getChildNodes();
 		for(int i = 0, n = nodes.getLength() ; i < n ; i++) {
 			final Node node = nodes.item(i);
@@ -60,7 +60,7 @@ public class FList extends Type {
 	}
 
 	public void load(File file) throws Exception {
-		Field valueDefine = define.stripAdoreType();
+		Field valueDefine = define.getValueFieldDefine();
 		try {
 			addValue(file.getName().endsWith(".xml") ?
 				 Type.create(host, valueDefine, DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement())
@@ -86,21 +86,13 @@ public class FList extends Type {
 	
 	@Override
 	public void verifyData() {
-		final String ref = define.getRef();
-		if(!ref.isEmpty()) {
-			for(Type d : values) {
-				verifyData(d, ref);
-			}
-		}
-		if(Field.isStruct(define.getTypes().get(1))) {
-			for (Type d : values) {
-                if(host == null) {
-                    Main.setCurVerifyData(d);
-                }
-				d.verifyData();
-			}
-		}
-	}
+        for (Type d : values) {
+            if (host == null) {
+                Main.setCurVerifyData(d);
+            }
+            d.verifyData();
+        }
+    }
 
 	@Override
 	public boolean isNull() {

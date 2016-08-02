@@ -71,9 +71,6 @@ public class FString extends Type {
             final List<String> finalRefPaths = refPaths.stream().map(path -> toFinalPath(path)).collect(Collectors.toList());
             if(finalRefPaths.stream().noneMatch(path -> new File(path).exists())) {
                 errorRef(this, finalRefPaths.stream().collect(Collectors.joining("] or [", "[", "]")));
-//                System.out.println("struct:" + host.getType() + " field:" + define.getName() + " value:" + value
-//                        + " verify refpath fail. not exist path:"
-//                        + finalRefPaths.stream().collect(Collectors.joining("] or [", "[", "]")));
             }
         }
     }

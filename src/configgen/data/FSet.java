@@ -15,7 +15,7 @@ public class FSet extends Type {
 	final public Set<Type> values = new HashSet<Type>();
 	public FSet(FStruct host, Field define, FlatStream is) {
 		super(host, define);
-		Field valueDefine = define.stripAdoreType();
+		Field valueDefine = define.getValueFieldDefine();
 		while(!is.isSectionEnd()) {
 			Type value = Type.create(host, valueDefine, is);
 			if(!values.add(value)) {
@@ -26,7 +26,7 @@ public class FSet extends Type {
 	
 	public FSet(FStruct host, Field define, Element ele) {
 		super(host, define);
-		Field valueDefine = define.stripAdoreType();
+		Field valueDefine = define.getValueFieldDefine();
 		final NodeList nodes = ele.getChildNodes();
 		for(int i = 0, n = nodes.getLength() ; i < n ; i++) {
 			final Node node = nodes.item(i);
@@ -54,16 +54,8 @@ public class FSet extends Type {
 	
 	@Override
 	public void verifyData() {
-		final String ref = define.getRef();
-		if(!ref.isEmpty()) {
-			for(Type d : values) {
-				verifyData(d, ref);
-			}
-		}
-        if(Field.isStruct(define.getTypes().get(1))) {
-            for (Type d : values) {
-                d.verifyData();
-            }
+        for (Type d : values) {
+            d.verifyData();
         }
 	}
 

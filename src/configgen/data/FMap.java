@@ -15,10 +15,13 @@ import java.util.Map;
 public class FMap extends Type {
 	public final Map<Type, Type> values = new LinkedHashMap<Type, Type>();
 
+    private final Field keyDefine;
+    private final Field valueDefine;
+
 	public FMap(FStruct host, Field define, FlatStream is) {
 		super(host, define);
-		Field keyDefine = define.stripAdoreType();
-		Field valueDefine = keyDefine.stripAdoreType();
+		this.keyDefine = define.getMapKeyFieldDefine();
+		this.valueDefine = define.getMapValueFieldDefine();
 		while(!is.isSectionEnd()) {
 			final Type key = Type.create(host, keyDefine, is);
 			if(values.put(key, Type.create(host, valueDefine, is)) != null) {
@@ -29,8 +32,8 @@ public class FMap extends Type {
 	
 	public FMap(FStruct host, Field define, Element ele) {
 		super(host, define);
-		Field keyDefine = define.stripAdoreType();
-		Field valueDefine = keyDefine.stripAdoreType();
+		this.keyDefine = define.getMapKeyFieldDefine();
+		this.valueDefine = define.getMapValueFieldDefine();
 		final NodeList nodes = ele.getChildNodes();
 		for(int i = 0, n = nodes.getLength() ; i < n ; i++) {
 			final Node node = nodes.item(i);
@@ -61,25 +64,9 @@ public class FMap extends Type {
 	
 	@Override
 	public void verifyData() {
-		final String keyRef = define.getKeyRef();
-		if(!keyRef.isEmpty()) {
-			for(Type d : values.keySet()) {
-				verifyData(d, keyRef);
-			}
-		}
-		
-		final String valueRef = define.getValueRef();
-		if(!valueRef.isEmpty()) {
-			for(Type d : values.values()) {
-				verifyData(d, valueRef);
-			}
-		}
-
-        Field valueDefine = define.stripAdoreType().stripAdoreType();
-        if(valueDefine.isStruct()) {
-            for(Type d : values.values()) {
-                d.verifyData();
-            }
+		for(Map.Entry<Type, Type> e : values.entrySet()) {
+		    e.getKey().verifyData();
+            e.getValue().verifyData();
         }
 	}
 

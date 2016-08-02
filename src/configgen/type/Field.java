@@ -80,19 +80,33 @@ public final class Field {
 			);	
 	}
 	
-	private Field(Struct parent, String name, String fullType, List<String> types, HashSet<String> groups) {
+	private Field(Struct parent, String name, String fullType, List<String> types, HashSet<String> groups, List<String> refs, List<String> refPaths) {
 		this.parent = parent;
 		this.name = name;
 		this.fullType = fullType;
 		this.types = types;
 		this.groups.addAll(groups);
         this.compounddelimiter = "";
+        this.refs.addAll(refs);
+        this.refPath.addAll(refPaths);
 	}
-	
-	public Field stripAdoreType() {
-		final List<String> newTypes = types.subList(1, types.size());
-		return new Field(parent, name, fullType, newTypes, groups);
-	}
+
+
+	public Field getValueFieldDefine() {
+	    return new Field(parent, name, fullType, types.subList(1, types.size()), groups, refs, refPath);
+    }
+
+    public Field getMapKeyFieldDefine() {
+        return new Field(parent, name, fullType, types.subList(1, types.size()), groups,
+                refs.isEmpty() ? Collections.emptyList() : Arrays.asList(refs.get(0)),
+                Collections.emptyList());
+    }
+
+    public Field getMapValueFieldDefine() {
+        return new Field(parent, name, fullType, types.subList(2, types.size()), groups,
+                refs.size() < 2 ? Collections.emptyList() : Arrays.asList(refs.get(1)),
+                refPath);
+    }
 	
 	public final Struct getParent() {
 		return parent;
