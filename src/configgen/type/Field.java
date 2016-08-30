@@ -75,7 +75,7 @@ public final class Field {
 			Utils.split(data, "type"),
 			Utils.split(data, "index"),
 			Utils.split(data, "ref"),
-            Utils.split(data, "refpath", ";"),
+            Utils.split(data, "refpath", ";|,|:"),
 			Utils.split(data, "group")
 			);	
 	}
