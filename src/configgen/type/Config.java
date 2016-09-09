@@ -131,7 +131,7 @@ public class Config {
 			for(File f : file.listFiles()) {
 				if(f.isDirectory()) {
 					loadFrom(f.getPath());
-				} else {
+				} else if(!f.getName().startsWith(".")){
 					data.load(f);
 				}
 			}

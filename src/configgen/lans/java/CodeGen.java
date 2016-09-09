@@ -209,7 +209,7 @@ public class CodeGen implements Generator {
 			final String vtype = c.getType();
 			final String cname = c.getName();
 			if(!c.isSingle()) {
-				ls.add(String.format("	public static final java.util.LinkedHashMap<%s, %s> %s = new java.util.LinkedHashMap<>();", 
+				ls.add(String.format("	public static java.util.LinkedHashMap<%s, %s> %s;",
 					toBoxType(c.getIndexType()), toBoxType(vtype), cname));
 			} else {
 				ls.add(String.format("	public static %s %s;", toJavaType(vtype), cname));
@@ -223,10 +223,13 @@ public class CodeGen implements Generator {
 			ls.add("		{");
 				ls.add(String.format("			final cfg.DataStream fs = cfg.DataStream.create(DataDir.dir + \"/%s\", DataDir.encoding);", c.getOutputDataFile()));
 				if(!c.isSingle()) {
+                    ls.add(String.format("          final java.util.LinkedHashMap<%s, %s> _datas = new java.util.LinkedHashMap<>();",
+                            toBoxType(c.getIndexType()), toBoxType(vtype), cname));
 					ls.add("			for(int n = fs.getInt() ; n-- > 0 ; ) {");
 					ls.add(String.format("				final %s v = %s;", toBoxType(vtype), readType(vtype)));
-					ls.add(String.format("				%s.put(v.%s, v);", cname, c.getIndex()));
+					ls.add(String.format("				_datas.put(v.%s, v);", c.getIndex()));
 					ls.add("			}");
+                    ls.add(String.format("          %s = _datas;", cname));
 			} else {
 				ls.add("			if(fs.getInt() != 1) throw new RuntimeException(\"single conifg size != 1\");");
 				ls.add(String.format("			%s = %s;", cname, readType(vtype)));
