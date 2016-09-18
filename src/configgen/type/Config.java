@@ -129,26 +129,58 @@ public class Config {
 		final File file = new File(fileName);
 		if(file.isDirectory()) {
 			for(File f : file.listFiles()) {
+			    if(f.getName().startsWith(".")) continue;;
 				if(f.isDirectory()) {
 					loadFrom(f.getPath());
-				} else if(!f.getName().startsWith(".")){
-					data.load(f);
+				} else {
+					data.loadOneRecord(f);
 				}
 			}
 		} else if(fileName.endsWith(".xml")) {
-			data.load(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement());
+			data.loadMultiRecord(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement());
 		} else {
-			data.load(new RowColumnStream(Utils.parse(fileName)));
+			data.loadMultiRecord(new RowColumnStream(Utils.parse(fileName)));
 		}
 	}
+
+	private void collectFiles(String fileName, TreeMap<String, File> files) {
+        final File file = new File(fileName);
+        if(file.isDirectory()) {
+            for(File f : file.listFiles()) {
+                final String subName = f.getName();
+                String[] tokens = subName.split("[\\\\|/]");
+                String selfName = tokens[tokens.length - 1];
+                if(selfName.startsWith(".")) continue;;
+                if(f.isDirectory()) {
+                    collectFiles(subName, files);
+                } else {
+                    files.put(subName, f);
+                }
+            }
+        } else {
+            files.put(fileName, file);
+        }
+    }
 	
 	public void loadData() throws Exception {
-		for (String file : inputFiles) {
+		for (String fileName : inputFiles) {
 			try {
-				loadFrom(file);
+                final File file = new File(fileName);
+                if(file.isDirectory()) {
+                    final TreeMap<String, File> subFiles = new TreeMap<>();
+                    collectFiles(fileName, subFiles);
+                    for(File f : subFiles.values()) {
+                        data.loadOneRecord(f);
+                    }
+
+                } else if(fileName.endsWith(".xml")) {
+                    data.loadMultiRecord(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement());
+                } else {
+                    data.loadMultiRecord(new RowColumnStream(Utils.parse(fileName)));
+                }
 			} catch (Exception e) {
                 e.printStackTrace();
-				System.out.println("\n【加载文件失败】:" + file);
+				System.out.println("\n【加载文件失败】:" + fileName);
                 throw e;
 			}
 		}
