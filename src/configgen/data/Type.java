@@ -57,7 +57,7 @@ public abstract class Type {
 		} else if(define.isContainer()) {
 			if(type.equals("list")) {
 				FList d = new FList(host, define);
-				d.loadMultiRecord(is);
+				d.loadMultiRecordNotCheckEnd(is);
 				return d;
 			} else if(type.equals("set")) {
 				return new FSet(host, define, is);

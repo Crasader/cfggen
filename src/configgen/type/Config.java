@@ -125,24 +125,6 @@ public class Config {
 		}
 	}
 
-	private void loadFrom(String fileName) throws Exception {
-		final File file = new File(fileName);
-		if(file.isDirectory()) {
-			for(File f : file.listFiles()) {
-			    if(f.getName().startsWith(".")) continue;;
-				if(f.isDirectory()) {
-					loadFrom(f.getPath());
-				} else {
-					data.loadOneRecord(f);
-				}
-			}
-		} else if(fileName.endsWith(".xml")) {
-			data.loadMultiRecord(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement());
-		} else {
-			data.loadMultiRecord(new RowColumnStream(Utils.parse(fileName)));
-		}
-	}
-
 	private void collectFiles(String fileName, TreeMap<String, File> files) {
         final File file = new File(fileName);
         if(file.isDirectory()) {

@@ -40,11 +40,24 @@ public class FList extends Type {
 		}
 	}
 
+    public void loadMultiRecordNotCheckEnd(FlatStream is) {
+        final Field valueDefine = define.getValueFieldDefine();
+        while(!is.isSectionEnd()) {
+            addValue(Type.create(host, valueDefine, is));
+        }
+    }
+
 	public void loadMultiRecord(FlatStream is) {
 		final Field valueDefine = define.getValueFieldDefine();
 		while(!is.isSectionEnd()) {
 			addValue(Type.create(host, valueDefine, is));
 		}
+		try {
+		    is.getString();
+            throw new RuntimeException("有部分未读数据,可能是错误地提前输入了列表结束符 ]] !");
+        } catch (Exception e) {
+            // 读完所有数据后应该不再有有效数据.
+        }
 	}
 
 
