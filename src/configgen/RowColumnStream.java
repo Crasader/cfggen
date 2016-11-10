@@ -7,16 +7,13 @@ public final class RowColumnStream extends FlatStream {
 	private int col;
 	private int row;
 	
-	private final String EOL = "##"; // %#
-	private final String END = "]]"; // %]
-	
-	public static RowColumnStream Cur;
+	private static final String EOL = "##"; // %#
+	private static final String END = "]]"; // %]
 	
 	public RowColumnStream(List<List<String>> data) {
 		lines = data;
 		col = -1;
 		row = 0;
-		Cur = this;
 	}
 	
 	private String getNext() {
@@ -70,7 +67,8 @@ public final class RowColumnStream extends FlatStream {
 	}
 	
 	private void error(String err) {
-		throw new RuntimeException(String.format("%d:%d %s", row + 1, col + 1, err));
+		throw new RuntimeException(String.format("%d:%d %s%n line:%s", row + 1, col + 1, err,
+                (lines.isEmpty() ? "" : lines.get(Math.min(row, lines.size() - 1)))));
 	}
 	
 	private String getNextAndCheckNotEmpty() {

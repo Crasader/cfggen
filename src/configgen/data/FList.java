@@ -52,14 +52,21 @@ public class FList extends Type {
 		while(!is.isSectionEnd()) {
 			addValue(Type.create(host, valueDefine, is));
 		}
-		try {
-		    is.getString();
-            throw new RuntimeException("有部分未读数据,可能是错误地提前输入了列表结束符 ]] !");
-        } catch (Exception e) {
-            // 读完所有数据后应该不再有有效数据.
-        }
+        expectEnd(is);
 	}
 
+	private void expectEnd(FlatStream is) {
+        boolean hasRemain = false;
+        try {
+            is.getString();
+            hasRemain = true;
+        } catch (Exception e) {
+
+        }
+        if(hasRemain)
+            throw new RuntimeException("有部分未读数据,可能是错误地提前输入了列表结束符 ]] !");
+        // 读完所有数据后应该不再有有效数据.
+    }
 
 	public void loadMultiRecord(Element ele) {
 		Field valueDefine = define.getValueFieldDefine();
@@ -75,11 +82,15 @@ public class FList extends Type {
 	public void loadOneRecord(File file) throws Exception {
 		Field valueDefine = define.getValueFieldDefine();
 		try {
-			addValue(file.getName().endsWith(".xml") ?
-				 Type.create(host, valueDefine, DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement())
-				:Type.create(host, valueDefine, new RowColumnStream(Utils.parse(file.getAbsolutePath()))));
+		    if(file.getName().endsWith(".xml")) {
+                addValue(Type.create(host, valueDefine, DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement()));
+            } else {
+                final FlatStream is = new RowColumnStream(Utils.parse(file.getAbsolutePath()));
+                addValue(Type.create(host, valueDefine, is));
+                expectEnd(is);
+            }
 		} catch (Exception e) {
-			System.out.printf("【加载文件失败】 %s\n", file.getAbsolutePath());
+			System.out.printf("【加载文件失败】 %s%n", file.getAbsolutePath());
             throw e;
         }
 	}

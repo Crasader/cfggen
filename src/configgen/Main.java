@@ -31,8 +31,7 @@ public final class Main {
 	
 	public static final Set<String> languages = new HashSet<String>();
 	public static final Set<String> groups = new HashSet<String>();
-	
-	private static Object lastLoadData = null;
+
 	
     private static void usage(String reason) {
         System.out.println(reason);
@@ -157,8 +156,8 @@ public final class Main {
 	        }
         }
         final long endTime = System.currentTimeMillis();
-        System.out.printf("\n\n");
-        System.out.printf("====> cost time %.2f s <====\n", (endTime - startTime) / 1000.0);
+        System.out.printf("%n%n");
+        System.out.printf("====> cost time %.2f s <====%n", (endTime - startTime) / 1000.0);
 	}
 
 	public static String curXml = "";
@@ -181,12 +180,20 @@ public final class Main {
         for(Element ele : Utils.getChildsByTagName(root, "config")) {
 			if("true".equals(ele.getAttribute("extern"))) {
 				if(!Utils.getChildsByTagName(ele, "field").isEmpty()) {
-					throw new RuntimeException("extern config:" + ele.getAttribute("name") + " can't define fields");
+					Utils.error("extern config:" + ele.getAttribute("name") + " can't define fields");
 				}
 				Struct.importDefineFromInput(doc, ele, relateDir, ele.getAttribute("input"));
 			}
         	new Struct(namespace, ele);
         	new Config(namespace, ele, relateDir);
+        }
+
+        for(Element ele : Utils.getChildsByTagName(root, "namespace")) {
+            final String name = ele.getAttribute("name");
+            if(name.isEmpty())
+                Utils.error("xml:%s subnamespace's name missing!", root);
+            ele.setAttribute("namespace", namespace + "." + name);
+            loadDefine(doc, ele, relateDir);
         }
         
         for(Element ele : Utils.getChildsByTagName(root, "import")) {
@@ -201,7 +208,6 @@ public final class Main {
         }
         
 	}
-
 	
 	public static void println(Object s) {
 		if(verbose) {
@@ -228,7 +234,7 @@ public final class Main {
             c.loadData();
             final long t2 = System.currentTimeMillis();
             if(t2 - t1 > 1000) {
-                System.out.printf("\nload config:%s cost time:%.2f s\n", c.getName(), (t2 - t1) / 1000.0);
+                System.out.printf("%nload config:%s cost time:%.2f s%n", c.getName(), (t2 - t1) / 1000.0);
             }
         }
 	}
@@ -237,6 +243,9 @@ public final class Main {
 		System.out.println();
 		Config.configs.values().stream().forEach(Config::verifyData);
 	}
+
+    private static Object lastLoadData = null;
+    private static Object curLoadData = null;
 
     private static Config curVerifyConfig = null;
     private static Object curVerifyData = null;
@@ -260,4 +269,8 @@ public final class Main {
     public static void addLastLoadData(Object data) {
 		lastLoadData = data;
 	}
+
+	public static void setCurLoadData(Object data) {
+	    curLoadData = data;
+    }
 }

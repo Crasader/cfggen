@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public final class ENUM {
-	public final static HashMap<String, ENUM> enums = new HashMap<>();
+	private final static HashMap<String, ENUM> enums = new HashMap<>();
 	public static boolean isEnum(String name) {
 		return enums.containsKey(name.toLowerCase());
 	}

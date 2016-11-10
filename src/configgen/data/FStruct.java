@@ -12,6 +12,7 @@ import java.util.List;
 public class FStruct extends Type {
 	private final String type;
 	private ArrayList<Type> values = new ArrayList<Type>();
+
 	public FStruct(FStruct host, Field define, String type, FlatStream is) {
 		super(host, define);
 		this.type = type;
@@ -56,9 +57,24 @@ public class FStruct extends Type {
 			load(Struct.get(base), is);
 		}
 		for(Field f : self.getFields()) {
-			values.add(Type.create(this, f, is));
+            try {
+                values.add(Type.create(this, f, is));
+            } catch (RuntimeException e) {
+                if(host == null) {
+                    printStacks(f);
+                }
+                throw e;
+            }
 		}
 	}
+
+	private void printStacks(Field field) {
+        System.out.println();
+        System.out.println("=================err data=====================");
+        System.out.println("error in read field:" + field.getName());
+        System.out.println(this);
+        System.out.println("=================err data=====================");
+    }
 
 	private void load(Struct self, Element ele) {
 		final String base = self.getBase();
@@ -66,21 +82,28 @@ public class FStruct extends Type {
 			load(Struct.get(base), ele);
 		}
 		for(Field f : self.getFields()) {
-			final String fname = f.getName();
-			List<Element> ns = Utils.getChildsByTagName(ele, fname);
-			if(ns.isEmpty()) {
-				// 如果是简单类型,子element找不到时,尝试从attribue时找
-				// type 属性被保留作 多态类的类名,唯一例外.
-				if((f.isRaw() || f.isEnum()) && !f.getName().equals("type") && ele.hasAttribute(fname)) {
-					values.add(Type.create(this, f, ele.getAttribute(fname)));
-				} else {
-					Utils.error("type:%s field:%s missing", self.getName(), fname);
-				}
-			} else if(ns.size() > 1) {
-				Utils.error("type:%s field:%s duplicate", self.getName(), fname);
-			} else {
-				values.add(Type.create(this, f, ns.get(0)));
-			}
+		    try {
+                final String fname = f.getName();
+                List<Element> ns = Utils.getChildsByTagName(ele, fname);
+                if (ns.isEmpty()) {
+                    // 如果是简单类型,子element找不到时,尝试从attribue时找
+                    // type 属性被保留作 多态类的类名,唯一例外.
+                    if ((f.isRaw() || f.isEnum()) && !f.getName().equals("type") && ele.hasAttribute(fname)) {
+                        values.add(Type.create(this, f, ele.getAttribute(fname)));
+                    } else {
+                        Utils.error("type:%s field:%s missing", self.getName(), fname);
+                    }
+                } else if (ns.size() > 1) {
+                    Utils.error("type:%s field:%s duplicate", self.getName(), fname);
+                } else {
+                    values.add(Type.create(this, f, ns.get(0)));
+                }
+            } catch (RuntimeException e) {
+                if(host == null) {
+                    printStacks(f);
+                }
+                throw e;
+            }
 		}
 	}
 	

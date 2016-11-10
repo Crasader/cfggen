@@ -188,6 +188,8 @@ public class CodeGen implements Generator {
 							ls.add(String.format("std::map<%s, %s> %s;", toCppDefineType(ftypes.get(1)), toCppDefineType(ftypes.get(2)), fname));
 							break;
 						}
+						default:
+						    throw new RuntimeException("unknown field type:" + ftype);
 					}
 				} else {
 					Utils.error("unknown type:" + ftype);

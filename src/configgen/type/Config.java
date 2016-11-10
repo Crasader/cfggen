@@ -101,7 +101,7 @@ public class Config {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("config{name=").append(name).append(",type=").append(type);
-		sb.append(",file=").append(inputFiles);
+		sb.append(",file=").append(Arrays.toString(inputFiles));
 		sb.append("}}");
 		return sb.toString();
 	}
