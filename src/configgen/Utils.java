@@ -4,12 +4,15 @@ import configgen.type.ENUM;
 import configgen.type.Struct;
 import org.apache.poi.ss.usermodel.*;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -47,19 +50,6 @@ public final class Utils {
         }
     }
 	
-	public static String concat(String[] strs, String splitor) {
-		StringBuilder sb = new StringBuilder();
-		boolean first = true;
-		for(String s : strs) {
-			if(!first) 
-				sb.append(splitor);
-			else
-				first = false;
-			sb.append(s);
-		}
-		return sb.toString();
-	}
-	
 	public static List<Element> getChildsByTagName(Element data, String tag) {
 		ArrayList<Element> eles = new ArrayList<Element>();
 		final NodeList nodes = data.getChildNodes();
@@ -78,22 +68,95 @@ public final class Utils {
 			return "";
 		}
 	}
-	
-	public static String getFileWithoutExtension(String file) {
-		try {
-			return file.substring(0, file.lastIndexOf('.'));
-		} catch (Exception e) {
-			return file;
-		}
-	}
-	
-	public static List<List<String>> parse(String file) throws Exception {
-		switch(getFileExtension(file)) {
-		case "csv": return parseCSV(file);
-		case "lne": return parseLineFile(file);
-		default : return parseExcel(file);
-		}
-	}
+    public static String elementToString(Node n) {
+        String name = n.getNodeName();
+        short type = n.getNodeType();
+        if (Node.CDATA_SECTION_NODE == type) {
+            return "<![CDATA[" + n.getNodeValue() + "]]&gt;";
+        }
+        if (name.startsWith("#")) {
+            return "";
+        }
+        StringBuffer sb = new StringBuffer();
+        sb.append('<').append(name);
+
+        NamedNodeMap attrs = n.getAttributes();
+        if (attrs != null) {
+            for (int i = 0; i < attrs.getLength(); i++) {
+                Node attr = attrs.item(i);
+                sb.append(' ').append(attr.getNodeName()).append("=\"").append(attr.getNodeValue()).append(
+                        "\"");
+            }
+        }
+        String textContent;
+        NodeList children = n.getChildNodes();
+        if (children.getLength() == 0) {
+            if ((textContent = n.getTextContent()) != null && !"".equals(textContent)) {
+                sb.append(textContent).append("</").append(name).append('>');
+            } else {
+                sb.append("/>").append('\n');
+            }
+        } else {
+            sb.append('>').append('\n');
+            boolean hasValidChildren = false;
+            for (int i = 0; i < children.getLength(); i++) {
+                String childToString = elementToString(children.item(i));
+                if (!"".equals(childToString)) {
+                    sb.append(childToString);
+                    hasValidChildren = true;
+                }
+            }
+
+            if (!hasValidChildren && ((textContent = n.getTextContent()) != null)) {
+                sb.append(textContent);
+            }
+
+            sb.append("</").append(name).append('>');
+        }
+        return sb.toString();
+    }
+
+	public static List<List<String>> parseExcelXml(Element ele) {
+	    final List<List<String>> lines = new ArrayList<>();
+	    final NodeList rows = ele.getElementsByTagName("Row");
+	    for(int i = 0 ; i < rows.getLength() ; i++) {
+	        final List<String> line = new ArrayList<>();
+	        final Element row = (Element)rows.item(i);
+	        final NodeList cells = row.getElementsByTagName("ss:Data");
+	        final NodeList datas = row.getElementsByTagName("Data");
+	        if(cells.getLength() != 0)
+	            throw new RuntimeException("excel文件包含了不能识别的 tag <ss:Data><YYY>xxxxx</YYY></ss:Data>,请手动将ss:Data替换成Data,并且去掉内嵌的子tag,变成如右形式 <Data>xxxxx</Data>." + elementToString(row));
+	        for(int j = 0 ; j < datas.getLength() ; j++) {
+	            final Element c = (Element)datas.item(j);
+                String value = c.getFirstChild().getTextContent();
+                if(c.getAttribute("ss:Type").equals("Boolean"))
+                    value = Boolean.toString(Integer.parseInt(value) == 1);
+	            datas.item(j).getFirstChild().getTextContent();
+	            if(value.startsWith("##")) break;
+	            line.add(value);
+            }
+            lines.add(line);
+        }
+        return lines;
+    }
+
+	public static Object parseAsXmlOrFlatStream(String file) throws Exception {
+        switch(getFileExtension(file)) {
+            case "csv": return parseCSV(file);
+            case "lne": return parseLineFile(file);
+            case "xml": {
+                final Element ele = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(file)).getDocumentElement();
+                if (ele.getTagName().equals("Workbook")) {
+                    // excel 2003 xml格式
+                    //System.out.println("parse:" + file);
+                    return parseExcelXml(ele);
+                } else {
+                    return ele;
+                }
+            }
+            default : return parseExcel(file);
+        }
+    }
 	
 	private static List<List<String>> parseLineFile(String file) throws Exception {
 		final List<String> lines = Files.readAllLines(new File(file).toPath());
@@ -107,7 +170,7 @@ public final class Utils {
 		return CSV.parse(new BufferedReader(new InputStreamReader(new FileInputStream(new File(file)), Main.inputEncoding)));
 	}
 	
-	static List<List<String>> parseExcel(String file) throws Exception {
+	public static List<List<String>> parseExcel(String file) throws Exception {
 		final Workbook workbook = WorkbookFactory.create(new File(file));
 		final List<List<String>> lines = new ArrayList<>();
 		final FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
@@ -211,8 +274,9 @@ public final class Utils {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		System.out.println(parse("F:/cfggen.git/trunk/csv/test.csv"));
-		System.out.println(parse("F:/cfggen.git/trunk/csv/test.xlsx"));
-		System.out.println(parse("F:/cfggen.git/trunk/csv/test.xls"));
+//		System.out.println(parse("F:/cfggen.git/trunk/csv/test.csv"));
+//		System.out.println(parse("F:/cfggen.git/trunk/csv/test.xlsx"));
+//		System.out.println(parse("F:/cfggen.git/trunk/csv/test.xls"));
+        System.out.println(parseAsXmlOrFlatStream("D:\\workspace\\luxianres\\branches\\test826\\csv\\ectype\\ectypebasic2.xml"));
 	}
 }

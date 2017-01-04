@@ -53,13 +53,14 @@ public final class Struct {
 	private final static HashSet<Integer> typeids = new HashSet<>();
     private final String delimiter;
 
+	@SuppressWarnings("unchecked")
 	public static void importDefineFromInput(Document doc, Element ele, String csvDir, String inputFileStr) throws Exception {
 		final String configName = ele.getAttribute("name");
 		final String[] inputs = Utils.split(ele, "input");
 		if(inputs.length == 0)
 			Utils.error("extern config:%s input miss", configName);
 		final String path = Utils.combine(Main.csvDir, Utils.combine(csvDir, inputs[0]));
-		final List<List<String>> lines = Utils.parse(path);
+		final List<List<String>> lines = (List<List<String>>)Utils.parseAsXmlOrFlatStream(path);
 		if(lines.isEmpty() || lines.get(0).isEmpty() || !lines.get(0).get(0).startsWith("##"))
 			Utils.error("extern config:%s can't find field defines!", configName);
 

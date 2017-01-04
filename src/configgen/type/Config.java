@@ -1,5 +1,6 @@
 package configgen.type;
 
+import configgen.FlatStream;
 import configgen.Main;
 import configgen.RowColumnStream;
 import configgen.Utils;
@@ -143,7 +144,8 @@ public class Config {
             files.put(fileName, file);
         }
     }
-	
+
+    @SuppressWarnings("unchecked")
 	public void loadData() throws Exception {
 		for (String fileName : inputFiles) {
 			try {
@@ -151,14 +153,17 @@ public class Config {
                 if(file.isDirectory()) {
                     final TreeMap<String, File> subFiles = new TreeMap<>();
                     collectFiles(fileName, subFiles);
-                    for(File f : subFiles.values()) {
+                    for (File f : subFiles.values()) {
                         data.loadOneRecord(f);
                     }
-
-                } else if(fileName.endsWith(".xml")) {
-                    data.loadMultiRecord(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement());
                 } else {
-                    data.loadMultiRecord(new RowColumnStream(Utils.parse(fileName)));
+                    final Object content = Utils.parseAsXmlOrFlatStream(file.getAbsolutePath());
+                    if(content instanceof  Element) {
+                        data.loadMultiRecord((Element)content);
+                    } else {
+                        final FlatStream is = new RowColumnStream((List<List<String>>)content);
+                        data.loadMultiRecord(is);
+                    }
                 }
 			} catch (Exception e) {
                 e.printStackTrace();

@@ -69,7 +69,7 @@ public class FList extends Type {
     }
 
 	public void loadMultiRecord(Element ele) {
-		Field valueDefine = define.getValueFieldDefine();
+        Field valueDefine = define.getValueFieldDefine();
 		final NodeList nodes = ele.getChildNodes();
 		for(int i = 0, n = nodes.getLength() ; i < n ; i++) {
 			final Node node = nodes.item(i);
@@ -79,13 +79,15 @@ public class FList extends Type {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void loadOneRecord(File file) throws Exception {
 		Field valueDefine = define.getValueFieldDefine();
 		try {
-		    if(file.getName().endsWith(".xml")) {
-                addValue(Type.create(host, valueDefine, DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file).getDocumentElement()));
+		    final Object data = Utils.parseAsXmlOrFlatStream(file.getAbsolutePath());
+		    if(data instanceof  Element) {
+		        addValue(Type.create(host, valueDefine, (Element)data));
             } else {
-                final FlatStream is = new RowColumnStream(Utils.parse(file.getAbsolutePath()));
+                final FlatStream is = new RowColumnStream((List<List<String>>)data);
                 addValue(Type.create(host, valueDefine, is));
                 expectEnd(is);
             }
