@@ -22,7 +22,7 @@ public final class Main {
 	public static String dataDir = "";
 	public static String csmarshalcodeDir = "";
 	public static String outputEncoding = "utf8";
-	public static String inputEncoding = "GBK";
+	public static String inputEncoding = "GB2312";
 	public static boolean verbose = false;
 	public static boolean check = false;
 	public static String cfgmgrName = "CfgMgr";
@@ -44,7 +44,7 @@ public final class Main {
         System.out.println("    -csmarshalcodedir   csharp marshal code output directory" );
         System.out.println("    -group server:client:all:xxx   group to export, can be multi.");
         System.out.println("    -outputencoding  output encoding. default utf8");
-        System.out.println("    -inputencoding   input encoding. default GBK");
+        System.out.println("    -inputencoding   input csv encoding. default GB2312");
         System.out.println("    -verbose  show detail. default not");
         System.out.println("    -check load and check even not set -datadir");
         System.out.println("    -cfgmgrname set cfgmgr class name");
