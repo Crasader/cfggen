@@ -80,30 +80,36 @@ public final class Field {
 			);	
 	}
 	
-	private Field(Struct parent, String name, String fullType, List<String> types, HashSet<String> groups, List<String> refs, List<String> refPaths) {
+	private Field(Struct parent, String name, String delimiter, String fullType, List<String> types, HashSet<String> groups, List<String> refs, List<String> refPaths) {
 		this.parent = parent;
 		this.name = name;
 		this.fullType = fullType;
 		this.types = types;
 		this.groups.addAll(groups);
-        this.compounddelimiter = "";
+        this.compounddelimiter = delimiter;
         this.refs.addAll(refs);
         this.refPath.addAll(refPaths);
 	}
 
 
 	public Field getValueFieldDefine() {
-	    return new Field(parent, name, fullType, types.subList(1, types.size()), groups, refs, refPath);
+		final String valueType = types.get(1);
+		Struct s = Struct.get(valueType);
+	    return new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups, refs, refPath);
     }
 
     public Field getMapKeyFieldDefine() {
-        return new Field(parent, name, fullType, types.subList(1, types.size()), groups,
+		final String keyType = types.get(1);
+		Struct s = Struct.get(keyType);
+        return new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups,
                 refs.isEmpty() ? Collections.emptyList() : Arrays.asList(refs.get(0)),
                 Collections.emptyList());
     }
 
     public Field getMapValueFieldDefine() {
-        return new Field(parent, name, fullType, types.subList(2, types.size()), groups,
+		final String valueType = types.get(2);
+		Struct s = Struct.get(valueType);
+        return new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(2, types.size()), groups,
                 refs.size() < 2 ? Collections.emptyList() : Arrays.asList(refs.get(1)),
                 refPath);
     }
@@ -271,6 +277,7 @@ public final class Field {
 				final String valueType = types.get(1);
 				if(!isRawOrEnumOrStruct(valueType))
 					error("非法的set value类型:" + valueType);
+
 			} else if("list".equals(type)) {
 				checkType(1);
 				final String valueType = types.get(1);
