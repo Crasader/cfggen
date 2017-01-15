@@ -7,9 +7,10 @@ import configgen.Utils;
 import configgen.data.DataVisitor;
 import configgen.data.FList;
 import configgen.data.Type;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaValue;
 import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -133,7 +134,7 @@ public class Config {
                 final String subName = f.getName();
                 String[] tokens = subName.split("[\\\\|/]");
                 String selfName = tokens[tokens.length - 1];
-                if(selfName.startsWith(".")) continue;;
+                if(selfName.startsWith(".") || selfName.startsWith("~")) continue;;
                 if(f.isDirectory()) {
                     collectFiles(subName, files);
                 } else {
@@ -157,13 +158,18 @@ public class Config {
                         data.loadOneRecord(f);
                     }
                 } else {
-                    final Object content = Utils.parseAsXmlOrFlatStream(file.getAbsolutePath());
+                    final Object content = Utils.parseAsXmlOrLuaOrFlatStream(file.getAbsolutePath());
                     if(content instanceof  Element) {
                         data.loadMultiRecord((Element)content);
-                    } else {
+                    } else if(content instanceof List){
                         final FlatStream is = new RowColumnStream((List<List<String>>)content);
                         data.loadMultiRecord(is);
-                    }
+                    } else {
+						if(isSingle())
+							data.loadOneRecord((LuaTable)content);
+						else
+							data.loadMultiRecord((LuaValue)content);
+					}
                 }
 			} catch (Exception e) {
                 e.printStackTrace();

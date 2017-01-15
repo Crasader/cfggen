@@ -10,7 +10,12 @@ public class FFloat extends Type {
 		super(host, define);
 		value = is.equalsIgnoreCase(NULL_STR) ? NULL_VALUE : Double.parseDouble(is);
 	}
-	
+
+	public FFloat(FStruct host, Field define, double v) {
+		super(host, define);
+		value = v;
+	}
+
 	public FFloat(FStruct host, Field define, FlatStream is) {
 		this(host, define, is.getString());
 	}

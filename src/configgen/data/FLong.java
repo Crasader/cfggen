@@ -10,6 +10,11 @@ public final class FLong extends Type {
 		super(host, define);
 		value = is.equalsIgnoreCase(NULL_STR) ? NULL_VALUE : Long.parseLong(is);
 	}
+
+	public FLong(FStruct host, Field define, long v) {
+		super(host, define);
+		value = v;
+	}
 	
 	public FLong(FStruct host, Field define, FlatStream is) {
 		this(host, define, is.getString());

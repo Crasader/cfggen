@@ -3,8 +3,9 @@ package configgen;
 import configgen.type.ENUM;
 import configgen.type.Struct;
 import org.apache.poi.ss.usermodel.*;
+import org.luaj.vm2.Globals;
+import org.luaj.vm2.lib.jse.JsePlatform;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -67,95 +68,22 @@ public final class Utils {
 			return "";
 		}
 	}
-    public static String elementToString(Node n) {
-        String name = n.getNodeName();
-        short type = n.getNodeType();
-        if (Node.CDATA_SECTION_NODE == type) {
-            return "<![CDATA[" + n.getNodeValue() + "]]&gt;";
-        }
-        if (name.startsWith("#")) {
-            return "";
-        }
-        StringBuffer sb = new StringBuffer();
-        sb.append('<').append(name);
 
-        NamedNodeMap attrs = n.getAttributes();
-        if (attrs != null) {
-            for (int i = 0; i < attrs.getLength(); i++) {
-                Node attr = attrs.item(i);
-                sb.append(' ').append(attr.getNodeName()).append("=\"").append(attr.getNodeValue()).append(
-                        "\"");
-            }
-        }
-        String textContent;
-        NodeList children = n.getChildNodes();
-        if (children.getLength() == 0) {
-            if ((textContent = n.getTextContent()) != null && !"".equals(textContent)) {
-                sb.append(textContent).append("</").append(name).append('>');
-            } else {
-                sb.append("/>").append('\n');
-            }
-        } else {
-            sb.append('>').append('\n');
-            boolean hasValidChildren = false;
-            for (int i = 0; i < children.getLength(); i++) {
-                String childToString = elementToString(children.item(i));
-                if (!"".equals(childToString)) {
-                    sb.append(childToString);
-                    hasValidChildren = true;
-                }
-            }
-
-            if (!hasValidChildren && ((textContent = n.getTextContent()) != null)) {
-                sb.append(textContent);
-            }
-
-            sb.append("</").append(name).append('>');
-        }
-        return sb.toString();
-    }
-
-	public static List<List<String>> parseExcelXml(Element ele) {
-	    final List<List<String>> lines = new ArrayList<>();
-	    final NodeList rows = ele.getElementsByTagName("Row");
-	    for(int i = 0 ; i < rows.getLength() ; i++) {
-	        final List<String> line = new ArrayList<>();
-	        final Element row = (Element)rows.item(i);
-	        final NodeList cells = row.getElementsByTagName("ss:Data");
-	        final NodeList datas = row.getElementsByTagName("Data");
-	        if(cells.getLength() != 0)
-	            throw new RuntimeException("excel文件包含了不能识别的 tag <ss:Data><YYY>xxxxx</YYY></ss:Data>,请手动将ss:Data替换成Data,并且去掉内嵌的子tag,变成如右形式 <Data>xxxxx</Data>." + elementToString(row));
-	        for(int j = 0 ; j < datas.getLength() ; j++) {
-	            final Element c = (Element)datas.item(j);
-                String value = c.getFirstChild().getTextContent();
-                if(c.getAttribute("ss:Type").equals("Boolean"))
-                    value = Boolean.toString(Integer.parseInt(value) == 1);
-	            datas.item(j).getFirstChild().getTextContent();
-	            if(value.startsWith("##")) break;
-	            line.add(value);
-            }
-            lines.add(line);
-        }
-        return lines;
-    }
-
-	public static Object parseAsXmlOrFlatStream(String file) throws Exception {
+	public static Object parseAsXmlOrLuaOrFlatStream(String file) throws Exception {
         switch(getFileExtension(file)) {
             case "csv": return parseCSV(file);
             case "lne": return parseLineFile(file);
-            case "xml": {
-                final Element ele = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(file)).getDocumentElement();
-                if (ele.getTagName().equals("Workbook")) {
-                    // excel 2003 xml格式
-                    //System.out.println("parse:" + file);
-                    return parseExcelXml(ele);
-                } else {
-                    return ele;
-                }
-            }
+            case "xml": return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(file)).getDocumentElement();
+			case "lua": return parseLua(file);
             default : return parseExcel(file);
         }
     }
+
+	public static Object parseLua(String file) {
+		Globals g = JsePlatform.standardGlobals();
+		g.loadfile(file).call();
+		return g.loadfile(file).call();
+	}
 	
 	private static List<List<String>> parseLineFile(String file) throws Exception {
 		final List<String> lines = Files.readAllLines(new File(file).toPath());
@@ -163,7 +91,6 @@ public final class Utils {
 		rowcol.add(lines);
 		return rowcol;
 	}
-
 
 	static List<List<String>> parseCSV(String file) throws IOException {
 		return CSV.parse(new BufferedReader(new InputStreamReader(new FileInputStream(new File(file)), Main.inputEncoding)));
@@ -276,6 +203,6 @@ public final class Utils {
 //		System.out.println(parse("F:/cfggen.git/trunk/csv/test.csv"));
 //		System.out.println(parse("F:/cfggen.git/trunk/csv/test.xlsx"));
 //		System.out.println(parse("F:/cfggen.git/trunk/csv/test.xls"));
-        System.out.println(parseAsXmlOrFlatStream("D:\\workspace\\luxianres\\branches\\test826\\csv\\ectype\\ectypebasic2.xml"));
+        System.out.println(parseAsXmlOrLuaOrFlatStream("D:\\workspace\\luxianres\\branches\\test826\\csv\\ectype\\ectypebasic2.xml"));
 	}
 }

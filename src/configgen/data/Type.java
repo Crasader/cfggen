@@ -6,6 +6,7 @@ import configgen.RowColumnStream;
 import configgen.type.Config;
 import configgen.type.Field;
 import configgen.type.Struct;
+import org.luaj.vm2.LuaValue;
 import org.w3c.dom.Element;
 
 import java.util.Arrays;
@@ -159,6 +160,56 @@ public abstract class Type {
 		error("unknown type:" + type);
 		return null;
 	}
+
+
+	public static Type create(FStruct host, Field define, LuaValue data) {
+		final String type = define.getType();
+		if(define.isRaw()) {
+			if(type.equals("bool")) {
+				return new FBool(host, define, data.toboolean());
+			} else if(type.equals("int")) {
+				return new FInt(host, define, data.toint());
+			} else if(type.equals("long")) {
+				return new FLong(host, define, data.tolong());
+			} else if(type.equals("float")) {
+				return new FFloat(host, define, data.todouble());
+			} else if(type.equals("string")) {
+				return new FString(host, define, data.tojstring());
+			}
+		} else if(define.isContainer()) {
+			if(type.equals("list")) {
+				FList d = new FList(host, define);
+				d.loadMultiRecord(data);
+				return d;
+			} else if(type.equals("set")) {
+				return new FSet(host, define, data.checktable());
+			} else if(type.equals("map")) {
+				return new FMap(host, define, data.checktable());
+			}
+		} else if(define.isEnum()) {
+			return new FEnum(host, define, data.tojstring());
+		} else if(define.isStruct()) {
+			data.checktable();
+			final String baseType = define.getType();
+			final Struct base = Struct.get(define.getType());
+			if(base.isDynamic()) {
+				final String subType = base.getNamespace() + "." + data.get("class").tojstring();
+				Struct real = Struct.get(subType);
+				if(real == null || !real.getFullName().equals(subType))
+					error("dynamic type:" + subType + " unknown");
+				if(real.isDynamic())
+					error("data type:" + subType + " is dynamic type!");
+				if(!Struct.isDeriveFrom(subType, baseType))
+					error("dynamic type:" + subType + " isn't sub type of:" + baseType);
+				return new FStruct(host, define, subType, data.checktable());
+			} else {
+				return new FStruct(host, define, baseType, data.checktable());
+			}
+		}
+
+		error("unknown type:" + type);
+		return null;
+	}
 	
 	public abstract boolean isNull();
 	public abstract void accept(Visitor visitor);
@@ -192,5 +243,5 @@ public abstract class Type {
 		verifyData(this, define.getRef());
 	}
 
-	
+
 }

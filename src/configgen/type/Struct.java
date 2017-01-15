@@ -60,7 +60,7 @@ public final class Struct {
 		if(inputs.length == 0)
 			Utils.error("extern config:%s input miss", configName);
 		final String path = Utils.combine(Main.csvDir, Utils.combine(csvDir, inputs[0]));
-		final List<List<String>> lines = (List<List<String>>)Utils.parseAsXmlOrFlatStream(path);
+		final List<List<String>> lines = (List<List<String>>)Utils.parseAsXmlOrLuaOrFlatStream(path);
 		if(lines.isEmpty() || lines.get(0).isEmpty() || !lines.get(0).get(0).startsWith("##"))
 			Utils.error("extern config:%s can't find field defines!", configName);
 

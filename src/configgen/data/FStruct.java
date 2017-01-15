@@ -4,6 +4,8 @@ import configgen.FlatStream;
 import configgen.Utils;
 import configgen.type.Field;
 import configgen.type.Struct;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaValue;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -17,6 +19,12 @@ public class FStruct extends Type {
 		super(host, define);
 		this.type = type;
 		load(Struct.get(type), is);
+	}
+
+	public FStruct(FStruct host, Field define, String type, LuaTable g) {
+		super(host, define);
+		this.type = type;
+		load(Struct.get(type), g);
 	}
 	
 	public FStruct(FStruct host, Field define, String type, Element ele) {
@@ -104,6 +112,27 @@ public class FStruct extends Type {
                 }
                 throw e;
             }
+		}
+	}
+
+	private void load(Struct self, LuaTable g) {
+		final String base = self.getBase();
+		if(!base.isEmpty()) {
+			load(Struct.get(base), g);
+		}
+		for(Field f : self.getFields()) {
+			try {
+				final String fname = f.getName();
+				LuaValue v = g.get(fname);
+				if(v.isnil())
+					Utils.error("type:%s field:%s missing", self.getName(), fname);
+				values.add(Type.create(this, f, v));
+			}  catch (RuntimeException e) {
+				if(host == null) {
+					printStacks(f);
+				}
+				throw e;
+			}
 		}
 	}
 	

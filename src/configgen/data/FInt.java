@@ -1,14 +1,18 @@
 package configgen.data;
 
-import org.w3c.dom.Element;
-
 import configgen.FlatStream;
 import configgen.type.Field;
+import org.w3c.dom.Element;
 
 public final class FInt extends Type {
 	public FInt(FStruct host, Field define, String is) {
 		super(host, define);
 		value = is.equalsIgnoreCase(NULL_STR) ? NULL_VALUE : Integer.parseInt(is);
+	}
+
+	public FInt(FStruct host, Field define, int v) {
+		super(host, define);
+		value = v;
 	}
 	
 	public FInt(FStruct host, Field define, FlatStream is) {
@@ -20,7 +24,7 @@ public final class FInt extends Type {
 	}
 
 	public final int value;
-	
+
 	public String toString() {
 		return "int:" + value;
 	}

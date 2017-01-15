@@ -7,6 +7,11 @@ import configgen.Utils;
 import configgen.type.Field;
 
 public class FBool extends Type {
+	public FBool(FStruct host, Field define, boolean v) {
+		super(host, define);
+		value = v;
+	}
+
 	public FBool(FStruct host, Field define, String v) {
 		super(host, define);
 		value = Boolean.parseBoolean(v);

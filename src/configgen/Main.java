@@ -245,7 +245,6 @@ public final class Main {
 	}
 
     private static Object lastLoadData = null;
-    private static Object curLoadData = null;
 
     private static Config curVerifyConfig = null;
     private static Object curVerifyData = null;
@@ -270,7 +269,4 @@ public final class Main {
 		lastLoadData = data;
 	}
 
-	public static void setCurLoadData(Object data) {
-	    curLoadData = data;
-    }
 }

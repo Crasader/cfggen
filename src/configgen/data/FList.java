@@ -5,11 +5,12 @@ import configgen.Main;
 import configgen.RowColumnStream;
 import configgen.Utils;
 import configgen.type.Field;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaValue;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,22 +80,34 @@ public class FList extends Type {
 		}
 	}
 
+	public void loadMultiRecord(LuaValue g) {
+		Field valueDefine = define.getValueFieldDefine();
+		for(int i = 1, n = g.rawlen() ; i <= n ; i++)
+			addValue(Type.create(host, valueDefine, g.get(i)));
+	}
+
 	@SuppressWarnings("unchecked")
 	public void loadOneRecord(File file) throws Exception {
 		Field valueDefine = define.getValueFieldDefine();
 		try {
-		    final Object data = Utils.parseAsXmlOrFlatStream(file.getAbsolutePath());
+		    final Object data = Utils.parseAsXmlOrLuaOrFlatStream(file.getAbsolutePath());
 		    if(data instanceof  Element) {
 		        addValue(Type.create(host, valueDefine, (Element)data));
-            } else {
+            } else if(data instanceof List){
                 final FlatStream is = new RowColumnStream((List<List<String>>)data);
                 addValue(Type.create(host, valueDefine, is));
                 expectEnd(is);
-            }
+            } else {
+				addValue(Type.create(host, valueDefine, (LuaValue)data));
+			}
 		} catch (Exception e) {
 			System.out.printf("【加载文件失败】 %s%n", file.getAbsolutePath());
             throw e;
         }
+	}
+
+	public void loadOneRecord(LuaTable g) throws Exception {
+		addValue(Type.create(host, define.getValueFieldDefine(), g));
 	}
 
 	public String toString() {
@@ -124,5 +137,5 @@ public class FList extends Type {
 	public boolean isNull() {
 		return false;
 	}
-	
+
 }

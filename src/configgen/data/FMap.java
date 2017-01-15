@@ -2,13 +2,13 @@ package configgen.data;
 
 import configgen.FlatStream;
 import configgen.Utils;
-import configgen.type.Config;
 import configgen.type.Field;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaValue;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,6 +25,18 @@ public class FMap extends Type {
 		while(!is.isSectionEnd()) {
 			final Type key = Type.create(host, keyDefine, is);
 			if(values.put(key, Type.create(host, valueDefine, is)) != null) {
+				throw new RuntimeException(String.format("field:%s key:%s dunplicate", define, key));
+			}
+		}
+	}
+
+	public FMap(FStruct host, Field define, LuaTable t) {
+		super(host, define);
+		this.keyDefine = define.getMapKeyFieldDefine();
+		this.valueDefine = define.getMapValueFieldDefine();
+		for(LuaValue k : t.keys()) {
+			final Type key = Type.create(host, keyDefine, k);
+			if(values.put(key, Type.create(host, valueDefine, t.get(k))) != null) {
 				throw new RuntimeException(String.format("field:%s key:%s dunplicate", define, key));
 			}
 		}
