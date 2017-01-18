@@ -26,7 +26,9 @@ public final class Main {
 	public static boolean verbose = false;
 	public static boolean check = false;
 	public static String cfgmgrName = "CfgMgr";
-	
+	public static String inputLocalizedFile = null;
+	public static String outputLocalizedFile = null;
+
 	public static final String magicStringForNewLine = ".g9~/";
 	
 	public static final Set<String> languages = new HashSet<String>();
@@ -47,6 +49,7 @@ public final class Main {
         System.out.println("    -inputencoding   input csv encoding. default GB2312");
         System.out.println("    -verbose  show detail. default not");
         System.out.println("    -check load and check even not set -datadir");
+		System.out.println("    -localized  inputlocalizedfile:outputlocalizedfile     set input&output localized file");
         System.out.println("    -cfgmgrname set cfgmgr class name");
         System.out.println("    --help show usage");
 
@@ -86,6 +89,14 @@ public final class Main {
 			case "-check":
 				check = true;
 				break;
+			case "-localized": {
+				final String[] params = args[++i].split(":");
+				if(params.length != 2)
+					usage("-localized inputfile:outputfile");
+				inputLocalizedFile = params[0];
+				outputLocalizedFile = params[1];
+				break;
+			}
 			case "-cfgmgrname":
 				cfgmgrName = args[++i];
 				break;
@@ -106,7 +117,7 @@ public final class Main {
 			usage("-codedir miss");
 		
 		if(codeDir.isEmpty() && dataDir.isEmpty() && csmarshalcodeDir.isEmpty() && !check)
-			usage("needs -codeDir or -dataDir or csmarshalcodedir or -check");
+			usage("needs -codedir or -datadir or csmarshalcodedir or -check");
 
         final long startTime = System.currentTimeMillis();
         final File cfgxml = new File(xmlSchemeFile);
@@ -225,8 +236,10 @@ public final class Main {
 		Struct.getStructs().values().stream().forEach(Struct::verityDefine);
 		Config.configs.values().stream().forEach(Config::verifyDefine);
 	}
-	
+
 	static void loadData() throws Exception{
+		if(inputLocalizedFile != null)
+			Localized.Ins.load(inputLocalizedFile);
         for (Config c : Config.configs.values()) {
             lastLoadData = null;
             System.out.printf(".");
@@ -237,6 +250,8 @@ public final class Main {
                 System.out.printf("%nload config:%s cost time:%.2f s%n", c.getName(), (t2 - t1) / 1000.0);
             }
         }
+		if(outputLocalizedFile != null)
+			Localized.Ins.saveUnLocalizedAs(outputLocalizedFile);
 	}
 	
 	private static void verifyData() {

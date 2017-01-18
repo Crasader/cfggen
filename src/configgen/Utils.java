@@ -92,8 +92,12 @@ public final class Utils {
 		return rowcol;
 	}
 
-	static List<List<String>> parseCSV(String file) throws IOException {
-		return CSV.parse(new BufferedReader(new InputStreamReader(new FileInputStream(new File(file)), Main.inputEncoding)));
+	public static List<List<String>> parseCSV(String file) throws IOException {
+		return parseCSV(file, Main.inputEncoding);
+	}
+
+	public static List<List<String>> parseCSV(String file, String encoding) throws IOException {
+		return CSV.parse(new BufferedReader(new InputStreamReader(new FileInputStream(new File(file)), encoding)));
 	}
 	
 	public static List<List<String>> parseExcel(String file) throws Exception {

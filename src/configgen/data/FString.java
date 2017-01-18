@@ -1,5 +1,6 @@
 package configgen.data;
 
+import configgen.Localized;
 import configgen.Main;
 import org.w3c.dom.Element;
 
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 public class FString extends Type {
 	public FString(FStruct host, Field define, String is) {
 		super(host, define);
-		value = is;
+		value = checkLocalized(is);
 	}
 	
 
@@ -22,20 +23,41 @@ public class FString extends Type {
 		super(host, define);
 		final String s = is.getString();
 		// 因为null用来表示空字符串,%n 存在的意义是为了能够在 string 里配出 null.
-		value = s.equals(EMPTY) ? "" :
-			(s.indexOf('%') >= 0 ? s.replace("%#", "#").replace("%]", "]").replace("%n", "n") : s);
+		value = checkLocalized(s.equals(EMPTY) ? "" :
+			(s.indexOf('%') >= 0 ? s.replace("%#", "#").replace("%]", "]").replace("%n", "n") : s));
 	}
 	
 	public FString(FStruct host, Field define, Element node) {
 		this(host, define, node.getFirstChild() != null ? node.getFirstChild().getTextContent() : "");
 	}
 
-	public String value;
+	public final String value;
 
 	public String toString() {
 		return "string:'" + value + "'";
 	}
-	
+
+	private String checkLocalized(String s) {
+		if(!define.isLocalized()) return s;
+		Localized loc = Localized.Ins;
+		if(loc.isHasLocalized()) {
+			final String r = loc.getLocalizedStr(s);
+			if(r != null) {
+				return r;
+			} else {
+				loc.addUnlocalizedStr(s);
+				// 那些需要本地化的字符串有时候即使相同的串,也要映射到不同的文字。这时候需要一个tag
+				// 来区分他们。
+				// 原来一个字符串是 xxxyyzz, 加了tag后为 xxxyyzz@name@
+				// 如果没有找到本土化映射,会自动帮它脱去尾部的 @...@
+				if(s.endsWith("@")) {
+					return s.substring(0, s.lastIndexOf('@', s.length() - 2));
+				}
+				return s;
+			}
+		}
+		return s;
+	}
 
 	@Override
 	public void accept(Visitor visitor) {

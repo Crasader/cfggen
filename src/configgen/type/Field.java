@@ -12,6 +12,7 @@ public final class Field {
 	private final String name;
 	private final String fullType;
 	private final List<String> types;
+	private final boolean localized;
 
     private String compounddelimiter;
 
@@ -20,10 +21,9 @@ public final class Field {
 	private final List<String> refs = new ArrayList<>();
     private final List<String> refPath = new ArrayList<>();
 	
-	private final static HashSet<String> RawTypes = new HashSet<>(Arrays.asList("bool", "int", "float", "long", "string"));
+	private final static HashSet<String> RawTypes = new HashSet<>(Arrays.asList("bool", "int", "float", "long", "string", "text"));
 	private final static HashSet<String> ConTypes = new HashSet<>(Arrays.asList("list", "set", "map"));
 	private final static HashSet<String> ReserveNames = new HashSet<>(Arrays.asList("end", "base", "super"));//, "typeid", "friend"));
-
 
 	private final static Pattern namePattern = Pattern.compile("[a-zA-Z]\\w*");
 	public Field(Struct parent, String name, String compounddelimiter, String fulltype, String[] types, String[] indexs, String[] refs, String[] refPath, String[] groups) {
@@ -33,6 +33,12 @@ public final class Field {
 		this.types = Arrays.asList(types);
 		if(this.types.isEmpty())
 			error("没有定义 type");
+		if(fulltype.equalsIgnoreCase("text")) {
+			this.localized = true;
+			this.types.set(0, "string");
+		} else {
+			this.localized = false;
+		}
 		
 		for(int i = 0 ; i < types.length ; i++) {
 			String t = types[i];
@@ -85,6 +91,12 @@ public final class Field {
 		this.name = name;
 		this.fullType = fullType;
 		this.types = types;
+		if(types.get(0).equalsIgnoreCase("text")) {
+			this.localized = true;
+			this.types.set(0, "string");
+		} else {
+			this.localized = false;
+		}
 		this.groups.addAll(groups);
         this.compounddelimiter = delimiter;
         this.refs.addAll(refs);
@@ -113,7 +125,11 @@ public final class Field {
                 refs.size() < 2 ? Collections.emptyList() : Arrays.asList(refs.get(1)),
                 refPath);
     }
-	
+
+	public boolean isLocalized() {
+		return localized;
+	}
+
 	public final Struct getParent() {
 		return parent;
 	}
