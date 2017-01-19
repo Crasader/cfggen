@@ -41,6 +41,7 @@ public class FString extends Type {
 		if(!define.isLocalized()) return s;
 		Localized loc = Localized.Ins;
 		if(loc.isHasLocalized()) {
+			if(s.trim().isEmpty()) return s;
 			final String r = loc.getLocalizedStr(s);
 			if(r != null) {
 				return r;

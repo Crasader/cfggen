@@ -27,7 +27,7 @@ public class Localized {
             if(line.size() != 2) {
                 Utils.error("localized file. invalid line:" + line);
             }
-            if(mapper.put(line.get(0), line.get(1)) != null) {
+            if(mapper.put(unescape(line.get(0)), unescape(line.get(1))) != null) {
                 Utils.error("localized file. duplicate line:" + line);
             }
         }
@@ -42,9 +42,17 @@ public class Localized {
         unmappers.add(src);
     }
 
+    public static String escape(String s) {
+        return s.replace("\n", "$enter$").replace("\"", "$quote$").replace("\'", "$quote2$");
+    }
+
+    public static String unescape(String s) {
+        return s.replace("$enter$", "\n").replace("$quote$", "\"").replace("$quote2$", "\'");
+    }
+
     public void saveUnLocalizedAs(String file) {
-        final String text = unmappers.stream().map(s -> s.replace("\"", "\"\""))
-                .map(s -> s.contains("\n") ? "\"" + s + "\"" : s).collect(Collectors.joining("\n"));
+        final String text = unmappers.stream()
+                .map(Localized::escape).collect(Collectors.joining("\n"));
         Utils.save(Utils.combine(Main.csvDir, file), text);
     }
 }
