@@ -71,6 +71,10 @@ public final class Field {
 		if(this.groups.isEmpty()) 
 			this.groups.add("all");
 	}
+
+	private Field valueFieldDefine;
+	private Field mapKeyFieldDefine;
+	private Field mapValueFieldDefine;
 	
 	public Field(Struct parent, Element data) {
 		this(
@@ -105,25 +109,15 @@ public final class Field {
 
 
 	public Field getValueFieldDefine() {
-		final String valueType = types.get(1);
-		Struct s = Struct.get(valueType);
-	    return new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups, refs, refPath);
+		return valueFieldDefine;
     }
 
     public Field getMapKeyFieldDefine() {
-		final String keyType = types.get(1);
-		Struct s = Struct.get(keyType);
-        return new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups,
-                refs.isEmpty() ? Collections.emptyList() : Arrays.asList(refs.get(0)),
-                Collections.emptyList());
+		return mapKeyFieldDefine;
     }
 
     public Field getMapValueFieldDefine() {
-		final String valueType = types.get(2);
-		Struct s = Struct.get(valueType);
-        return new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(2, types.size()), groups,
-                refs.size() < 2 ? Collections.emptyList() : Arrays.asList(refs.get(1)),
-                refPath);
+		return mapValueFieldDefine;
     }
 
 	public boolean isLocalized() {
@@ -288,12 +282,22 @@ public final class Field {
 				final String valueType = types.get(2);
 				if(!isRawOrEnumOrStruct(valueType))
 					error("非法的map value类型:" + valueType);
+
+				valueFieldDefine = null;
+				Struct s = Struct.get(valueType);
+				mapKeyFieldDefine = new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups,
+						refs.isEmpty() ? Collections.emptyList() : Arrays.asList(refs.get(0)),
+						Collections.emptyList());
+				mapValueFieldDefine =  new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups, refs, refPath);
 			} else if("set".equals(type)) {
 				checkType(1);
 				final String valueType = types.get(1);
 				if(!isRawOrEnumOrStruct(valueType))
 					error("非法的set value类型:" + valueType);
 
+				mapKeyFieldDefine = mapValueFieldDefine = null;
+				Struct s = Struct.get(valueType);
+				valueFieldDefine = new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups, refs, refPath);
 			} else if("list".equals(type)) {
 				checkType(1);
 				final String valueType = types.get(1);
@@ -304,6 +308,13 @@ public final class Field {
 						error("list的 value 类型:" + valueType + "必须是struct才能index");
 					}
 				}
+				mapKeyFieldDefine = mapValueFieldDefine = null;
+				Struct s = Struct.get(valueType);
+				valueFieldDefine = new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups, refs, refPath);
+			}
+			for(int i = 0 ; i < types.size() ; i++) {
+				if(types.get(i).equals("text"))
+					types.set(i, "string");
 			}
 		} else {
 			error("未知类型:" + type);
