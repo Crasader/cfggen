@@ -125,6 +125,7 @@ public class Config {
 				Utils.error("config:%s id不能是map,set,list这些容器类型", name);
 			}
 		}
+		this.data.getDefine().verifyDefine();
 	}
 
 	private void collectFiles(String fileName, TreeMap<String, File> files) {

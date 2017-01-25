@@ -288,7 +288,7 @@ public final class Field {
 				mapKeyFieldDefine = new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups,
 						refs.isEmpty() ? Collections.emptyList() : Arrays.asList(refs.get(0)),
 						Collections.emptyList());
-				mapValueFieldDefine =  new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups, refs, refPath);
+				mapValueFieldDefine =  new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(2, types.size()), groups, refs, refPath);
 			} else if("set".equals(type)) {
 				checkType(1);
 				final String valueType = types.get(1);
