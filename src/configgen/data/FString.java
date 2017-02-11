@@ -44,9 +44,10 @@ public class FString extends Type {
 			if(s.trim().isEmpty()) return s;
 			final String r = loc.getLocalizedStr(s);
 			if(r != null) {
+				loc.addHasLocalizedStr(s, r);
 				return r;
 			} else {
-				loc.addUnlocalizedStr(s);
+				loc.addNotLocalizedStr(s);
 			}
 		}
 		// 那些需要本地化的字符串有时候即使相同的串,也要映射到不同的文字。这时候需要一个tag

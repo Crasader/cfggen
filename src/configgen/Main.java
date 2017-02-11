@@ -28,6 +28,7 @@ public final class Main {
 	public static String cfgmgrName = "CfgMgr";
 	public static String inputLocalizedFile = null;
 	public static String outputLocalizedFile = null;
+	public static String outputUnlocalizedFile = null;
 
 	public static final String magicStringForNewLine = ".g9~/";
 	
@@ -49,7 +50,7 @@ public final class Main {
         System.out.println("    -inputencoding   input csv encoding. default GB2312");
         System.out.println("    -verbose  show detail. default not");
         System.out.println("    -check load and check even not set -datadir");
-		System.out.println("    -localized  inputlocalizedfile:outputlocalizedfile     set input&output localized file");
+		System.out.println("    -localized  inputlocalizedfile:outputlocalizedfile:outputunlocalizedfile     set input&output localized file");
         System.out.println("    -cfgmgrname set cfgmgr class name");
         System.out.println("    --help show usage");
 
@@ -91,10 +92,11 @@ public final class Main {
 				break;
 			case "-localized": {
 				final String[] params = args[++i].split(":");
-				if(params.length != 2)
-					usage("-localized inputfile:outputfile");
+				if(params.length != 3)
+					usage("-localized");
 				inputLocalizedFile = params[0];
 				outputLocalizedFile = params[1];
+				outputUnlocalizedFile = params[2];
 				break;
 			}
 			case "-cfgmgrname":
@@ -251,7 +253,10 @@ public final class Main {
             }
         }
 		if(outputLocalizedFile != null)
-			Localized.Ins.saveUnLocalizedAs(outputLocalizedFile);
+			Localized.Ins.saveLocalizedAs(outputLocalizedFile);
+
+		if(outputUnlocalizedFile != null)
+			Localized.Ins.saveUnLocalizedAs(outputUnlocalizedFile);
 	}
 	
 	private static void verifyData() {

@@ -27,7 +27,6 @@ public class Config {
 	private String[] indexs;
 	private final String[] groups;
 	private final HashSet<String> hsGroups = new HashSet<>();
-	private final boolean manager; // 是否出现在CfgMgr的加载列表里
 	private final boolean single;
 	
 	private FList data;
@@ -62,13 +61,13 @@ public class Config {
 			Utils.error("config:%s 只能有一个index!", name);
 		else if(indexs.length == 0 && !single)
 			indexs = new String[] { Struct.get(type).getFields().get(0).getName() };
-		manager = !data.getAttribute("manager").equals("false");
 		this.data = new FList(null, new Field(null, name, "", "list:" + type,
 			new String[]{"list", type},
 			indexs,
 			new String[]{},
             new String[]{},
-			groups));
+			groups,
+			new String[]{}));
 	}
 	
 	public String getName() {

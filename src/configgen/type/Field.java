@@ -12,7 +12,7 @@ public final class Field {
 	private final String name;
 	private final String fullType;
 	private final List<String> types;
-	private final boolean localized;
+	private final List<String> localizeds;
 
     private String compounddelimiter;
 
@@ -21,24 +21,19 @@ public final class Field {
 	private final List<String> refs = new ArrayList<>();
     private final List<String> refPath = new ArrayList<>();
 	
-	private final static HashSet<String> RawTypes = new HashSet<>(Arrays.asList("bool", "int", "float", "long", "string", "text"));
+	private final static HashSet<String> RawTypes = new HashSet<>(Arrays.asList("bool", "int", "float", "long", "string"));
 	private final static HashSet<String> ConTypes = new HashSet<>(Arrays.asList("list", "set", "map"));
 	private final static HashSet<String> ReserveNames = new HashSet<>(Arrays.asList("end", "base", "super"));//, "typeid", "friend"));
 
 	private final static Pattern namePattern = Pattern.compile("[a-zA-Z]\\w*");
-	public Field(Struct parent, String name, String compounddelimiter, String fulltype, String[] types, String[] indexs, String[] refs, String[] refPath, String[] groups) {
+	public Field(Struct parent, String name, String compounddelimiter, String fulltype, String[] types, String[] indexs, String[] refs, String[] refPath, String[] groups, String[] localizeds) {
 		this.parent = parent;
 		this.name = name;
 		this.fullType = fulltype;
 		this.types = Arrays.asList(types);
 		if(this.types.isEmpty())
 			error("没有定义 type");
-		if(fulltype.equalsIgnoreCase("text")) {
-			this.localized = true;
-			this.types.set(0, "string");
-		} else {
-			this.localized = false;
-		}
+		this.localizeds = Arrays.asList(localizeds);
 		
 		for(int i = 0 ; i < types.length ; i++) {
 			String t = types[i];
@@ -71,10 +66,6 @@ public final class Field {
 		if(this.groups.isEmpty()) 
 			this.groups.add("all");
 	}
-
-	private Field valueFieldDefine;
-	private Field mapKeyFieldDefine;
-	private Field mapValueFieldDefine;
 	
 	public Field(Struct parent, Element data) {
 		this(
@@ -86,21 +77,17 @@ public final class Field {
 			Utils.split(data, "index"),
 			Utils.split(data, "ref"),
             Utils.split(data, "refpath", ";|,|:"),
-			Utils.split(data, "group")
+			Utils.split(data, "group"),
+			Utils.split(data, "localized")
 			);	
 	}
 	
-	private Field(Struct parent, String name, String delimiter, String fullType, List<String> types, HashSet<String> groups, List<String> refs, List<String> refPaths) {
+	private Field(Struct parent, String name, String delimiter, String fullType, List<String> types, HashSet<String> groups, List<String> refs, List<String> refPaths, List<String> localizeds) {
 		this.parent = parent;
 		this.name = name;
 		this.fullType = fullType;
 		this.types = types;
-		if(types.get(0).equalsIgnoreCase("text")) {
-			this.localized = true;
-			this.types.set(0, "string");
-		} else {
-			this.localized = false;
-		}
+		this.localizeds = localizeds;
 		this.groups.addAll(groups);
         this.compounddelimiter = delimiter;
         this.refs.addAll(refs);
@@ -109,19 +96,32 @@ public final class Field {
 
 
 	public Field getValueFieldDefine() {
-		return valueFieldDefine;
+		Struct s = Struct.get(types.get(1));
+		String delimiter = s != null ? s.getdelimiter() : "";
+		return new Field(parent, name, delimiter, fullType, types.subList(1, types.size()), groups,
+				(refs.isEmpty() ? Collections.emptyList() : Arrays.asList(refs.get(0))), refPath, localizeds);
     }
 
     public Field getMapKeyFieldDefine() {
-		return mapKeyFieldDefine;
+		Struct s = Struct.get(types.get(1));
+		String delimiter =  s != null ? s.getdelimiter() : "";
+		return new Field(parent, name, delimiter, fullType, types.subList(1, types.size()), groups,
+				(refs.isEmpty() ? Collections.emptyList() : Arrays.asList(refs.get(0))),
+				(refPath.isEmpty() ? Collections.emptyList() : Arrays.asList(refPath.get(0))),
+				localizeds.isEmpty() ? Collections.emptyList() : Arrays.asList(localizeds.get(0)));
     }
 
     public Field getMapValueFieldDefine() {
-		return mapValueFieldDefine;
+		Struct s = Struct.get(types.get(2));
+		String delimiter =  s != null ? s.getdelimiter() : "";
+		return  new Field(parent, name, delimiter, fullType, types.subList(2, types.size()), groups,
+				(refs.size() <= 1 ? Collections.emptyList() : Arrays.asList(refs.get(1))),
+				(refPath.size() <= 1 ? Collections.emptyList() : Arrays.asList(refPath.get(1))),
+				(localizeds.size() <= 1 ? Collections.emptyList() : Arrays.asList(localizeds.get(1))));
     }
 
 	public boolean isLocalized() {
-		return localized;
+		return localizeds.size() > 0 && !localizeds.get(0).isEmpty();
 	}
 
 	public final Struct getParent() {
@@ -282,22 +282,11 @@ public final class Field {
 				final String valueType = types.get(2);
 				if(!isRawOrEnumOrStruct(valueType))
 					error("非法的map value类型:" + valueType);
-
-				valueFieldDefine = null;
-				Struct s = Struct.get(valueType);
-				mapKeyFieldDefine = new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups,
-						refs.isEmpty() ? Collections.emptyList() : Arrays.asList(refs.get(0)),
-						Collections.emptyList());
-				mapValueFieldDefine =  new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(2, types.size()), groups, refs, refPath);
 			} else if("set".equals(type)) {
 				checkType(1);
 				final String valueType = types.get(1);
 				if(!isRawOrEnumOrStruct(valueType))
 					error("非法的set value类型:" + valueType);
-
-				mapKeyFieldDefine = mapValueFieldDefine = null;
-				Struct s = Struct.get(valueType);
-				valueFieldDefine = new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups, refs, refPath);
 			} else if("list".equals(type)) {
 				checkType(1);
 				final String valueType = types.get(1);
@@ -308,9 +297,6 @@ public final class Field {
 						error("list的 value 类型:" + valueType + "必须是struct才能index");
 					}
 				}
-				mapKeyFieldDefine = mapValueFieldDefine = null;
-				Struct s = Struct.get(valueType);
-				valueFieldDefine = new Field(parent, name, (s != null ? s.getdelimiter() : ""), fullType, types.subList(1, types.size()), groups, refs, refPath);
 			}
 			for(int i = 0 ; i < types.size() ; i++) {
 				if(types.get(i).equals("text"))
