@@ -50,19 +50,11 @@ public final class Field {
 			error("保留关键字:" + name);
 
         this.compounddelimiter = compounddelimiter;
-		for(String idx : indexs)
-			this.indexs.add(idx);
-		
-		this.refs.addAll(Arrays.asList(refs));
-        this.refPath.addAll(Arrays.asList(refPath));
-		
-//		else if(!name.isEmpty() && isEnum())
-//			error("enum can't have name");
-		
-		for(String groupName : groups) {
-			this.groups.add(groupName);
-		}
-		
+		Collections.addAll(this.indexs, indexs);
+		Collections.addAll(this.refs, refs);
+		Collections.addAll(this.refPath, refPath);
+		Collections.addAll(this.groups, groups);
+
 		if(this.groups.isEmpty()) 
 			this.groups.add("all");
 	}
@@ -99,33 +91,29 @@ public final class Field {
 		Struct s = Struct.get(types.get(1));
 		String delimiter = s != null ? s.getdelimiter() : "";
 		return new Field(parent, name, delimiter, fullType, types.subList(1, types.size()), groups,
-				(refs.isEmpty() ? Collections.emptyList() : Arrays.asList(refs.get(0))), refPath, localizeds);
+				(refs.isEmpty() ? Collections.emptyList() : Collections.singletonList(refs.get(0))), refPath, localizeds);
     }
 
     public Field getMapKeyFieldDefine() {
 		Struct s = Struct.get(types.get(1));
 		String delimiter =  s != null ? s.getdelimiter() : "";
 		return new Field(parent, name, delimiter, fullType, types.subList(1, types.size()), groups,
-				(refs.isEmpty() ? Collections.emptyList() : Arrays.asList(refs.get(0))),
-				(refPath.isEmpty() ? Collections.emptyList() : Arrays.asList(refPath.get(0))),
-				localizeds.isEmpty() ? Collections.emptyList() : Arrays.asList(localizeds.get(0)));
+				(refs.isEmpty() ? Collections.emptyList() : Collections.singletonList(refs.get(0))),
+				(refPath.isEmpty() ? Collections.emptyList() : Collections.singletonList(refPath.get(0))),
+				localizeds.isEmpty() ? Collections.emptyList() : Collections.singletonList(localizeds.get(0)));
     }
 
     public Field getMapValueFieldDefine() {
 		Struct s = Struct.get(types.get(2));
 		String delimiter =  s != null ? s.getdelimiter() : "";
 		return  new Field(parent, name, delimiter, fullType, types.subList(2, types.size()), groups,
-				(refs.size() <= 1 ? Collections.emptyList() : Arrays.asList(refs.get(1))),
-				(refPath.size() <= 1 ? Collections.emptyList() : Arrays.asList(refPath.get(1))),
-				(localizeds.size() <= 1 ? Collections.emptyList() : Arrays.asList(localizeds.get(1))));
+				(refs.size() <= 1 ? Collections.emptyList() : Collections.singletonList(refs.get(1))),
+				(refPath.size() <= 1 ? Collections.emptyList() : Collections.singletonList(refPath.get(1))),
+				(localizeds.size() <= 1 ? Collections.emptyList() : Collections.singletonList(localizeds.get(1))));
     }
 
 	public boolean isLocalized() {
 		return localizeds.size() > 0 && !localizeds.get(0).isEmpty();
-	}
-
-	public final Struct getParent() {
-		return parent;
 	}
 
 	public String getName() {
@@ -158,14 +146,6 @@ public final class Field {
 	
 	public final String getRef() {
 		return refs.size() >= 1 ? refs.get(0) : "";
-	}
-	
-	public final String getKeyRef() {
-		return refs.size() >= 1 ? refs.get(0) : "";
-	}
-	
-	public final String getValueRef() {
-		return getType().equals("map") ? (refs.size() >= 2 ? refs.get(1) : "") : (refs.size() >= 1 ? refs.get(0) : ""); 
 	}
 
     public final List<String> getRefPath() {
@@ -235,11 +215,6 @@ public final class Field {
 		}
 		sb.append("}}");
 		return sb.toString();
-	}
-	
-	public void checkSize(int n) {
-		if(types.size() != n)
-			error("没有定义 type");
 	}
 	
 	public void checkType(int idx) {
