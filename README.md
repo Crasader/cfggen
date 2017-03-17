@@ -1,7 +1,9 @@
 # cfggen
 
 ## cfggen是一个游戏专用配置生成工具.
-
+	cfggen作为配置工具，已经集成到perfect(https://github.com/pirunxi/perfect)框架中
+	后续的维护将在perfect项目中进行，此项目不再维护。
+	
 	cfggen读取excel、xml或lua文件,导出配置数据,并且生成读取配置数据所需的代码.
 	cfggen良好支持本地化，支持字符串的本地化映射，比如制作繁体版，仅仅半小时就能轻松简单搞定
 	cfggen目前支持java,csharp,lua,c++.
