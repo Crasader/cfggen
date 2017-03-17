@@ -1,6 +1,6 @@
 # cfggen
 
-## cfggen作为配置工具，已经集成到perfect(https://github.com/pirunxi/perfect)框架中，后续的维护将在perfect项目中进行，此仓库不再维护。
+## cfggen作为配置工具，已经集成到perfect(https://github.com/pirunxi/perfect) 框架中，后续的维护将在perfect项目中进行，此仓库不再维护。
 
 ## cfggen是一个游戏专用配置生成工具.
 	
