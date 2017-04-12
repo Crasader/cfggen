@@ -47,7 +47,8 @@ public final class DataMarshal {
 	}
 	
 	public DataMarshal putString(String x) {
-		return put(x.replace("\n", Main.magicStringForNewLine));
+		return put(x.replace("\r\n", Main.magicStringForNewLine).replace("\n\r", Main.magicStringForNewLine)
+				.replace("\r", Main.magicStringForNewLine).replace("\n", Main.magicStringForNewLine));
 	}
 	
 	public String toData() {
