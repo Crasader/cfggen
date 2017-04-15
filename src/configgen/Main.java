@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 public final class Main {
 	public static String xmlSchemeFile = "";
@@ -242,16 +243,47 @@ public final class Main {
 	static void loadData() throws Exception{
 		if(inputLocalizedFile != null)
 			Localized.Ins.load(inputLocalizedFile);
+		/*
+		Config.configs.values().parallelStream().forEach(c -> {
+			try {
+				lastLoadData = null;
+				System.out.printf(".");
+				final long t1 = System.currentTimeMillis();
+				c.loadData();
+				final long t2 = System.currentTimeMillis();
+				if (t2 - t1 > 1000) {
+					System.out.printf("%nload config:%s cost time:%.2f s%n", c.getName(), (t2 - t1) / 1000.0);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		});
+		*/
+		CountDownLatch countdown = new CountDownLatch(Config.configs.size());
+
         for (Config c : Config.configs.values()) {
-            lastLoadData = null;
-            System.out.printf(".");
-            final long t1 = System.currentTimeMillis();
-            c.loadData();
-            final long t2 = System.currentTimeMillis();
-            if(t2 - t1 > 1000) {
-                System.out.printf("%nload config:%s cost time:%.2f s%n", c.getName(), (t2 - t1) / 1000.0);
-            }
-        }
+			Thread work = new Thread(() -> {
+				try {
+					lastLoadData = null;
+					System.out.printf(".");
+					final long t1 = System.currentTimeMillis();
+					c.loadData();
+					final long t2 = System.currentTimeMillis();
+					if (t2 - t1 > 1000) {
+						System.out.printf("%nload config:%s cost time:%.2f s%n", c.getName(), (t2 - t1) / 1000.0);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.exit(1);
+				} finally {
+					countdown.countDown();
+				}
+			});
+			work.start();
+		}
+		countdown.await();
+
 		if(outputLocalizedFile != null)
 			Localized.Ins.saveLocalizedAs(outputLocalizedFile);
 
